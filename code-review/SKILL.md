@@ -111,64 +111,52 @@ Actively check the following dimensions (even if user doesn't mention them):
 
 ## Output Format
 
-输出一份 **AI 可直接消费的结构化 Code Review 报告**。整体分两部分：人类可读摘要 + AI 可解析的结构化数据。
+输出一份 **结构化 Markdown 报告**。人类可读，AI 可直接理解和继续处理。
 
 ### 格式要求
 
-- 摘要部分供人类快速判断（3-5 行）
-- 结构化部分用 **JSON 代码块**，其他 AI 可直接 parse 使用
-- 不在 JSON 中放冗长描述，保持每个字段精简
-- 不确定的标注为 `"uncertain"`
+- 表格 + 列表为主，每个 issue 精简到 2-3 行
+- 不确定的内容标注 `[待确认]`
+- 无明显问题时写"未发现缺陷"并列出建议关注的点
+- 超过 10 个 issue 时，Minor 归并总结，优先列出 Critical/Major
 
 ### 输出模板
 
 ```markdown
 ## Code Review
 
-**风险**: Low / Medium / High
+**风险等级**: Low / Medium / High
 **结论**: 可直接合入 / 修复后合入 / 建议进一步验证
-**摘要**: 1-2 句话概括
+**摘要**: 1-3 句总结变更内容、核心风险、是否影响已有功能。
 
-```json
-{
-  "risk_level": "Low|Medium|High",
-  "verdict": "accept|fix_first|need_verification",
-  "summary": "1-3 句话总结变更内容、核心风险",
-  "issues": [
-    {
-      "severity": "Critical|Major|Minor|Suggestion",
-      "file": "src/server/feishu.ts",
-      "function": "getChannelDetailLines",
-      "line": 42,
-      "type": "logic_error|regression|compatibility|null_risk|concurrency|performance|security|maintainability",
-      "description": "具体问题",
-      "impact": "影响范围",
-      "affects_old_code": true,
-      "fix": "修复建议",
-      "confidence": "high|medium|low"
-    }
-  ],
-  "impact_analysis": {
-    "old_functionality": "none|potential|confirmed",
-    "old_functionality_reason": "原因",
-    "cascading": ["模块A", "调用链B"],
-    "not_applicable": ["cache", "message_queue"]
-  },
-  "verification": [
-    {"item": "验证项", "reason": "原因"},
-    {"item": "边界条件测试", "reason": "xxx 字段可能为空"}
-  ],
-  "final_note": "一句话最终结论"
-}
-\```
+### 问题清单
+
+| # | 严重度 | 位置 | 问题描述 | 修复建议 |
+|---|--------|------|----------|----------|
+| 1 | Critical | 文件:函数:行号 | 具体问题 | 修复方向 |
+| 2 | Major | 文件:函数 | 具体问题 | 修复方向 |
+
+> [需要补充上下文的 issue，在对应行下方用引用块追加 1-2 句分析]
+
+### 影响分析
+
+- **已有功能**: 无影响 / 可能影响（原因）/ 确认影响（原因）
+- **连带影响**: 受影响的模块和调用链（不适用写"无"）
+
+### 建议验证
+
+1. **验证项** — 原因
+2. **验证项** — 原因
+
+### 最终结论
+
+一句话结论 + 理由。
 ```
 
 ### 审查策略
 
-- 日志/注释/格式/文案类改动：只查编译错误、敏感信息泄露、可观测性影响，无问题则 `issues` 空数组 + `verdict: "accept"`
-- `issues` 超过 10 个：优先列出 Critical/Major，Minor 归并到一条 `{"severity": "Minor", "description": "N 个小问题汇总：...", "fix": "..."}` 中
-- 改动范围过大：`confidence` 字段标注 `"low"`，注明范围限制
-- `confidence` 为 `low` 或 `medium` 时，AI 消费方可据此降低自动化判断权重
+- 日志/注释/格式/文案类改动：只查编译错误、敏感信息泄露、可观测性影响，无问题则直接通过
+- 改动范围过大：注明"本次仅重点审查核心变更"
 
 
 ---
