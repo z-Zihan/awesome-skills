@@ -1,0 +1,251 @@
+---
+name: fe-cli-electron
+description: >
+  Scaffold an Electron desktop application. For macOS/Windows desktop apps using React/Vue.
+  Features auto-update (electron-updater), IPC communication, system tray, native menus.
+  Triggered as a sub-skill of fe-cli when user wants Electron/桌面端 project.
+---
+
+# fe-cli-electron — Electron Desktop App Scaffolding
+
+## Workflow
+
+### Step 1: Gather Options
+
+1. **Framework**: React 19 / Vue 3
+2. **Styling**: Tailwind CSS / Ant Design / MUI / 纯 SCSS
+3. **CSS Preprocessor**: Sass / Less
+4. **State Management**: Zustand / Redux Toolkit / None
+5. **Router**: React Router / Vue Router
+6. **i18n**: Yes / No
+7. **Auto Update**: Yes (default) / No
+8. **System Tray**: Yes / No
+9. **Testing**: Vitest / None
+10. **Pre-commit**: Yes / No
+11. **Project name**: string
+
+### Step 2: Scaffold
+
+```
+pnpm create vite <project-name> --template react-ts
+cd <project-name>
+pnpm add -D electron electron-builder concurrently wait-on
+pnpm add electron-updater electron-store  # if auto-update selected
+```
+
+### Step 3: Project Structure
+
+```
+project-name/
+├── electron/
+│   ├── main.ts              # Main process entry
+│   ├── preload.ts            # Preload script (contextBridge)
+│   └── updater.ts            # Auto-update logic (if selected)
+├── src/                      # Renderer process (React/Vue)
+│   ├── ...                   # Same as Web SPA structure
+│   └── electron.d.ts         # IPC type declarations
+├── package.json
+├── vite.config.ts
+├── electron-builder.yml      # Build config
+└── resources/                # App icons
+```
+
+### Step 4: Key Templates
+
+**`electron/main.ts`:**
+```typescript
+import { app, BrowserWindow, ipcMain, Tray, Menu, nativeImage } from 'electron';
+import path from 'path';
+import { setupUpdater } from './updater';  // if auto-update
+
+let mainWindow: BrowserWindow | null = null;
+let tray: Tray | null = null;
+
+const isDev = !app.isPackaged;
+
+function createWindow() {
+  mainWindow = new BrowserWindow({
+    width: 1200,
+    height: 800,
+    minWidth: 800,
+    minHeight: 600,
+    webPreferences: {
+      preload: path.join(__dirname, 'preload.js'),
+      contextIsolation: true,
+      nodeIntegration: false,
+    },
+    titleBarStyle: 'hiddenInset',  // macOS native title bar
+  });
+
+  if (isDev) {
+    mainWindow.loadURL('http://localhost:5173');
+    mainWindow.webContents.openDevTools();
+  } else {
+    mainWindow.loadFile(path.join(__dirname, '../dist/index.html'));
+  }
+
+  // System tray (if selected)
+  if (process.env.NODE_ENV !== 'linux') {
+    const icon = nativeImage.createFromPath(path.join(__dirname, '../resources/icon.png'));
+    tray = new Tray(icon.resize({ width: 16, height: 16 }));
+    tray.setToolTip('Your App');
+    tray.setContextMenu(Menu.buildFromTemplate([
+      { label: 'Show', click: () => mainWindow?.show() },
+      { type: 'separator' },
+      { label: 'Quit', click: () => app.quit() },
+    ]));
+  }
+}
+
+// IPC handlers
+ipcMain.handle('get-app-version', () => app.getVersion());
+ipcMain.handle('get-platform', () => process.platform);
+
+app.whenReady().then(() => {
+  createWindow();
+  if (process.env.AUTO_UPDATE !== 'false') setupUpdater(mainWindow!);
+  app.on('activate', () => { if (!mainWindow) createWindow(); });
+});
+
+app.on('window-all-closed', () => { if (process.platform !== 'darwin') app.quit(); });
+```
+
+**`electron/preload.ts`:**
+```typescript
+import { contextBridge, ipcRenderer } from 'electron';
+
+contextBridge.exposeInMainWorld('electronAPI', {
+  getAppVersion: () => ipcRenderer.invoke('get-app-version'),
+  getPlatform: () => ipcRenderer.invoke('get-platform'),
+  onUpdateAvailable: (cb: (info: unknown) => void) => ipcRenderer.on('update-available', (_, info) => cb(info)),
+  onUpdateDownloaded: (cb: () => void) => ipcRenderer.on('update-downloaded', () => cb()),
+  installUpdate: () => ipcRenderer.send('install-update'),
+  minimize: () => ipcRenderer.send('window-minimize'),
+  maximize: () => ipcRenderer.send('window-maximize'),
+  close: () => ipcRenderer.send('window-close'),
+});
+```
+
+**`electron/updater.ts`** (if auto-update):
+```typescript
+import { autoUpdater } from 'electron-updater';
+import { BrowserWindow } from 'electron';
+
+export function setupUpdater(mainWindow: BrowserWindow) {
+  autoUpdater.autoDownload = false;
+  autoUpdater.autoInstallOnAppQuit = true;
+
+  autoUpdater.on('update-available', (info) => {
+    mainWindow.webContents.send('update-available', info);
+  });
+
+  autoUpdater.on('update-downloaded', () => {
+    mainWindow.webContents.send('update-downloaded');
+  });
+
+  autoUpdater.on('error', (err) => {
+    console.error('Update error:', err);
+  });
+
+  // Check for updates every 4 hours
+  autoUpdater.checkForUpdatesAndNotify();
+  setInterval(() => autoUpdater.checkForUpdatesAndNotify(), 4 * 60 * 60 * 1000);
+}
+```
+
+**`src/electron.d.ts`:**
+```typescript
+export {};
+
+declare global {
+  interface Window {
+    electronAPI: {
+      getAppVersion: () => Promise<string>;
+      getPlatform: () => Promise<string>;
+      onUpdateAvailable: (cb: (info: unknown) => void) => void;
+      onUpdateDownloaded: (cb: () => void) => void;
+      installUpdate: () => void;
+      minimize: () => void;
+      maximize: () => void;
+      close: () => void;
+    };
+  }
+}
+```
+
+**`electron-builder.yml`:**
+```yaml
+appId: com.example.app
+productName: Your App
+directories:
+  output: release
+files:
+  - dist/**/*
+  - electron/**/*
+  - package.json
+mac:
+  target:
+    - dmg
+    - zip
+  artifactName: ${productName}-${version}-mac-${arch}.${ext}
+  hardenedRuntime: true
+  gatekeeperAssess: false
+  entitlements: build/entitlements.mac.plist
+  entitlementsInherit: build/entitlements.mac.plist
+win:
+  target:
+    - nsis
+  artifactName: ${productName}-${version}-win-${arch}.${ext}
+nsis:
+  oneClick: false
+  allowToChangeInstallationDirectory: true
+publish:
+  - provider: generic
+    url: https://update.example.com
+```
+
+**`package.json` scripts:**
+```json
+{
+  "main": "electron/main.js",
+  "scripts": {
+    "dev": "concurrently \"vite\" \"wait-on http://localhost:5173 && electron .\"",
+    "dev:renderer": "vite",
+    "dev:electron": "electron .",
+    "build": "vite build && tsc -p tsconfig.electron.json",
+    "build:prod": "vite build && tsc -p tsconfig.electron.json && electron-builder",
+    "preview": "vite preview",
+    "pack": "electron-builder --dir",
+    "dist": "electron-builder"
+  }
+}
+```
+
+### Step 5: Vite Config
+
+```typescript
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
+import path from 'path';
+
+export default defineConfig({
+  plugins: [react()],
+  resolve: { alias: { '@': path.resolve(__dirname, 'src') } },
+  base: './',  // Electron loads from file:// so relative paths
+  build: { outDir: 'dist' },
+  server: { port: 5173 },
+});
+```
+
+### Step 6: Shared Layer + Final
+
+Read fe-cli references, generate shared files. Only generate env files for VITE_ variables (no API proxy needed — Electron uses direct connection).
+
+After setup:
+```bash
+cd <project-name>
+pnpm install
+pnpm dev
+```
+
+Announce: project with Electron + auto-update config, dev starts both Vite and Electron.

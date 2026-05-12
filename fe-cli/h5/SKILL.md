@@ -1,0 +1,233 @@
+---
+name: fe-cli-h5
+description: >
+  Scaffold a Mobile H5 frontend project. For mobile web pages, WeChat H5 pages,
+  and mobile-first web apps. Features vw/vh responsive, touch gestures, safe area,
+  and WeChat JSSDK integration. Triggered as a sub-skill of fe-cli.
+---
+
+# fe-cli-h5 — Mobile H5 Scaffolding
+
+## Workflow
+
+### Step 1: Gather Options
+
+1. **Framework**: React 19 / Vue 3
+2. **Styling**: Tailwind CSS (default, mobile-first) / Ant Design Mobile / 纯 SCSS
+3. **CSS Preprocessor**: Sass (default) / Less
+4. **State Management**: Zustand / Redux Toolkit / Pinia / None
+5. **Router**: React Router / Vue Router
+6. **i18n**: react-i18next / vue-i18n / None
+7. **WeChat JSSDK**: Yes / No (if yes, add `weixin-js-sdk`)
+8. **Testing**: Vitest / None
+9. **Pre-commit**: husky + lint-staged? (default: No)
+10. **Project name**: string
+
+### Step 2: Scaffold
+
+```
+pnpm create vite <project-name> --template react-ts
+```
+
+### Step 3: Dependencies
+
+```
+pnpm add react-router-dom
+pnpm add -D postcss-px-to-viewport-8-plugin amfe-flexible
+pnpm add -D sass
+```
+
+If WeChat JSSDK: `pnpm add weixin-js-sdk`
+If Vue: replace react-router-dom with vue-router
+
+### Step 4: H5-Specific Configuration
+
+**`postcss.config.cjs`:**
+```javascript
+module.exports = {
+  plugins: {
+    'postcss-px-to-viewport-8-plugin': {
+      viewportWidth: 375,  // Design width
+      unitPrecision: 5,
+      viewportUnit: 'vw',
+      selectorBlackList: ['.ignore-vw'],
+      minPixelValue: 1,
+      mediaQuery: false,
+    },
+  },
+};
+```
+
+**`vite.config.ts`** — add mobile-specific config:
+```typescript
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
+import path from 'path';
+
+export default defineConfig(({ mode }) => ({
+  plugins: [react()],
+  resolve: { alias: { '@': path.resolve(__dirname, 'src') } },
+  css: {
+    postcss: './postcss.config.cjs',
+    preprocessorOptions: {
+      scss: { additionalData: '@use "@/styles/variables" as *;' },
+    },
+  },
+  server: {
+    port: 5173,
+    host: '0.0.0.0',  // Allow LAN access for mobile testing
+    proxy: { '/api': { target: 'http://localhost:3000', changeOrigin: true } },
+  },
+}));
+```
+
+**`index.html`** — add viewport meta:
+```html
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+```
+
+### Step 5: H5-Specific Files
+
+```
+src/
+├── components/
+│   ├── ErrorBoundary.tsx
+│   ├── PageLoading.tsx
+│   ├── EmptyState.tsx
+│   ├── ErrorState.tsx
+│   └── SafeArea.tsx            # Safe area padding for notch phones
+├── pages/
+│   ├── Home/
+│   │   └── index.tsx
+│   ├── Detail/
+│   │   └── index.tsx
+│   └── Mine/
+│       └── index.tsx
+├── layouts/
+│   └── MobileLayout.tsx        # Bottom tab bar
+├── hooks/
+│   ├── useRequest.ts
+│   └── useWechat.ts            # WeChat JSSDK hook (if selected)
+├── App.tsx
+└── main.tsx
+```
+
+**`components/SafeArea.tsx`:**
+```tsx
+// Safe area padding for iPhone notch / Android punch-hole
+export default function SafeArea({ children }: { children: React.ReactNode }) {
+  return (
+    <div style={{
+      paddingTop: 'env(safe-area-inset-top)',
+      paddingBottom: 'env(safe-area-inset-bottom)',
+      paddingLeft: 'env(safe-area-inset-left)',
+      paddingRight: 'env(safe-area-inset-right)',
+    }}>{children}</div>
+  );
+}
+```
+
+**`layouts/MobileLayout.tsx`:**
+```tsx
+import { Outlet, useNavigate, useLocation } from 'react-router-dom';
+import { HomeOutlined, AppstoreOutlined, UserOutlined } from '@ant-design/icons';
+import styles from './MobileLayout.module.scss';  // or Tailwind classes
+
+const tabs = [
+  { key: '/home', icon: <HomeOutlined />, label: '首页' },
+  { key: '/category', icon: <AppstoreOutlined />, label: '分类' },
+  { key: '/mine', icon: <UserOutlined />, label: '我的' },
+];
+
+export default function MobileLayout() {
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+      <main style={{ flex: 1, overflow: 'auto' }}>
+        <Outlet />
+      </main>
+      <nav style={{
+        display: 'flex', borderTop: '1px solid #eee', paddingBottom: 'env(safe-area-inset-bottom)',
+        background: '#fff', height: 50,
+      }}>
+        {tabs.map((tab) => (
+          <div key={tab.key} onClick={() => navigate(tab.key)}
+            style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+              color: location.pathname === tab.key ? '#1677ff' : '#999', fontSize: 12 }}>
+            {tab.icon}
+            <span>{tab.label}</span>
+          </div>
+        ))}
+      </nav>
+    </div>
+  );
+}
+```
+
+**`hooks/useWechat.ts`** (if WeChat selected):
+```typescript
+import { useEffect, useState } from 'react';
+import wx from 'weixin-js-sdk';
+
+interface WxConfig {
+  appId: string;
+  timestamp: number;
+  nonceStr: string;
+  signature: string;
+}
+
+export function useWechat(config?: WxConfig) {
+  const [ready, setReady] = useState(false);
+
+  useEffect(() => {
+    if (!config) return;
+    wx.config({ debug: false, ...config, jsApiList: ['updateAppMessageShareData', 'updateTimelineShareData'] });
+    wx.ready(() => setReady(true));
+  }, [config]);
+
+  const share = (title: string, desc: string, link: string, imgUrl: string) => {
+    if (!ready) return;
+    wx.updateAppMessageShareData({ title, desc, link, imgUrl, success: () => {} });
+    wx.updateTimelineShareData({ title, link, imgUrl, success: () => {} });
+  };
+
+  return { ready, share };
+}
+```
+
+### Step 6: Global Styles
+
+In `global.scss`, add mobile-specific styles:
+```scss
+html, body, #root {
+  height: 100%;
+  overflow-x: hidden;
+}
+
+// Safe area
+body {
+  padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+}
+
+// 1px border on retina
+.hairline {
+  position: relative;
+  &::after {
+    content: '';
+    position: absolute;
+    left: 0; bottom: 0;
+    width: 100%; height: 1px;
+    background: #e5e5e5;
+    transform: scaleY(0.5);
+  }
+}
+
+// No scroll body when modal open
+body.no-scroll { overflow: hidden; }
+```
+
+### Step 7: Shared Layer + Final
+
+Read fe-cli references, generate shared files, `pnpm install && pnpm dev`.
