@@ -1,16 +1,23 @@
-# 🧰 OpenClaw Team Skills
+# 🧰 Awesome Skills
 
-团队共享的 OpenClaw AI Agent 技能库。一个 skill 就是一份 `SKILL.md`，安装后 Agent 会自动按需加载。
+通用 AI Agent 技能库。一个 skill 就是一份 `SKILL.md`，按需加载，开箱即用。
+
+适用于任何支持读取本地 Markdown 作为系统指令的 AI Agent（OpenClaw、Claude Desktop、Cursor、Cline 等）。
 
 ## 快速开始
 
 ```bash
-git clone <repo-url>
-cd skills
-bash install.sh    # 软链接所有 skill 到 ~/.openclaw-autoclaw/skills/
+git clone https://github.com/z-Zihan/awesome-skills.git
 ```
 
-更新也一样：`git pull && bash install.sh`。
+将 `SKILL.md` 放到你的 Agent 能扫描到的目录即可。不同工具的加载方式：
+
+| Agent | 配置方式 |
+|---|---|
+| OpenClaw | 软链接到 `~/.openclaw-autoclaw/skills/` |
+| Claude Desktop | 在 `CLAUDE.md` 中引用文件路径 |
+| Cursor | 在 `.cursorrules` 或项目 `.cursor/` 中配置 |
+| Cline | 在 `.clinerules` 中引用 |
 
 ---
 
@@ -61,14 +68,13 @@ bash install.sh    # 软链接所有 skill 到 ~/.openclaw-autoclaw/skills/
 ## 目录结构
 
 ```
-skills/
+awesome-skills/
 ├── README.md
-├── install.sh              # 一键安装脚本
 ├── code-review/
 │   └── SKILL.md            # 代码审查
 └── fe-cli/
     ├── SKILL.md            # 主控：类型识别 + 共享层生成
-    ├── references/         # 共享模板（按需读取，不触发安装）
+    ├── references/         # 共享模板（按需读取）
     │   ├── shared-base.md
     │   ├── shared-config.md
     │   └── ai-project-md.md
@@ -79,8 +85,6 @@ skills/
     ├── ssr/SKILL.md
     └── miniapp/SKILL.md
 ```
-
-> `references/` 下的 `.md` 不会被 `install.sh` 发现（没有名为 `SKILL.md`），不会产生多余链接。
 
 ---
 
@@ -93,7 +97,7 @@ my-skill/
 └── SKILL.md
 ```
 
-2. **SKILL.md 必须包含 YAML frontmatter**：
+2. **SKILL.md 建议包含 YAML frontmatter**：
 
 ```yaml
 ---
@@ -104,13 +108,13 @@ description: >
 ---
 ```
 
-3. 提交 push。团队成员 `git pull && bash install.sh` 即可获取。
+3. 提交 push 即可。
 
 ---
 
 ## 设计原则
 
 - **按需加载**：Skill 内容只在触发时读入，不占用日常上下文
-- **独立触发**：即使嵌套在子目录下，`install.sh` 也会为每个 `SKILL.md` 创建独立顶层链接
+- **独立触发**：每个子 Skill 独立可被发现和加载
 - **模板分离**：共享代码模板放在 `references/`，不影响 skill 发现
-- **不重复造轮子**：优先复用 OpenClaw 已有能力，skill 只补充领域知识
+- **通用兼容**：纯 Markdown 格式，适配任何 AI Agent 工具
