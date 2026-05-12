@@ -3,8 +3,11 @@ name: code-review
 description: >
   Senior code review agent. Conducts high-quality, context-sensitive, regression-risk-focused
   code reviews on user-provided diffs, files, or commits. Outputs actionable, structured
-  review conclusions suitable for merge decisions. Use when user asks for code review,
-  CR, 代码审查, 审查代码, review PR/diff/commit, or mentions reviewing changes.
+  review conclusions suitable for merge decisions.
+  触发词：code review, CR, 代码审查, 审查代码, review代码, review PR/diff/commit,
+  review修改, review当前的修改, 帮我review, 帮我看看代码, 看看有没有问题,
+  帮我检查一下代码, 代码有没有问题, 这段代码怎么样, 改动有没有风险,
+  能不能合入, review一下, 帮我过一遍代码, 检查一下改动.
   NOT for: general code questions, writing code, debugging live issues (those are different workflows).
 ---
 
