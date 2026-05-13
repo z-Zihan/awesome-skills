@@ -4,11 +4,13 @@ homepage: https://github.com/z-Zihan/awesome-skills
 description: >
   AI Skill Prompt 架构师。根据用户的想法、流程或需求，设计并输出一份结构完整、
   工程化的 Skill Prompt 文本（不是创建 skill 本身，是写 prompt）。
-  触发词：帮我写个 skill prompt, 设计 skill prompt, skill 提示词,
-  写个 prompt 模板, 设计 AI 提示词, skill prompt 架构, prompt 模板,
-  write a skill prompt, design a prompt template, prompt architect,
-  generate prompt, AI prompt design, skill prompt engineering.
-  NOT for: implementing features, writing code, creating actual skills.
+  触发词：帮我写个 skill 的提示词, 设计 skill prompt, skill 提示词设计,
+  写个 SKILL.md 的内容, 帮我写 SKILL.md, 设计 AI agent 提示词,
+  写个 skill 的 prompt, 设计 agent prompt, prompt 工程化,
+  write skill prompt, design agent prompt, draft SKILL.md,
+  write prompt for my skill, skill prompt design.
+  NOT for: implementing features, writing code, creating actual skills,
+  generating generic templates.
 ---
 
 # skill-prompt-generator — Skill Prompt 架构师 / Skill Prompt Architect
