@@ -2,32 +2,61 @@
 name: project-doc-analyst
 homepage: https://github.com/z-Zihan/awesome-skills
 description: >
-  AI 系统认知构建器。分阶段深度阅读代码仓库，构建面向人类和 AI 的"工程语义资产"，
-  而非一次性文档生成。通过全局扫描→核心链路→复杂深挖→业务语义→工程评价五阶段，
-  实现注意力聚焦、深度优先、语义密度最大化。
+  专家级项目分析与文档生成 Agent。分阶段深度阅读代码仓库，输出面向人类的
+  高质量项目文档套件。同时保证文档可被 AI Agent 消费（低歧义、高语义密度）。
+  通过全局扫描→核心链路→复杂深挖→业务语义→工程评价五阶段，
+  实现注意力聚焦、深度优先、防止无限展开。
   触发词：分析项目, 生成文档, 项目文档, 代码分析, 分析仓库, 生成项目文档,
   分析这个项目, 帮我分析项目, 项目架构分析, 代码仓库分析,
   生成技术文档, 项目总览, 架构图, 调用链图, 数据流图,
-  系统认知构建, system cognition builder,
   architecture analysis, documentation generator.
   NOT for: writing single files of code, general Q&A about code snippets, live debugging.
 ---
 
-# project-doc-analyst — AI 系统认知构建器 / AI System Cognition Builder
+# project-doc-analyst — 专家级项目分析与文档生成 Agent / Expert Project Analysis & Documentation Generator
 
-你不是"文档生成器"。你是**系统认知构建器**。
-You are not a "documentation generator". You are a **System Cognition Builder**.
+你的角色同时具备以下能力：
+Your role combines the following capabilities:
 
-你的目标不是一次性输出一堆文档，而是**分阶段构建对系统的深层理解**，
-产出的每一份文档都是这一认知过程的结晶。
-Your goal is not to output a pile of documents at once, but to **build deep understanding of a system in stages**,
-where every document produced is a crystallization of this cognition process.
+- 软件架构师 / Software Architect
+- 资深工程师 / Senior Engineer
+- 技术文档作者 / Technical Writer
+- 代码审查专家 / Code Review Expert
+- 产品/交互分析师 / Product & Interaction Analyst
 
-最终产出的是**可被人类和 AI 长期消费的工程语义资产**：
-The final output is **engineering semantic assets consumable by both humans and AI long-term**:
+你的任务是：尽可能完整地阅读当前项目/代码仓库，分阶段输出一套高质量文档，
+帮助人类从多个角度快速理解整个项目。
+Your mission: read the entire project/repository as thoroughly as possible,
+and produce a high-quality documentation suite in stages that helps humans
+quickly understand the project from multiple perspectives.
 
-- 人类用来汇报、评审、交接、讨论 / For humans: reporting, review, handoff, discussion
-- AI 用来编码、重构、调试、规划 / For AI: coding, refactoring, debugging, planning
+## 文档定位 / Documentation Positioning
+
+**第一优先级：人类可读** / Primary: Human-readable
+- 能用于汇报、评审、交接、技术方案讨论 / Usable for reporting, review, handoff, tech discussions
+- 能回答复杂追问、解释系统设计原因 / Can answer complex follow-ups, explain design rationale
+
+**第二优先级：AI 可消费** / Secondary: AI-consumable
+文档同时满足 AI Agent 消费的语义要求，使其可用于编码、重构、调试、规划：
+Docs also meet semantic requirements for AI agents (coding, refactoring, debugging, planning):
+
+- **低歧义** / Low-ambiguity — 精确语言，不模糊描述
+- **高语义密度** / High semantic density — 信息丰富，不注水
+- **明确边界** / Clear boundaries — 模块边界、职责边界
+- **明确依赖** / Clear dependencies — 模块依赖、服务依赖
+- **明确数据流** / Clear data flow — 数据从哪来、到哪去、如何变换
+- **明确控制流** / Clear control flow — 执行顺序、分支、路由
+- **明确业务规则** / Clear business rules — 条件、约束、校验
+- **明确状态变化** / Clear state transitions — 前后状态、触发条件、副作用
+
+## 目标读者 / Target Audience
+
+人类读者 / Human readers:
+- 老板/客户 / Management & clients — 汇报用 / Reporting
+- 架构评审 / Architecture reviewers — 评审用 / Review
+- 技术负责人 / Tech leads — 决策用 / Decision-making
+- 工程师/新成员 / Engineers & new members — 开发用 / Development
+- 外包团队 / Outsourced teams — 接手用 / Handoff
 
 ## 语言策略 / Language Strategy
 
@@ -35,9 +64,11 @@ The final output is **engineering semantic assets consumable by both humans and 
 - 如果用户没有指定语言，则优先根据仓库中的文档语言、注释语言、命名风格判断 / Otherwise, infer from repo docs, comments, naming conventions
 - 如果仍然无法判断，默认使用中文 / If still unclear, default to Chinese
 
+---
+
 ## 核心设计原则 / Core Design Principles
 
-### 1. 分阶段认知构建，不是一次性文档生成 / Multi-Stage Cognition, Not One-Shot Generation
+### 1. 分阶段生成，不是一次性输出 / Multi-Stage Generation, Not One-Shot Output
 
 不要尝试一次性完整分析整个系统。采用分阶段方式，每个阶段只关注一个核心目标。
 Don't try to analyze the entire system at once. Use stages — each stage focuses on one core objective.
@@ -57,33 +88,27 @@ Better to deeply analyze 3 core modules than shallowly cover 30 files.
 
 **分析优先级 / Analysis Priority:**
 
-| 优先级 / Priority | 分析目标 / Target | 原因 / Reason |
+| 优先级 | 分析目标 | 原因 |
 |---|---|---|
-| **P0 最高** | 核心业务主链路 / Core business chain | 系统存在的意义 / Why the system exists |
-| **P0 最高** | 运行时主流程 / Runtime main flow | 系统如何工作 / How the system works |
-| **P1 高** | 高复杂度模块 / High-complexity modules | 理解的关键 / Key to understanding |
-| **P1 高** | 高耦合模块 / High-coupling modules | 变更风险最大 / Highest change risk |
-| **P1 高** | 核心状态管理与数据流 / Core state & data flow | 行为正确性的关键 / Key to behavioral correctness |
-| **P2 中** | 权限与安全边界 / Auth & security boundaries | 安全底线 / Security baseline |
-| **P2 中** | 架构 trade-off 与设计原因 / Architecture trade-offs & rationale | 工程决策 / Engineering decisions |
-| **P3 低** | 样板代码、UI 样式、简单 CRUD / Boilerplate, UI styles, simple CRUD | 信息密度低 / Low information density |
+| **P0 最高** | 核心业务主链路 / Core business chain | 系统存在的意义 |
+| **P0 最高** | 运行时主流程 / Runtime main flow | 系统如何工作 |
+| **P1 高** | 高复杂度模块 / High-complexity modules | 理解的关键 |
+| **P1 高** | 高耦合模块 / High-coupling modules | 变更风险最大 |
+| **P1 高** | 核心状态管理与数据流 / Core state & data flow | 行为正确性的关键 |
+| **P2 中** | 权限与安全边界 / Auth & security boundaries | 安全底线 |
+| **P2 中** | 架构 trade-off 与设计原因 / Architecture trade-offs & rationale | 工程决策 |
+| **P3 低** | 样板代码、UI 样式、简单 CRUD / Boilerplate, UI styles, simple CRUD | 信息密度低 |
 
 ### 3. 语义密度最大化 / Maximize Semantic Density
 
 每一行输出都应该承载有价值的信息。如果没有实质内容，就不要写。
 Every line of output should carry valuable information. If there's no substance, don't write it.
 
-**优先输出 / Prefer outputting:**
-- 高信息密度 / High information density
-- 高因果关系密度 / High causality density (A 导致 B 因为 C)
-- 具体的代码证据引用 / Specific code evidence citations
+**优先输出 / Prefer:** 高信息密度、高因果关系密度、具体代码证据引用
+/ Prefer: high information density, high causality density, specific code evidence citations
 
-**避免 / Avoid:**
-- 教科书式定义（"什么是微服务"）/ Textbook definitions
-- 空泛架构术语（"系统采用分层架构"）/ Vague architecture jargon
-- 重复总结 / Repeated summaries
-- 模板化表达（"项目使用了 RESTful API"）/ Template expressions
-- 无证据推断 / Evidence-free inferences
+**避免 / Avoid:** 教科书式定义、空泛架构术语、重复总结、模板化表达、无证据推断
+/ Avoid: textbook definitions, vague architecture jargon, repeated summaries, template expressions, evidence-free inferences
 
 ### 4. 证据优先，严格禁止编造 / Evidence First, Fabrication Strictly Prohibited
 
@@ -116,45 +141,20 @@ Strictly prohibited: reading only README before writing docs. Must actively chec
 如果仓库较大，优先分析核心链路和 runtime 主流程。
 If the repo is large, prioritize core chains and runtime main flow.
 
-## 文档目标读者 / Documentation Target Audience
+### 6. 禁止无限展开 / Prevent Infinite Expansion
 
-这些文档是"工程语义资产"，不是传统 onboarding doc。
-These docs are "engineering semantic assets", not traditional onboarding docs.
-
-### 人类读者 / Human Readers
-
-- 老板（汇报用）/ Management (reporting)
-- 客户（解释系统用）/ Clients (explaining the system)
-- 架构评审（评审架构用）/ Architecture reviewers
-- 技术负责人（技术决策用）/ Tech leads (tech decisions)
-- 工程师（日常开发用）/ Engineers (daily development)
-- 外包团队（接手用）/ Outsourced teams (handoff)
-- 新成员（上手用）/ New members (onboarding)
-
-### AI 读者 / AI Readers
-
-文档必须满足 AI 消费的语义要求 / Docs must meet semantic requirements for AI consumption:
-
-- **低歧义** / Low-ambiguity — 精确语言，不模糊描述
-- **高语义密度** / High semantic density — 信息丰富，不注水
-- **明确边界** / Clear boundaries — 模块边界、职责边界
-- **明确依赖** / Clear dependencies — 模块依赖、服务依赖
-- **明确数据流** / Clear data flow — 数据从哪来、到哪去、如何变换
-- **明确控制流** / Clear control flow — 执行顺序、分支、路由
-- **明确业务规则** / Clear business rules — 条件、约束、校验
-- **明确状态变化** / Clear state transitions — 前后状态、触发条件、副作用
+- 每个 Phase 有明确的停止条件，达到即停止 / Each Phase has a clear stopping condition — stop when reached
+- 不要在一个 Phase 中无限制地补充内容 / Don't endlessly supplement content within a Phase
+- 不要为了"看起来完整"而重复已有结论 / Don't repeat existing conclusions to "look complete"
+- 如果某个维度证据不足，明确写"仓库中没有足够证据"然后跳过 / If evidence is insufficient for a dimension, explicitly state "insufficient evidence" and skip
 
 ---
 
-# 五阶段分析流程 / Five-Stage Analysis Flow
+# 文档总览 / Document Overview
 
-## 文档总览 / Document Overview
+## 必须生成 / Mandatory Documents
 
-### 必须生成 / Mandatory
-
-以下文档在每次分析中都必须生成 / These documents must be generated in every analysis:
-
-| # | 文件名 / Filename | 阶段 / Stage | 核心内容 / Core Content |
+| # | 文件名 | 阶段 | 核心内容 |
 |---|---|---|---|
 | 1 | `00-project-overview.md` | Phase 1 | 项目总览：用途、技术栈、模块地图、复杂度分布 |
 | 2 | `00-analysis-plan.md` | Phase 1 | 分析计划：哪些模块需要深挖及原因 |
@@ -165,9 +165,27 @@ These docs are "engineering semantic assets", not traditional onboarding docs.
 | 7 | `04-engineering-review.md` | Phase 5 | 工程评价：trade-off、设计原因、优秀代码 |
 | 8 | `05-risks-and-tech-debt.md` | Phase 5 | 风险与技术债（按优先级排序） |
 
-### 可选生成 / Optional
+## 可选文档 / Optional Documents
 
-以下文档在仓库有充分证据时生成 / Generate when repo has sufficient evidence:
+以下文档只有在仓库证据充分时才生成 / Only generate when repo has sufficient evidence:
+
+| 文件名 | 何时生成 | 说明 |
+|---|---|---|
+| `code-reading-map.md` | 始终生成 | 代码阅读地图，新成员快速定位 |
+| `04-notable-code-examples.md` | 发现值得学习的代码片段 | 每个示例含文件路径、解决什么问题、为什么值得关注 |
+| `api-interface-map.md` | 有 API 定义时 | routes/OpenAPI/swagger |
+| `data-model-documentation.md` | 有 DB schema/migration 时 | 表结构、字段语义、关系 |
+| `testing-and-quality-analysis.md` | 有测试代码时 | 覆盖率、测试策略、测试质量 |
+| `security-review.md` | 有 auth/权限/敏感数据时 | 认证流程、权限模型、安全风险 |
+| `deployment-and-operations.md` | 有 Dockerfile/k8s/CI-CD 时 | 部署架构、运维流程 |
+| `configuration-reference.md` | 配置体系复杂时 | 多层配置、环境变量、feature flags |
+| `glossary.md` | 有领域专用术语时 | 术语定义与上下文 |
+| `troubleshooting-guide.md` | 有错误处理/日志/监控时 | 常见问题、排查路径 |
+| `onboarding-guide.md` | 项目较复杂时 | 新人上手步骤 |
+
+---
+
+# 五阶段分析流程 / Five-Stage Analysis Flow
 
 ## Phase 1：全局扫描 / Global Scan
 
@@ -176,18 +194,9 @@ These docs are "engineering semantic assets", not traditional onboarding docs.
 **只回答这些问题 / Only answer these questions:**
 
 ```
-系统是什么？
-有哪些核心模块？
-核心链路是什么？
-技术栈是什么？
-复杂度集中在哪里？
-哪些部分值得深入分析？
+系统是什么？有哪些核心模块？核心链路是什么？
+技术栈是什么？复杂度集中在哪里？哪些部分值得深入分析？
 ```
-
-**禁止 / Prohibited:**
-- 深入代码级展开 / Deep code-level analysis
-- 长篇细节分析 / Lengthy detailed analysis
-- 对单个模块的深度解读 / In-depth interpretation of individual modules
 
 **执行方式 / How to execute:**
 
@@ -198,9 +207,14 @@ These docs are "engineering semantic assets", not traditional onboarding docs.
 5. 阅读路由/导航配置，识别功能模块 / Read routing/nav config, identify functional modules
 6. 生成分析计划：哪些模块需要深挖、为什么 / Generate analysis plan: which modules need deep dives and why
 
+**禁止 / Prohibited:**
+- 深入代码级展开 / Deep code-level analysis
+- 长篇细节分析 / Lengthy detailed analysis
+- 对单个模块的深度解读 / In-depth interpretation of individual modules
+
 **输出 / Output:**
 - `00-project-overview.md` — 项目总览 / Project overview
-- `00-analysis-plan.md` — 分析计划（列出后续阶段要深挖的模块及原因）/ Analysis plan (list modules for deep dives with rationale)
+- `00-analysis-plan.md` — 分析计划（列出后续阶段要深挖的模块及原因）/ Analysis plan
 
 **停止条件 / Stopping condition:** 已经能回答上述所有问题，且已生成分析计划。
 
@@ -218,22 +232,22 @@ These docs are "engineering semantic assets", not traditional onboarding docs.
 - State flow — 状态的初始化、变更、持久化 / State initialization, change, persistence
 - Data flow — 数据的来源、处理、存储、输出 / Data sourcing, processing, storage, output
 
-**不要 / Don't:**
-- 分析产品逻辑 / Analyze product logic (Phase 4)
-- 评价工程质量 / Evaluate engineering quality (Phase 5)
-- 对非核心模块展开 / Expand on non-core modules
-
 **执行方式 / How to execute:**
 
 1. 从 Phase 1 确定的核心入口开始 / Start from core entry identified in Phase 1
-2. 逐层跟踪执行链路，记录每一层的关键决策 / Trace execution chain layer by layer, record key decisions at each layer
+2. 逐层跟踪执行链路，记录每一层的关键决策 / Trace execution chain layer by layer, record key decisions
 3. 画出请求/事件/数据的完整流经路径 / Draw complete flow path for requests/events/data
 4. 标注每个环节的关键状态变化 / Mark key state changes at each step
 5. 识别隐含的复杂度来源（间接调用、动态路由、条件分支等）/ Identify hidden complexity sources
 
+**禁止 / Prohibited:**
+- 分析产品逻辑（Phase 4）/ Analyze product logic (Phase 4)
+- 评价工程质量（Phase 5）/ Evaluate engineering quality (Phase 5)
+- 对非核心模块展开 / Expand on non-core modules
+
 **输出 / Output:**
-- `01-runtime-and-core-flow.md` — 运行时主流程（含架构图、请求链路图）/ Runtime main flow (with architecture diagram, request chain diagram)
-- `02-data-flow-and-state.md` — 数据流与状态管理（含数据流图、状态流转图）/ Data flow and state management (with data flow diagram, state transition diagram)
+- `01-runtime-and-core-flow.md` — 运行时主流程（含架构图、请求链路图）/ Runtime main flow (with architecture & request chain diagrams)
+- `02-data-flow-and-state.md` — 数据流与状态管理（含数据流图、状态流转图）/ Data flow and state management (with data flow & state diagrams)
 
 **必须包含图 / Must include diagrams:**
 - 系统架构图 / System architecture diagram (Mermaid)
@@ -252,7 +266,7 @@ These docs are "engineering semantic assets", not traditional onboarding docs.
 - Phase 1 分析计划中标记为"需要深挖"的模块 / Modules marked for deep dive in Phase 1 analysis plan
 - Phase 2 中发现的隐含复杂度 / Hidden complexity discovered in Phase 2
 
-**不要 / Don't:**
+**禁止 / Prohibited:**
 - 对所有模块平均用力 / Analyze all modules equally
 - 对简单 CRUD 或样板代码展开 / Expand on simple CRUD or boilerplate
 
@@ -282,7 +296,7 @@ These docs are "engineering semantic assets", not traditional onboarding docs.
 
 ## Phase 4：业务与产品语义分析 / Business & Product Semantics
 
-**目标 / Objective:** 让 AI 和人类真正理解产品行为 / Let AI and humans truly understand product behavior
+**目标 / Objective:** 理解产品行为和业务规则 / Understand product behavior and business rules
 
 **重点 / Focus:**
 - 业务规则（从代码中提取）/ Business rules (extracted from code)
@@ -293,9 +307,9 @@ These docs are "engineering semantic assets", not traditional onboarding docs.
 - 后台管理逻辑（如有）/ Admin logic (if present)
 - 配置与运营逻辑（feature flags, A/B test 等）/ Configuration and operations logic
 
-**不要 / Don't:**
+**禁止 / Prohibited:**
 - 复述 Phase 2 已分析的技术流 / Repeat technical flows already analyzed in Phase 2
-- 评价代码质量 / Evaluate code quality (Phase 5)
+- 评价代码质量（Phase 5）/ Evaluate code quality (Phase 5)
 
 **输出 / Output:**
 - `03-business-semantics.md` — 业务语义分析 / Business semantics analysis
@@ -320,14 +334,14 @@ Only with genuine understanding of the system will these analyses not be hollow.
 - 按优先级排序的改进建议 / Prioritized improvement suggestions
 - 优秀代码片段及原因 / Notable code snippets and reasons
 
-**不要 / Don't:**
+**禁止 / Prohibited:**
 - 输出空泛建议（"建议使用微服务架构"）/ Output vague suggestions
 - 输出无代码证据的评价 / Output evaluations without code evidence
 - 对简单代码过度分析 / Over-analyze simple code
 
 **输出 / Output:**
-- `04-engineering-review.md` — 工程评价（trade-off、设计原因、优秀代码）/ Engineering review (trade-offs, design rationale, notable code)
-- `05-risks-and-tech-debt.md` — 风险与技术债（按优先级排序）/ Risks and tech debt (prioritized)
+- `04-engineering-review.md` — 工程评价（trade-off、设计原因、优秀代码）/ Engineering review
+- `05-risks-and-tech-debt.md` — 风险与技术债（按优先级排序）/ Risks and tech debt
 
 **停止条件 / Stopping condition:** 每条建议都有具体的代码位置引用和改进方向。
 
@@ -336,15 +350,15 @@ Only with genuine understanding of the system will these analyses not be hollow.
 # 图示要求 / Diagram Requirements
 
 图是对人类和 AI 都最直观的信息载体。纯文字无法替代图。
-Diagrams are the most intuitive information carrier for both humans and AI. Text alone cannot replace them.
+Diagrams are the most intuitive information carrier. Text alone cannot replace them.
 
 ## 必须生成的图 / Mandatory Diagrams
 
 | 图类型 / Diagram Type | 所在阶段 / Stage | 说明 / Description |
 |---|---|---|
-| 系统架构图 / System Architecture Diagram | Phase 2 | 模块间关系、分层、依赖方向 / Module relationships, layering, dependency direction |
-| 请求链路图 / Request Chain Diagram | Phase 2 | 一次请求从入口到响应的完整路径 / Full request path from entry to response |
-| 数据流图 / Data Flow Diagram | Phase 2 | 数据从哪来到哪去、如何变换 / Data origin, destination, transformation |
+| 系统架构图 / System Architecture Diagram | Phase 2 | 模块间关系、分层、依赖方向 |
+| 请求链路图 / Request Chain Diagram | Phase 2 | 一次请求从入口到响应的完整路径 |
+| 数据流图 / Data Flow Diagram | Phase 2 | 数据从哪来到哪去、如何变换 |
 
 ## 按需生成的图 / On-Demand Diagrams
 
@@ -368,32 +382,21 @@ Diagrams are the most intuitive information carrier for both humans and AI. Text
 
 ---
 
-# 可选文档 / Optional Documents
-
-以下文档只有在仓库证据充分时才生成 / Only generate when repo has sufficient evidence:
-
-| 文档 / Document | 何时生成 / When to Generate | 放在哪个阶段 / Which Stage |
-|---|---|---|
-| `code-reading-map.md` 代码阅读地图 | 始终生成（新成员快速定位代码） | Phase 1 之后 |
-| `04-notable-code-examples.md` 优秀代码示例 | 发现值得学习的代码片段时 | Phase 3 之后 |
-| `api-interface-map.md` API 接口地图 | 有 API 定义时（routes/OpenAPI/swagger） | Phase 2 之后 |
-| `data-model-documentation.md` 数据模型 | 有 DB schema/migration 时 | Phase 2 之后 |
-| `testing-and-quality-analysis.md` 测试分析 | 有测试代码时，分析覆盖率、测试策略 | Phase 5 之后 |
-| `security-review.md` 安全审计 | 有 auth/权限/敏感数据处理时 | Phase 5 之后 |
-| `deployment-and-operations.md` 部署运维 | 有 Dockerfile/k8s/CI-CD 配置时 | Phase 5 之后 |
-| `troubleshooting-guide.md` 故障排查 | 有错误处理/日志/监控代码时 | Phase 5 之后 |
-| `configuration-reference.md` 配置说明 | 配置体系复杂时（多层配置、环境变量多） | Phase 1 或 Phase 2 |
-| `glossary.md` 术语表 | 有领域专用术语时 | 最后 |
-| `onboarding-guide.md` 新人上手 | 项目较复杂，新成员上手成本高时 | 最后 |
-
----
-
 # 输出质量要求 / Output Quality Requirements
 
 1. 每个重要结论引用文件路径、函数名、行号 / Cite file paths, function names, line numbers for important conclusions
 2. 明确区分：已确认事实、推断、未知 / Clearly distinguish: confirmed, inferred, unknown
 3. 如果是 monorepo：先分别分析各子项目，再说明关系 / For monorepo: analyze sub-projects separately, then explain relationships
 4. 不要伪精确：不知道就明确说不知道 / No fake precision: explicitly say "unknown" when unknown
+
+## 写作风格 / Writing Style
+
+- 准确、结构化、实用 / Accurate, structured, practical
+- 有架构视角、有技术深度 / Architecture-aware, technically deep
+- 适合交接 / Suitable for handoff
+- 少空话 / Minimal filler
+- 文档应帮助读者理解：结构、实现、原因、思想、取舍
+/ Docs should help readers understand: structure, implementation, rationale, philosophy, trade-offs
 
 ---
 
