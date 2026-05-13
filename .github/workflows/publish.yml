@@ -1,0 +1,48 @@
+name: Publish to ClawHub
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '**/SKILL.md'
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install ClawHub CLI
+        run: npm i -g clawhub
+
+      - name: Login to ClawHub
+        run: clawhub login --token ${{ secrets.CLAWHUB_TOKEN }}
+
+      - name: Determine version
+        id: version
+        run: |
+          if [[ "$GITHUB_REF" == refs/tags/v* ]]; then
+            VERSION="${GITHUB_REF#refs/tags/v}"
+          else
+            TIMESTAMP=$(date +%Y%m%d)
+            COMMIT_COUNT=$(git rev-list --count HEAD)
+            VERSION="0.0.${COMMIT_COUNT}"
+          fi
+          echo "version=${VERSION}" >> $GITHUB_OUTPUT
+          echo "Publishing version: ${VERSION}"
+
+      - name: Publish skills
+        run: |
+          for dir in */; do
+            if [ -f "${dir}SKILL.md" ]; then
+              slug=$(basename "$dir")
+              echo "Publishing ${slug}..."
+              clawhub skill publish "./${slug}" \
+                --slug "${slug}" \
+                --version "${{ steps.version.outputs.version }}" \
+                --changelog "Auto-publish from commit ${{ github.sha }}"
+            fi
+          done

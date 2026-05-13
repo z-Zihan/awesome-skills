@@ -4,13 +4,15 @@
 
 适用于任何支持读取本地 Markdown 作为系统指令的 AI Agent（OpenClaw、Claude Desktop、Cursor、Cline 等）。
 
-## 快速开始
+## 安装
+
+### 方式一：Git Clone
 
 ```bash
 git clone https://github.com/z-Zihan/awesome-skills.git
 ```
 
-将 `SKILL.md` 放到你的 Agent 能扫描到的目录即可。不同工具的加载方式：
+将 `SKILL.md` 放到你的 Agent 能扫描到的目录即可：
 
 | Agent | 配置方式 |
 |---|---|
@@ -19,21 +21,36 @@ git clone https://github.com/z-Zihan/awesome-skills.git
 | Cursor | 在 `.cursorrules` 或项目 `.cursor/` 中配置 |
 | Cline | 在 `.clinerules` 中引用 |
 
+### 方式二：ClawHub 安装（OpenClaw 用户）
+
+> ⚠️ 首次需要先安装 ClawHub CLI 并登录：`npm i -g clawhub && clawhub login`
+
+```bash
+openclaw skills install code-review
+openclaw skills install fe-cli
+openclaw skills install screenshot-to-prompt
+```
+
+更新已安装的 skill：
+
+```bash
+openclaw skills update --all
+```
+
 ---
 
 ## Skill 一览
 
 ### 🤖 code-review — 代码审查
 
-资深代码审查专家。从正确性、回归风险、兼容性、稳定性、性能、安全性、上下游影响等多维度审查代码变更。输出结构化、可用于合入决策的审查结论。
+资深代码审查专家。从正确性、回归风险、完成度、兼容性、安全性、上下游影响等多维度审查代码变更。输出结构化审查结论，含可复制给 AI agent 的修复指令。
 
-```
-触发："review 这段代码" / "审查这个文件" / 贴 diff
-```
+- **能力**：需求完成度分析、Bug 修复边界检查、旧功能影响评估、自动生成修复指令
+- **触发**："review 这段代码" / "帮我看看改动" / "审查代码" / "代码有没有问题"
 
 ### 🏗️ fe-cli — 前端项目脚手架
 
-一键创建规范化前端项目，自动生成标准目录结构、共享代码层（请求封装 / 样式 / 工具函数 / 环境配置 / AI 可读文档）、Vite + TypeScript 配置。
+一键创建规范化前端项目，自动生成标准目录结构、共享代码层（请求封装 / 样式 / 工具函数 / 环境配置 / AI 可读文档）。
 
 | 子 Skill | 类型 | 触发关键词 |
 |---|---|---|
@@ -44,24 +61,31 @@ git clone https://github.com/z-Zihan/awesome-skills.git
 | `fe-cli-ssr` | 服务端渲染 | SSR、Next.js、Nuxt、SEO |
 | `fe-cli-miniapp` | 小程序 | 小程序、微信小程序、MiniApp |
 
-**使用：**
+**技术栈规范：** pnpm / Sass / native fetch / Vite + TypeScript / `@/` 路径别名
 
+### 📸 screenshot-to-prompt — 截图转实现 Prompt
+
+输入页面截图，输出结构化页面识别结果 + 可直接发给 coding agent 的实现 prompt。不是代码生成器，是截图翻译器。
+
+- **能力**：页面结构识别、组件类型识别、文案字段提取、交互状态推断、多图状态归并
+- **UI 策略**：自动切换骨架模式 / 自由发挥 UI / 设计稿还原
+- **触发**：发截图说"帮我分析这个页面" / "生成实现 prompt" / "截图转实现"
+
+---
+
+## 版本管理
+
+- **日常更新**：push 到 `main` 分支，GitHub Actions 自动同步到 ClawHub（版本号自动递增）
+- **正式发版**：打 git tag（如 `v1.0.0`），Actions 使用 tag 作为版本号发布
+
+```bash
+# 日常开发，push 即自动发布
+git push origin main
+
+# 正式发版
+git tag v1.0.0
+git push origin v1.0.0
 ```
-"创建一个 React + Ant Design 后台项目，叫 order-admin"
-"新建一个移动端 H5 项目"
-"初始化 Electron 桌面应用"
-```
-
-**技术栈规范：**
-
-| 约束 | 值 |
-|---|---|
-| 包管理器 | pnpm |
-| CSS 预处理器 | Sass (SCSS) |
-| 网络库 | native fetch（不用 axios） |
-| 路径别名 | `@/` → `src/` |
-| Node 版本 | 18+ |
-| 响应式断点 | 768px / 1024px |
 
 ---
 
@@ -69,46 +93,50 @@ git clone https://github.com/z-Zihan/awesome-skills.git
 
 ```
 awesome-skills/
+├── .github/workflows/
+│   └── publish.yml         # ClawHub 自动发布
 ├── README.md
 ├── code-review/
-│   └── SKILL.md            # 代码审查
-└── fe-cli/
-    ├── SKILL.md            # 主控：类型识别 + 共享层生成
-    ├── references/         # 共享模板（按需读取）
-    │   ├── shared-base.md
-    │   ├── shared-config.md
-    │   └── ai-project-md.md
-    ├── web/SKILL.md
-    ├── admin/SKILL.md
-    ├── h5/SKILL.md
-    ├── electron/SKILL.md
-    ├── ssr/SKILL.md
-    └── miniapp/SKILL.md
+│   └── SKILL.md
+├── fe-cli/
+│   ├── SKILL.md
+│   ├── references/
+│   │   ├── shared-base.md
+│   │   ├── shared-config.md
+│   │   └── ai-project-md.md
+│   ├── web/SKILL.md
+│   ├── admin/SKILL.md
+│   ├── h5/SKILL.md
+│   ├── electron/SKILL.md
+│   ├── ssr/SKILL.md
+│   └── miniapp/SKILL.md
+└── screenshot-to-prompt/
+    └── SKILL.md
 ```
 
 ---
 
 ## 贡献新 Skill
 
-1. 在仓库根目录创建文件夹 + `SKILL.md`：
+1. 创建文件夹 + `SKILL.md`：
 
 ```
 my-skill/
 └── SKILL.md
 ```
 
-2. **SKILL.md 建议包含 YAML frontmatter**：
+2. 建议包含 YAML frontmatter（用于触发匹配）：
 
 ```yaml
 ---
 name: my-skill
 description: >
-  一句话描述。支持多关键词触发。
-  例如：Use when user asks for X, mentions Y, or wants to Z.
+  一句话描述。列出触发关键词。
+  NOT for: 不适用的场景。
 ---
 ```
 
-3. 提交 push 即可。
+3. 提交 push，GitHub Actions 会自动发布到 ClawHub。
 
 ---
 
@@ -116,5 +144,5 @@ description: >
 
 - **按需加载**：Skill 内容只在触发时读入，不占用日常上下文
 - **独立触发**：每个子 Skill 独立可被发现和加载
-- **模板分离**：共享代码模板放在 `references/`，不影响 skill 发现
 - **通用兼容**：纯 Markdown 格式，适配任何 AI Agent 工具
+- **自动发布**：push 即发布，无需手动管理版本号
