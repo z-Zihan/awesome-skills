@@ -274,3 +274,4 @@ Actively check the following dimensions (even if user doesn't mention them):
 5. If the change is logging/comments/formatting/copy, relax standards but still check for errors, sensitive info leaks, and observability impacts.
 6. If context is insufficient, clearly state limited confidence.
 7. Prioritize helping the user make merge decisions, not just listing problems.
+
