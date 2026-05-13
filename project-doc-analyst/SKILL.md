@@ -505,30 +505,28 @@ It's an "API semantic doc": helps readers understand what capabilities the syste
 
 **⚠️ 只有在项目中存在明显的接口调用时才生成 / Only generate when the project has significant API interactions**
 
-每个接口尽量说明 / For each API, try to include:
+**⚠️ 只收录在其他文档（架构、设计、产品分析等）中已提到过的接口 / Only include APIs that were already referenced in other docs**
+
+每个接口说明 / For each API:
 
 - 接口名称（使用 `【接口：xxx】` 格式）/ API name (using `【接口：xxx】` format)
 - 调用方（`前端请求` / `后端调用` / `内部调用`）/ Caller (frontend request / backend call / internal call)
-- 功能说明 / Functionality description — 这个接口做什么
-- 入参说明 / Input description — 需要传什么参数、各参数含义
-- 输出说明 / Output description — 返回什么数据、数据结构含义
-- 特殊行为 / Special behaviors — 权限要求、缓存策略、限流、异步处理等
-- 错误处理 / Error handling — 常见错误场景和返回
+- 功能说明 / Functionality — 做什么
+- 入参概述 / Input overview — 大概需要传什么（不需要列具体字段）
+- 输出概述 / Output overview — 服务端会返回什么（不需要列具体字段）
 
 **组织方式 / Organization:**
 
-按业务模块分组，而不是按路径分组 / Group by business module, not by path:
+按业务模块分组 / Group by business module:
 
 ```
 ## 用户模块
 
 ### 【接口：用户登录】
 - 调用方：前端请求
-- 功能：验证用户凭据，返回认证令牌
-- 入参：用户名、密码、验证码 token
-- 输出：访问令牌（JWT）、刷新令牌、用户基本信息
-- 特殊行为：密码错误 5 次后锁定 15 分钟
-- 错误处理：密码错误返回 401，账户锁定返回 423
+- 功能：验证用户凭据，颁发认证令牌
+- 入参：用户名 + 密码 + 验证码 token
+- 输出：访问令牌 + 刷新令牌 + 用户基本信息
 
 ### 【接口：获取用户信息】
 ...
@@ -537,10 +535,13 @@ It's an "API semantic doc": helps readers understand what capabilities the syste
 **不要写的内容 / Don't include:**
 
 - 具体路径（如 `/api/v1/users/login`）/ Actual paths
-- HTTP 方法（除非有语义区别，如 GET vs POST）/ HTTP methods (unless semantically significant)
+- HTTP 方法 / HTTP methods
 - curl 示例 / curl examples
-- 响应的 JSON 结构 / Response JSON structures（用文字描述即可）
+- 具体字段列表（如 `username: string, required`）/ Detailed field lists
+- 响应的 JSON 结构 / Response JSON structures
 - 请求头信息（如 Content-Type）/ Request headers
+- 错误处理 / Error handling
+- 未在其他文档中提到的接口 / APIs not referenced in other docs
 
 ## 可选文档 / Optional Documents
 
