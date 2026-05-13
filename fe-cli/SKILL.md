@@ -2,101 +2,97 @@
 name: fe-cli
 homepage: https://github.com/z-Zihan/awesome-skills
 description: >
-  Frontend project scaffolding CLI. Initialize standardized frontend projects with React/Vue/Next.js,
-  with Tailwind/Ant Design/MUI, Zustand/Redux, i18n, and more. Supports 6 project types: web SPA,
-  admin dashboard, mobile H5, Electron desktop, SSR (Next.js/Nuxt), and mini-program (WeChat/Taro).
-  Use when user asks to create a new frontend project, scaffold a project, init a frontend app,
-  or mentions "新建前端项目", "初始化项目", "脚手架", "创建 React/Vue 项目".
-  Also use when user asks to check/audit an existing project for frontend best practices.
+  前端项目脚手架 CLI。支持 React/Vue/Next.js + Tailwind/Ant Design/MUI + Zustand/Redux + i18n，
+  初始化标准化前端项目。支持 6 种项目类型：Web SPA、后台管理、移动 H5、Electron 桌面端、
+  SSR (Next.js/Nuxt)、小程序 (微信/Taro)。
+  触发：用户要求创建新前端项目、初始化项目、搭建脚手架，
+  或提到"新建前端项目"、"初始化项目"、"脚手架"、"创建 React/Vue 项目"。
+  也可用于检查/审查已有前端项目的规范性。
 ---
 
-# fe-cli — Frontend Project Scaffolding / 前端项目脚手架
+# fe-cli — 前端项目脚手架 / Frontend Project Scaffolding
 
-Shared entry point for all frontend project types. Routes to type-specific sub-skills and generates
-the shared common layer (fetch utils, global styles, multi-env config, etc.).
 所有前端项目类型的统一入口。路由到类型专属子技能，并生成共享公共层（请求工具、全局样式、多环境配置等）。
+Shared entry point for all frontend project types. Routes to type-specific sub-skills and generates the shared common layer (fetch utils, global styles, multi-env config, etc.).
 
-## Quick Start / 快速开始
+## 快速开始 / Quick Start
 
-### One-liner (skip all questions / 跳过所有问题)
-
-```
-User: "初始化一个 React + Tailwind + Zustand 后台项目，叫 my-admin"
-→ Detect type=admin → delegate to fe-cli-admin in fast mode
-```
-
-### Interactive mode / 交互模式
+### 一句话启动（跳过所有问题）/ One-liner (skip all questions)
 
 ```
-User: "新建前端项目"
-→ Ask: "什么类型？" → Route to sub-skill → Sub-skill asks detailed questions
+用户: "初始化一个 React + Tailwind + Zustand 后台项目，叫 my-admin"
+→ 识别类型=admin → 委派给 fe-cli-admin 快速模式
+```
+
+### 交互模式 / Interactive mode
+
+```
+用户: "新建前端项目"
 → 询问: "什么类型？" → 路由到子技能 → 子技能询问详细问题
 ```
 
-## Project Type Detection / 项目类型检测
+## 项目类型检测 / Project Type Detection
 
-Identify the type from user's request. Keywords mapping:
-从用户请求中识别类型。关键词映射：
+从用户请求中识别类型 / Identify the type from user's request：
 
-| Keywords / 关键词 | Type / 类型 | Sub-Skill / 子技能 |
+| 关键词 / Keywords | 类型 / Type | 子技能 / Sub-Skill |
 |---|---|---|
 | 后台/管理/Admin/Dashboard/CRUD | admin | fe-cli-admin |
 | 移动/H5/手机/微信H5/Mobile | h5 | fe-cli-h5 |
 | 桌面/Electron/客户端/Desktop | electron | fe-cli-electron |
 | SSR/Next.js/Nuxt/服务端渲染/SEO | ssr | fe-cli-ssr |
 | 小程序/微信小程序/MiniApp/WeChat | miniapp | fe-cli-miniapp |
-| (default / 官网/Web/SPA/网页) | web | fe-cli-web |
+| (默认/官网/Web/SPA/网页) | web | fe-cli-web |
 
-If ambiguous, ask: "这是什么类型的项目？Web SPA / 后台管理 / 移动H5 / Electron桌面 / SSR / 小程序"
+如果不确定，询问："这是什么类型的项目？Web SPA / 后台管理 / 移动H5 / Electron桌面 / SSR / 小程序"
 
-## Routing to Sub-Skills / 路由到子技能
+## 路由到子技能 / Routing to Sub-Skills
 
-Once type is identified, read the corresponding sub-skill's SKILL.md:
 类型识别后，读取对应子技能的 SKILL.md：
+Once type is identified, read the corresponding sub-skill's SKILL.md：
 
 ```
 Read: ./<type>/SKILL.md (relative to fe-cli/)
 ```
 
-Each sub-skill handles:
-每个子技能负责：
-1. Type-specific questions (framework, UI library, state management, i18n, pre-commit) / 类型专属问题（框架、UI 库、状态管理、i18n、pre-commit）
-2. Type-specific file generation (layout, pages, routing) / 类型专属文件生成（布局、页面、路由）
-3. Installation and post-setup / 安装和后续配置
+每个子技能负责 / Each sub-skill handles：
+1. 类型专属问题（框架、UI 库、状态管理、i18n、pre-commit） / Type-specific questions
+2. 类型专属文件生成（布局、页面、路由） / Type-specific file generation
+3. 安装和后续配置 / Installation and post-setup
 
-## Shared Common Layer / 共享公共层
+## 共享公共层 / Shared Common Layer
 
-After the sub-skill generates type-specific files, generate these shared files into the project.
 子技能生成类型专属文件后，在项目中生成以下共享文件。
+After the sub-skill generates type-specific files, generate these shared files into the project.
 Read `references/shared-base.md` and `references/shared-config.md` for code templates.
 
-### Directory structure to generate / 要生成的目录结构
+### 要生成的目录结构 / Directory structure to generate
 
 ```
 project-name/
 ├── src/
 │   ├── services/
-│   │   ├── request.ts         # fetch wrapper with interceptors
-│   │   ├── logger.ts          # Structured logger (levels, rotation, persistent storage)
-│   │   ├── log-export.ts      # Log export (download .log/.json) + submit (endpoint TBD)
+│   │   ├── request.ts         # fetch 请求封装（含拦截器）
+│   │   ├── logger.ts          # 结构化日志（分级、轮转、持久化）
+│   │   ├── log-export.ts      # 日志导出（下载 .log/.json）+ 上报（待定）
 │   │   └── api/
-│   │       └── index.ts       # API endpoint definitions
+│   │       └── index.ts       # API 接口定义
 │   ├── styles/
-│   │   ├── global.scss        # CSS variables + global styles
+│   │   ├── global.scss        # CSS 变量 + 全局样式
 │   │   ├── reset.scss         # CSS reset
-│   │   └── variables.scss     # Design tokens (colors, spacing, breakpoints)
+│   │   └── variables.scss     # 设计令牌（颜色、间距、断点）
 │   ├── utils/
-│   │   ├── index.ts           # General utilities (debounce, clone, etc.)
-│   │   ├── storage.ts         # localStorage/sessionStorage wrapper
-│   │   ├── format.ts          # Date/number formatters
-│   │   └── validate.ts        # Form validation helpers
+│   │   ├── index.ts           # 通用工具函数（防抖、深拷贝等）
+│   │   ├── storage.ts         # localStorage/sessionStorage 封装
+│   │   ├── format.ts          # 日期/数字格式化
+│   │   └── validate.ts        # 表单校验工具
 │   └── types/
-│       └── global.d.ts        # Global type declarations
-├── .env                       # Common env / 公共环境变量
-├── .env.development           # Dev env / 开发环境
-├── .env.test                  # Test env / 测试环境
-├── .env.production            # Prod env / 生产环境
-└── package.json               # Scripts section
+│       └── global.d.ts        # 全局类型声明
+├── .env                       # 公共环境变量
+├── .env.development           # 开发环境
+├── .env.test                  # 测试环境
+├── .env.production            # 生产环境
+└── package.json               # Scripts 配置
 ```
 
 ### Package.json scripts
@@ -116,55 +112,54 @@ project-name/
 }
 ```
 
-### Shared code templates / 共享代码模板
+### 共享代码模板 / Shared code templates
 
-See `references/shared-base.md` for all shared source code templates (including logger.ts and log-export.ts).
-See `references/shared-config.md` for vite/tsconfig/eslint config templates.
+所有共享源码模板见 `references/shared-base.md`（含 logger.ts 和 log-export.ts）。
+vite/tsconfig/eslint 配置模板见 `references/shared-config.md`。
 
-## AI-Readable Project Doc / AI 可读项目文档
+## AI 可读项目文档 / AI-Readable Project Doc
 
+生成所有项目文件后，在项目根目录生成 `.ai/PROJECT.md`。
 After generating ALL project files (shared layer + type-specific), generate `.ai/PROJECT.md` in the project root.
-生成所有项目文件（共享层 + 类型专属）后，在项目根目录生成 `.ai/PROJECT.md`。
-This file is for AI agents to quickly understand the project. This file helps AI agents quickly understand the project.
+This file is for AI agents to quickly understand the project.
 
-### .ai/PROJECT.md Goals / 目标
+### .ai/PROJECT.md 目标 / Goals
 
-- **Full directory tree** with every file listed and a one-line purpose / 完整目录树，每个文件列出并有一行说明
-- **Tech stack summary** (framework, UI lib, state management, CSS, etc.) / 技术栈摘要
-- **Architectural conventions** (path aliases, import order, naming rules) / 架构约定（路径别名、导入顺序、命名规则）
-- **Commands** (dev, build, test, lint, typecheck) / 命令（开发、构建、测试、lint、类型检查）
-- **Key patterns** (how routing works, how API calls are made, how state is managed) / 关键模式（路由、API 调用、状态管理）
+- **完整目录树**，每个文件列出并有一行说明 / Full directory tree with every file listed and a one-line purpose
+- **技术栈摘要**（框架、UI 库、状态管理、CSS 等）/ Tech stack summary
+- **架构约定**（路径别名、导入顺序、命名规则）/ Architectural conventions
+- **命令**（dev、build、test、lint、typecheck）/ Commands
+- **关键模式**（路由、API 调用、状态管理）/ Key patterns
 
-### Template / 模板
+### 模板 / Template
 
-Read `references/ai-project-md.md` for the full template. Adapt the directory tree to match the actual files generated for the specific project type.
+完整模板见 `references/ai-project-md.md`，根据具体项目类型调整目录树。
 
-### Rules / 规则
+### 规则 / Rules
 
-- Always use `tree` command format (├── and └──) for directories; a flat list with one-liners for files
-- Every file entry must have a comment explaining its purpose / 每个文件必须有说明其用途的注释
-- Group by directory; keep the same order as the actual file system / 按目录分组，与实际文件系统顺序一致
-- Update `.ai/PROJECT.md` whenever project structure changes / 项目结构变化时更新
-- Keep it concise — one line per file, not paragraphs / 保持简洁 — 每个文件一行，不是段落
+- 目录使用 `tree` 命令格式（├── 和 └──），文件用一行说明 / Always use `tree` format for directories
+- 每个文件必须有说明其用途的注释 / Every file entry must have a comment explaining its purpose
+- 按目录分组，与实际文件系统顺序一致 / Group by directory; keep the same order as the actual file system
+- 项目结构变化时更新 / Update whenever project structure changes
+- 保持简洁——每个文件一行，不是段落 / Keep it concise — one line per file
 
-## Key Rules / 关键规则
+## 关键规则 / Key Rules
 
-- **Package manager**: Always use pnpm
-- **CSS preprocessor**: Sass (SCSS syntax) by default
-- **Path alias**: Configure `@/` → `src/` in both tsconfig and vite config
-- **Responsive breakpoints**: Mobile < 768px < Tablet < 1024px < Desktop
-- **Network library**: Native fetch with wrapper (no axios), see references/shared-base.md
-- **Env files**: Always generate `.env`, `.env.development`, `.env.test`, `.env.production`
-- **Logging**: Always generate `services/logger.ts` + `services/log-export.ts`. Logger uses `Logger.child("Module")` pattern. Max storage 5MB with auto-trim. Console output only in dev mode. Submit endpoint is placeholder (TBD).
-- **Node version**: Target Node 18+
-- **pnpm build scripts**: Use `pnpm.onlyBuiltDependencies` in package.json to auto-approve native builds (e.g., `@parcel/watcher`). Build commands (`build:prod`, `build:test`) should NOT include `tsc -b` — Vite handles TS transpilation; type checking is a separate `typecheck` script.
+- **包管理器**：始终使用 pnpm / Package manager: Always use pnpm
+- **CSS 预处理器**：默认 Sass（SCSS 语法）/ CSS preprocessor: Sass (SCSS syntax) by default
+- **路径别名**：在 tsconfig 和 vite config 中配置 `@/` → `src/` / Path alias: Configure `@/` → `src/`
+- **响应式断点**：Mobile < 768px < Tablet < 1024px < Desktop
+- **网络库**：原生 fetch 封装（不用 axios），见 references/shared-base.md
+- **环境文件**：始终生成 `.env`、`.env.development`、`.env.test`、`.env.production`
+- **日志**：始终生成 `services/logger.ts` + `services/log-export.ts`。使用 `Logger.child("Module")` 模式。最大存储 5MB 自动清理。仅开发模式控制台输出。上报端点为占位符（待定）。
+- **Node 版本**：目标 Node 18+
+- **pnpm 构建脚本**：在 package.json 中使用 `pnpm.onlyBuiltDependencies` 自动批准原生构建（如 `@parcel/watcher`）。构建命令（`build:prod`、`build:test`）不应包含 `tsc -b`——Vite 处理 TS 转译；类型检查是独立的 `typecheck` 脚本。
 
-## Existing Project Audit / 已有项目审查
+## 已有项目审查 / Existing Project Audit
 
-When user asks to check an existing project: "检查这个前端项目", "审查项目规范性":
-当用户要求检查已有项目时：
+当用户要求检查已有项目时："检查这个前端项目"、"审查项目规范性"：
 
-1. Read `package.json` → check required dependencies and scripts / 读取 → 检查必要依赖和脚本
-2. Check for vite.config / tsconfig / eslint / prettier config / 检查配置文件
-3. Check src directory structure against the standard above / 对照上述标准检查 src 目录结构
-4. Report what's missing and suggest improvements / 报告缺失项并给出改进建议
+1. 读取 `package.json` → 检查必要依赖和脚本 / Read → check required dependencies and scripts
+2. 检查 vite.config / tsconfig / eslint / prettier 配置 / Check for config files
+3. 对照上述标准检查 src 目录结构 / Check src directory structure against the standard above
+4. 报告缺失项并给出改进建议 / Report what's missing and suggest improvements
