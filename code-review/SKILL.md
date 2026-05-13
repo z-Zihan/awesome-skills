@@ -7,7 +7,8 @@ description: >
   触发词：code review, CR, 代码审查, 审查代码, review代码, review PR/diff/commit,
   review修改, review当前的修改, 帮我review, 帮我看看代码, 看看有没有问题,
   帮我检查一下代码, 代码有没有问题, 这段代码怎么样, 改动有没有风险,
-  能不能合入, review一下, 帮我过一遍代码, 检查一下改动.
+  能不能合入, review一下, 帮我过一遍代码, 检查一下改动,
+  需求完成度, 功能有没有做完, 有没有遗漏, bug修复完整吗, 边界情况.
   NOT for: general code questions, writing code, debugging live issues (those are different workflows).
 ---
 
@@ -55,6 +56,13 @@ For every code change, answer these questions:
    - Do NOT over-criticize. Do not apply core business change standards.
    - Only check: compile failure risk, runtime error risk, logic change risk, obvious performance issues, sensitive info leakage, changes to log level/critical fields/print frequency that affect troubleshooting, monitoring, or alerting.
    - If no obvious risks: explicitly state "This change is low-risk overall, acceptable."
+
+7. **需求完成度 / Bug 修复完成度分析**
+   - 判断本次变更类型：需求实现 / Bug 修复 / 重构优化
+   - **需求实现**：用户可能提供需求文档和接口文档，仔细阅读两个文档，逐条对照变更代码，检查是否完整实现。如果用户没有提供文档，则从代码角度分析变更意图，判断是否有遗漏的功能点或未处理的分支。
+   - **Bug 修复**：对照 bug 描述或 issue，判断修复是否完整覆盖了问题场景，有没有遗漏边界情况（空值、并发、异常路径、极端输入等）。
+   - **重构优化**：判断重构是否保持了原有功能等价性，优化是否达到了预期效果。
+   - 完成度结论：完整实现 / 基本完成但有遗漏 / 部分完成 / 未完成
 
 ## Review Methodology
 
@@ -168,6 +176,31 @@ Actively check the following dimensions (even if user doesn't mention them):
 > [需要补充上下文的 issue，在对应行下方用引用块追加 1-2 句分析]
 
 > **注意**：日志文案调整、注释修正、日志级别变更等不属于需要提出的问题。
+
+### 完成度分析
+
+**变更类型**: 需求实现 / Bug 修复 / 重构优化
+**完成度**: 完整实现 / 基本完成（有遗漏） / 部分完成 / 未完成
+
+#### 需求对照（需求实现时填写）
+
+| 需求点 | 是否实现 | 说明 |
+|--------|----------|------|
+| ... | ✅ / ⚠️ / ❌ | ... |
+
+#### Bug 修复对照（Bug 修复时填写）
+
+| Bug 场景 | 是否覆盖 | 说明 |
+|----------|----------|------|
+| 主场景 | ✅ / ❌ | ... |
+| 边界情况 | ✅ / ❌ | ... |
+
+#### 遗漏点
+
+- [如果有遗漏，列出具体遗漏的功能点或场景]
+- [如果没有遗漏，写"未发现明显遗漏"]
+
+---
 
 ### 影响分析
 
