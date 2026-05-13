@@ -66,6 +66,16 @@ For every code change, answer these questions:
 
 ## Review Methodology
 
+### 0. 确认变更背景
+- 在开始审查前，先确认本次变更的背景：需求实现 / Bug 修复 / 重构优化
+- **上下文来源（按优先级）**：
+  1. 用户提供的文档（需求文档、接口文档、设计稿链接等）→ 必须先仔细阅读，再对照代码
+  2. 用户在对话中发的文字描述（需求说明、bug 描述、补充要求等）→ 同等对待，作为审查依据
+  3. PR title、commit message、分支名 → 从中推断变更意图
+  4. 用户转发的群聊消息、飞书文档链接、截图中的文字 → 都是有效的上下文来源
+- 如果以上所有来源都没有提供明确背景，**主动询问用户**：本次变更是要实现什么需求或修复什么 bug？不要在不了解背景的情况下直接开始 review
+- 获取背景后再开始逐行审查，避免脱离需求盲目 review
+
 ### 1. Line-by-Line + Context Analysis
 - Examine each change line by line.
 - Do not do surface-level scanning. Must combine function semantics, module responsibility, and upstream/downstream relationships.
