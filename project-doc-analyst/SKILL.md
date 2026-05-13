@@ -579,8 +579,8 @@ It's an "API semantic doc": helps readers understand what capabilities the syste
 
 以下文档只有在证据充分时才生成 / Only generate these when evidence is sufficient:
 
-- `deployment-and-operations.md` — 部署 / 运维指南
-- `configuration-reference.md` — 配置项说明
+- `deployment-and-operations.md` — 部署 / 运维指南（优先级相对较高）/ Deployment & operations guide
+- `configuration-reference.md` — 配置项说明（优先级较低，仅当配置体系复杂且对理解系统必不可少时才生成）/ Configuration reference (low priority, only when config system is complex and essential to understanding)
 
 如果证据不足，就不要生成 / If evidence is insufficient, don't generate them
 
@@ -606,8 +606,9 @@ It's an "API semantic doc": helps readers understand what capabilities the syste
 每个专题尽量包含 / For each topic, try to include:
 
 - 解决什么问题 / What problem it solves
-- 涉及哪些模块/文件 / Which modules/files are involved
+- 涉及哪些模块 / Which modules are involved
 - 核心机制 / Core mechanism
+- **部分代码示例** — 用最小可运行代码或伪代码说明核心实现逻辑，帮助读者理解具体怎么做的 / Partial code examples — use minimal runnable code or pseudocode to explain core implementation logic, helping readers understand how it actually works
 - 执行流程 / Execution flow
 - 设计原因 / Design rationale
 - 难点 / 隐性复杂度 / Difficulties / hidden complexity
