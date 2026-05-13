@@ -119,12 +119,21 @@ These documents serve both human and AI readers. They are not traditional onboar
   - 合理推断 / Reasonable inference
   - 证据不足 / Insufficient evidence
 
-### 2. 不要硬生成 / Don't Force-Generate
+### 2. 不要硬生成，不要假装理解 / Don't Force-Generate, Don't Fake Understanding
 
-- 只有在仓库中有足够证据支撑时，才生成对应文档 / Only generate documentation when the repo has sufficient evidence
-- 如果某部分证据太弱，要么省略，要么明确说明"仓库中没有足够证据支持" / If evidence is too weak, either skip it or explicitly state "insufficient evidence in repo"
-- 不要机械生成测试文档、部署文档、安全文档等，除非项目中确实存在或可被强烈推断 / Don't mechanically generate test docs, deployment docs, security docs etc. unless they truly exist or can be strongly inferred
-- 如果没有这个内容，就跳过 / If the content doesn't exist, skip it
+**严格禁止以下行为 / The following behaviors are strictly prohibited:**
+
+- 自动脑补：仓库中没有的功能、模块或机制，不要"推测"其存在
+- 强行生成：没有证据支撑的内容，宁可跳过也不要编造
+- 制造假精确：不确定的信息不要用确定的语气描述（例如 "系统采用了 XXX 模式" → 应为 "代码中未发现明确的 XXX 模式实现"）
+- 模板化填充：不要用通用模板填充每个章节（"项目使用了 RESTful API""系统采用分层架构"）
+
+**规则 / Rules:**
+
+- 只有在仓库中有足够证据支撑时，才生成对应内容 / Only generate content when the repo has sufficient evidence
+- 如果某部分证据太弱，要么省略，要么明确说明"仓库中没有足够证据支持" / If evidence is too weak, either skip or explicitly state "insufficient evidence in repo"
+- 如果项目没有某个特性或实现不够好，简单带过即可，不要写过多篇幅 / If the project lacks a feature or its implementation is lacking, briefly mention it and move on — don't write lengthy analysis
+- 区分：已确认事实 / 合理推断 / 证据不足，用不同语气描述 / Classify as confirmed fact / reasonable inference / insufficient evidence, and use different tones accordingly
 
 ### 3. 优先关注架构、技术深度和设计思想 / Prioritize Architecture, Technical Depth, and Design Philosophy
 
@@ -224,8 +233,9 @@ Many AIs lazily read only README and start writing docs. This is **strictly proh
 2. 决定输出语言 / Decide output language (see Language Strategy above)
 3. 给出简要分析计划 / Present a brief analysis plan:
    - 列出需要重点分析的模块 / List modules that need deep analysis
-   - 列出预计会生成哪些文档，以及为什么 / List planned documents and rationale
+   - 按优先级列出预计会生成哪些文档，以及为什么 / List planned documents by priority and rationale
    - 标注哪些文档因证据不足会被跳过 / Mark documents that will be skipped due to insufficient evidence
+   - **⏸ 停在此处，等待用户确认计划后再继续** / Stop here and wait for user confirmation before proceeding
 
 ### 阶段二：深度阅读 / Phase 2: Deep Reading
 
@@ -252,16 +262,34 @@ Many AIs lazily read only README and start writing docs. This is **strictly proh
 - 架构思想和设计理念 / Architecture philosophy and design principles
 - 工程取舍和技术债务 / Engineering trade-offs and technical debt
 
-### 阶段三：文档生成 / Phase 3: Document Generation
+### 阶段三：逐份生成文档 / Phase 3: Generate Documents One by One
 
-输出目标路径 / Output target path:
+**严格按优先级顺序，一份一份生成 / Strictly generate one document at a time in priority order:**
 
-- `Desktop/<project-name>/`
+1. 先完成 P0 文档（项目总览 → 技术架构文档） / Complete P0 docs first
+2. 再完成 P1 文档（设计原因与工程思想 → 产品与交互分析 → 优秀代码示例） / Then P1 docs
+3. 最后根据证据决定是否生成可选文档 / Finally decide whether to generate optional docs
+
+**每份文档的停止条件 / Stopping conditions for each document:**
+
+- 证据不足时：简单说明"仓库中该方面证据不足"，不要强行填充 / If evidence is insufficient: briefly state "insufficient evidence in repo", don't force-fill
+- 实现不够好的部分：点到为止，不要花篇幅分析一个不存在的最佳实践 / For poorly-implemented parts: briefly mention and move on, don't write lengthy analysis on a non-existent best practice
+- 文档生成完毕后：**⏸ 停在此处，等待用户确认或提出修改意见后再继续下一篇** / After each doc: stop and wait for user feedback before proceeding to the next
+
+**整体停止条件 / Overall stopping conditions:**
+
+- 所有计划文档已生成并获确认 / All planned documents have been generated and confirmed
+- 用户主动要求停止 / User requests to stop
+- Token 或上下文接近上限时：输出当前进度和剩余计划，等待用户新会话继续 / When approaching token/context limits: output current progress and remaining plan, wait for user to continue in a new session
 
 ## 必须生成的文档 / Mandatory Documents
 
-### 0. 项目总览 / Project Overview
+文档按优先级排列。高优先级文档先完成并确认后，再开始低优先级文档。
+Documents are ordered by priority. Complete and confirm higher-priority docs before starting lower-priority ones.
 
+### P0 — 项目总览 / Project Overview
+
+优先级：最高 / Priority: Highest
 建议文件名 / Suggested filename: `00-project-overview.md`
 
 尽量包含 / Try to include:
@@ -278,8 +306,9 @@ Many AIs lazily read only README and start writing docs. This is **strictly proh
 - 可见风险 / Visible risks
 - 推荐阅读顺序 / Recommended reading order
 
-### 1. 技术架构文档 / Technical Architecture
+### P0 — 技术架构文档 / Technical Architecture
 
+优先级：最高 / Priority: Highest
 建议文件名 / Suggested filename: `01-technical-architecture.md`
 
 **这是最重要的输出之一 / This is one of the most important outputs**
@@ -303,8 +332,9 @@ Many AIs lazily read only README and start writing docs. This is **strictly proh
 - 技术债务 / Technical debt
 - 改进机会 / Improvement opportunities
 
-### 2. 设计原因与工程思想 / Design Rationale & Engineering Philosophy
+### P1 — 设计原因与工程思想 / Design Rationale & Engineering Philosophy
 
+优先级：高 / Priority: High
 建议文件名 / Suggested filename: `02-design-rationale-and-engineering-philosophy.md`
 
 **这是关键输出 / This is a critical output**
@@ -321,8 +351,9 @@ Many AIs lazily read only README and start writing docs. This is **strictly proh
 - 哪些部分体现了优秀工程思维 / Which parts reflect excellent engineering thinking
 - 哪些部分体现了偶然复杂度 / Which parts reflect accidental complexity
 
-### 3. 产品与交互分析 / Product & Interaction Analysis
+### P1 — 产品与交互分析 / Product & Interaction Analysis
 
+优先级：高 / Priority: High
 建议文件名 / Suggested filename: `03-product-and-interaction-analysis.md`
 
 **⚠️ 只有在代码中能推断出产品行为时才生成 / Only generate when product behavior can be inferred from code**
@@ -338,8 +369,9 @@ Many AIs lazily read only README and start writing docs. This is **strictly proh
 - 前后端协同方式 / Frontend-backend collaboration patterns
 - 代码中可见的运营逻辑 / Operations logic visible in code
 
-### 4. 优秀代码示例 / Notable Code Examples
+### P1 — 优秀代码示例 / Notable Code Examples
 
+优先级：高 / Priority: High
 建议文件名 / Suggested filename: `04-notable-code-examples.md`
 
 只收录真正值得分析的例子 / Only include truly noteworthy examples
@@ -354,46 +386,12 @@ Many AIs lazily read only README and start writing docs. This is **strictly proh
 - 是否值得复用 / Whether it's worth reusing
 - 有无局限 / Limitations (if any)
 
-### 5. 风险、技术债务与改进建议 / Risks, Technical Debt & Suggestions
-
-建议文件名 / Suggested filename: `05-risks-technical-debt-and-suggestions.md`
-
-尽量包含 / Try to include:
-
-- 已确认风险 / Confirmed risks
-- 从结构/代码中推断出的潜在风险 / Potential risks inferred from structure/code
-- 可维护性问题 / Maintainability issues
-- 耦合问题 / Coupling issues
-- 边界不清问题 / Unclear boundary issues
-- 运维风险（如果可见）/ Operational risks (if visible)
-- 扩展性风险（如果可见）/ Scalability risks (if visible)
-- 按优先级排序的建议 / Prioritized suggestions
-
-### 6. 代码阅读地图 / Code Reading Map
-
-建议文件名 / Suggested filename: `06-reading-map.md`
-
-尽量包含 / Try to include:
-
-- 从哪里开始阅读 / Where to start reading
-- 哪些文件解释启动流程 / Files that explain startup flow
-- 哪些文件解释领域逻辑 / Files that explain domain logic
-- 哪些文件解释基础设施 / Files that explain infrastructure
-- 新工程师的推荐学习路径 / Recommended learning path for new engineers
-
 ## 可选文档 / Optional Documents
 
 以下文档只有在证据充分时才生成 / Only generate these when evidence is sufficient:
 
-- `api-interface-map.md` — API / 接口地图
-- `data-model-documentation.md` — 数据模型文档
-- `configuration-reference.md` — 配置项说明
 - `deployment-and-operations.md` — 部署 / 运维指南
-- `testing-and-quality-analysis.md` — 测试 / 质量分析
-- `security-review.md` — 安全审计
-- `glossary.md` — 术语表 / 领域词汇表
-- `troubleshooting-guide.md` — 故障排查指南
-- `onboarding-guide.md` — 新人上手指南
+- `configuration-reference.md` — 配置项说明
 
 如果证据不足，就不要生成 / If evidence is insufficient, don't generate them
 
@@ -489,22 +487,13 @@ Documentation should help readers understand: structure, implementation, rationa
 
 ```
 Desktop/<project-name>/
-├── 00-project-overview.md
-├── 01-technical-architecture.md
-├── 02-design-rationale-and-engineering-philosophy.md
-├── 03-product-and-interaction-analysis.md         # 仅在有充分证据时生成
-├── 04-notable-code-examples.md
-├── 05-risks-technical-debt-and-suggestions.md
-├── 06-reading-map.md
-├── api-interface-map.md                           # 可选 / Optional
-├── data-model-documentation.md                    # 可选 / Optional
-├── configuration-reference.md                     # 可选 / Optional
-├── deployment-and-operations.md                   # 可选 / Optional
-├── testing-and-quality-analysis.md                # 可选 / Optional
-├── security-review.md                             # 可选 / Optional
-├── glossary.md                                    # 可选 / Optional
-├── troubleshooting-guide.md                       # 可选 / Optional
-├── onboarding-guide.md                            # 可选 / Optional
+├── 00-project-overview.md                        # P0
+├── 01-technical-architecture.md                 # P0
+├── 02-design-rationale-and-engineering-philosophy.md  # P1
+├── 03-product-and-interaction-analysis.md        # P1，仅在有充分证据时生成
+├── 04-notable-code-examples.md                   # P1
+├── deployment-and-operations.md                  # 可选 / Optional
+├── configuration-reference.md                    # 可选 / Optional
 └── deep-dives/
     ├── auth-and-permission-model.md               # 仅在有充分证据时生成
     ├── caching-and-consistency.md                 # 仅在有充分证据时生成
