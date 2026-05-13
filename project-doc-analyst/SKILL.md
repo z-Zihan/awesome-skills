@@ -223,6 +223,93 @@ Many AIs lazily read only README and start writing docs. This is **strictly proh
 - 函数名 / Function names
 - 配置项名 / Config keys
 
+## 文件过滤与阅读优先级 / File Filtering & Reading Priority
+
+**项目越大，context 越珍贵。每读一个低信号文件，都是浪费理解核心架构的 context。**
+The larger the project, the more precious context is. Every low-signal file read wastes context that should go toward understanding core architecture.
+
+### 必须跳过的文件 / Files to Always Skip
+
+在 `find` / `glob` 阶段就排除，不要读入 context：
+Exclude these at the `find` / `glob` stage — do not read them into context:
+
+| 类别 / Category | 文件模式 / Patterns | 原因 / Reason |
+|---|---|---|
+| 样式文件 / Styles | `*.css`, `*.scss`, `*.less`, `*.sass`, `*.styl` | 几乎不反映架构决策 |
+| 静态资源 / Static assets | `*.png`, `*.jpg`, `*.jpeg`, `*.gif`, `*.webp`, `*.ico`, `*.svg`, `*.bmp` | 图片，无法文本分析 |
+| 字体文件 / Fonts | `*.ttf`, `*.woff`, `*.woff2`, `*.eot`, `*.otf` | 二进制 |
+| Source Map | `*.map` | 编译产物 |
+| Lock 文件 / Lock files | `*.lock`, `pnpm-lock.yaml` | 巨大、无架构信息（package.json 已够） |
+| Minified 文件 / Minified | `*.min.js`, `*.min.css`, `*.min.*` | 不可读 |
+| 日志文件 / Logs | `*.log` | 运行时产物 |
+| 构建产物 / Build output | `dist/`, `out/`, `build/`, `.next/`, `.nuxt/`, `target/`, `__pycache__/` | 编译输出 |
+| 依赖目录 / Dependencies | `node_modules/`, `vendor/`, `third_party/` | 第三方代码 |
+| 编译缓存 / Compile cache | `.turbo/`, `.cache/`, `.parcel-cache/`, `.tsbuildinfo` | 缓存 |
+
+### 应该跳过的文件 / Files to Usually Skip
+
+除非有明确需要，否则不主动读取：
+Don't actively read unless there's a clear need:
+
+| 翻译文件 / i18n files | `locales/**`, `i18n/**`, `messages/**`, `**/translations/**`, `**/lang/**` | 纯文本映射，零架构价值 |
+| Changelog | `CHANGELOG.md`, `HISTORY.md` | 版本记录，低架构价值 |
+| License | `LICENSE`, `LICENSE.*`, `COPYING` | 法律文本 |
+| 编辑器配置 / Editor config | `.editorconfig`, `.prettierrc*`, `.eslintrc*`（规则文件）| 格式偏好，不影响架构 |
+| PR/Issue 模板 | `.github/PULL_REQUEST_TEMPLATE*`, `.github/ISSUE_TEMPLATE*` | 模板文本 |
+| 大型测试 fixtures | `**/__fixtures__/**`, `**/mocks/**/*.json`（>100 行的 JSON）| 测试数据，很少反映架构 |
+| 自动生成的代码 / Generated code | `**/generated/**`, `*.generated.ts`, `*.generated.*` | 生成产物，看 generator 配置即可 |
+
+### 需要采样而非全读的文件 / Files to Sample Instead of Read Fully
+
+| 类别 / Category | 策略 / Strategy |
+|---|---|
+| 测试文件 / Test files | 每个模块读 1-2 个代表性测试，理解测试风格即可 |
+| 类型声明 / Type declarations (`.d.ts`) | 只在需要理解外部 API 约束时读取 |
+| 大型配置文件 / Large config files | 读 key 结构，跳过重复项（如 tsconfig 的 paths）|
+| 国际化文件 / i18n files | 跳过 `locales/`、`i18n/`、`messages/` 下的翻译 JSON |
+| 常量文件 / Constants files | 只读导出名称和前几行，理解结构即可 |
+
+### 高信号文件 — 必须优先读取 / High-Signal Files — Read First
+
+按以下优先级顺序读取，context 不够时从后往前砍：
+
+**P0（必须读）/ Must read:**
+- `package.json`, `Cargo.toml`, `go.mod`, `pom.xml`, `pyproject.toml` — 包元信息
+- `src/index.ts`, `src/main.ts`, `src/app.ts` — 入口文件
+- `src/lib.rs`, `src/main.rs`, `cmd/*/main.go` — 入口文件
+- 核心模块的 `index.ts` / `mod.rs` / `__init__.py`
+- `types.ts`, `types/`, `interfaces/`, `schemas/` — 类型定义
+- `README.md`, `docs/` — 项目文档
+- 构建配置 — `vite.config.ts`, `webpack.config.*`, `next.config.*`, `tsconfig.json`
+- CI/CD — `.github/workflows/`, `.gitlab-ci.yml`
+- 基础设施 — `Dockerfile`, `docker-compose.yml`
+
+**P1（重要但可取舍）/ Important but trade-offable:**
+- `middleware.ts`, `interceptors/`, `guards/` — 中间件/守卫
+- `services/`, `handlers/`, `controllers/` — 业务逻辑
+- `stores/`, `reducers/`, `hooks/` — 状态管理
+- `models/`, `entities/`, `domain/` — 领域模型
+- `routes/`, `pages/` — 路由/页面（大项目只读路由定义，不读组件实现）
+- `scripts/` — 脚本
+- `migrations/`, `seeds/` — 数据库变更
+
+**P2（有余力再读）/ Read if context allows:**
+- 测试文件（代表性采样）
+- 工具函数 `utils/`, `helpers/`
+- 常量文件
+- 子组件实现（如果已有路由/页面级别的理解）
+
+### 大项目阅读策略 / Large Project Reading Strategy
+
+**当应用过滤规则后，项目剩余文件数 > 200 时，必须执行以下策略：**
+
+1. **先扫结构不读内容**：`find` + `ls` + `head`，建立文件索引
+2. **按优先级列表批量读取 P0 文件**：用 `cat` 一次读多个小文件
+3. **识别核心模块**：根据入口文件的 import/export 确定核心依赖图
+4. **只深入核心链路**：从入口 → 中间件 → 服务 → 数据的完整链路
+5. **跳过重复模式**：如果 10 个 controller 结构相同，只读 2-3 个
+6. **尽早停止阅读开始写作**：context 用到 60-70% 时开始生成文档，不要等到 100%
+
 ## 执行流程 / Execution Flow
 
 ### 阶段一：项目识别与分析计划 / Phase 1: Project Identification & Analysis Plan
@@ -281,6 +368,24 @@ Many AIs lazily read only README and start writing docs. This is **strictly proh
 - 所有计划文档已生成并获确认 / All planned documents have been generated and confirmed
 - 用户主动要求停止 / User requests to stop
 - Token 或上下文接近上限时：输出当前进度和剩余计划，等待用户新会话继续 / When approaching token/context limits: output current progress and remaining plan, wait for user to continue in a new session
+
+### 阶段四：用户反馈与补充 / Phase 4: User Feedback & Supplement
+
+文档初版全部生成后，用户阅读完毕可能会提出反馈：
+
+- 某处分析不够深入 / "XX 部分能再展开吗"
+- 某处有遗漏 / "你漏掉了 XX 模块的 XX 机制"
+- 某处不够准确 / "这里不是 XX 模式，实际是 YY"
+- 想新增文档 / "能不能加一份 XX 专题分析"
+- 想补充视角 / "从性能/安全/可维护性角度再看一下"
+
+**处理方式 / How to handle:**
+
+1. 根据反馈定位到相关源码文件，重新阅读必要部分 / Locate relevant source files based on feedback, re-read as needed
+2. 对已有文档做**精准修改或追加**，而不是全篇重写 / Make targeted edits or additions to existing docs, not full rewrites
+3. 如果需要新增文档，按 P0→P1 优先级评估 / If new docs are needed, evaluate by P0→P1 priority
+4. 反馈驱动的补充同样遵循"证据优先"原则——没有代码证据的不要写 / Feedback-driven supplements still follow "evidence first" — don't write without code evidence
+5. 每轮反馈修改后再次等待用户确认 / After each round of feedback changes, wait for user confirmation again
 
 ## 必须生成的文档 / Mandatory Documents
 
