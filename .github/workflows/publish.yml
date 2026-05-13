@@ -13,12 +13,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
 
       - name: Install ClawHub CLI
         run: npm i -g clawhub
 
       - name: Login to ClawHub
-        run: clawhub login --token ${{ secrets.CLAWHUB_TOKEN }}
+        env:
+          CLAWHUB_TOKEN: ${{ secrets.CLAWHUB_TOKEN }}
+        run: clawhub login --token "$CLAWHUB_TOKEN"
 
       - name: Determine version
         id: version
@@ -32,15 +36,47 @@ jobs:
           echo "version=${VERSION}" >> $GITHUB_OUTPUT
           echo "Publishing version: ${VERSION}"
 
-      - name: Publish skills
+      - name: Detect changed skills
+        id: changed
         run: |
-          for dir in */; do
-            if [ -f "${dir}SKILL.md" ]; then
-              slug=$(basename "$dir")
-              echo "Publishing ${slug}..."
-              clawhub skill publish "./${slug}" \
-                --slug "${slug}" \
-                --version "${{ steps.version.outputs.version }}" \
-                --changelog "Auto-publish from commit ${{ github.sha }}"
+          CHANGED_SKILLS=""
+          if [[ "$GITHUB_REF" == refs/tags/v* ]]; then
+            # Tag push: publish all skills
+            echo "Tag push detected, publishing all skills"
+            for dir in */; do
+              if [ -f "${dir}SKILL.md" ]; then
+                slug=$(basename "$dir")
+                CHANGED_SKILLS="${CHANGED_SKILLS} ${slug}"
+              fi
+            done
+          else
+            # Branch push: only publish skills with changed SKILL.md
+            if git rev-parse HEAD~1 >/dev/null 2>&1; then
+              CHANGED_FILES=$(git diff --name-only HEAD~1 HEAD -- '**/SKILL.md')
+            else
+              # First commit or shallow clone fallback: check all SKILL.md
+              CHANGED_FILES=$(git ls-files '**/SKILL.md')
             fi
+
+            for file in ${CHANGED_FILES}; do
+              # Extract skill directory name (e.g., "code-review-ProMax/SKILL.md" -> "code-review-ProMax")
+              skill_dir=$(dirname "$file")
+              slug=$(basename "$skill_dir")
+              CHANGED_SKILLS="${CHANGED_SKILLS} ${slug}"
+            done
+          fi
+
+          echo "skills=${CHANGED_SKILLS}" >> $GITHUB_OUTPUT
+          echo "Changed skills:${CHANGED_SKILLS}"
+
+      - name: Publish skills
+        if: steps.changed.outputs.skills != ''
+        run: |
+          for slug in ${{ steps.changed.outputs.skills }}; do
+            echo "Publishing ${slug}..."
+            clawhub skill publish "./${slug}" \
+              --slug "${slug}" \
+              --version "${{ steps.version.outputs.version }}" \
+              --changelog "Auto-publish from commit ${{ github.sha }}"
+            echo "---"
           done
