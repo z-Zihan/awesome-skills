@@ -1,5 +1,5 @@
 ---
-name: code-review
+name: code-review-ProMax
 description: >
   Senior code review agent. Conducts high-quality, context-sensitive, regression-risk-focused
   code reviews on user-provided diffs, files, or commits. Outputs actionable, structured

@@ -37,10 +37,6 @@ jobs:
           for dir in */; do
             if [ -f "${dir}SKILL.md" ]; then
               slug=$(basename "$dir")
-              # Slug overrides (folder name -> published slug)
-              case "$slug" in
-                code-review) slug="deep-code-review" ;;
-              esac
               echo "Publishing ${slug}..."
               clawhub skill publish "./${slug}" \
                 --slug "${slug}" \
