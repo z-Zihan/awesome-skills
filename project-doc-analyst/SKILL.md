@@ -558,7 +558,37 @@ Documents must be self-contained — readers should understand the entire projec
    - ✅ "代理解析采用 4 级降级策略：插件配置 → 环境变量 → 系统代理 → 兜底直连"
    - 允许 / Acceptable: 关键算法用伪代码片段说明，长度以能说清楚为准
 
-5. **架构图和数据流图是自包含的** / Architecture and data flow diagrams are self-contained
+5. **后端接口不写具体路径，用职责描述 + 专用格式** / Don't write specific API paths, use responsibility description + special formatting
+
+   后端接口是系统的重要组成部分，但不能写成具体路径（路径可能变化、且属于实现细节）。
+   Backend APIs are important system components, but don't write specific paths (paths may change and are implementation details).
+
+   **接口引用格式 / API Reference Format:**
+
+   使用 `→` 前缀 + HTTP 方法 + 接口职责描述，一眼可识别：
+   Use `→` prefix + HTTP method + responsibility description, instantly recognizable:
+
+   - `→ POST 提交 Agent 任务` （而不是 `POST /__ai-ins-agent`）
+   - `→ GET 获取任务实时输出（SSE）` （而不是 `GET /__ai-ins-agent/events`）
+   - `→ DELETE 删除/停止任务` （而不是 `DELETE /__ai-ins-agent/runs`）
+   - `→ GET 在编辑器中打开文件` （而不是 `GET /__open-in-editor`）
+   - `→ POST 创建用户会话` （而不是 `POST /api/v1/sessions`）
+   - `→ GET 查询用户信息` （而不是 `GET /api/v1/users/:id`）
+
+   **批量列举接口时用表格 / When listing multiple APIs, use a table:**
+
+   | 接口 / API | 方法 / Method | 说明 / Description |
+   |---|---|---|
+   | → 提交 Agent 任务 | POST | 传入源码位置、用户 prompt、Agent 类型，返回任务 ID |
+   | → 获取任务输出（SSE） | GET | 订阅指定任务的实时输出流，通过 Server-Sent Events 推送 |
+   | → 查询任务列表 | GET | 返回所有任务的摘要信息（状态、创建时间、源码位置） |
+
+   **原则 / Principles:**
+   - 读者看到格式就知道"这是一个接口调用"，不需要看到实际路径 / Readers recognize "this is an API call" from format alone, no actual path needed
+   - 接口描述包含：做什么事、传什么、返回什么 / Description includes: what it does, what it takes, what it returns
+   - 路径中的动态参数（如 `:id`）转换为职责描述 / Dynamic params in paths become responsibility descriptions: "根据用户 ID 查询" not "/users/:id"
+
+6. **架构图和数据流图是自包含的** / Architecture and data flow diagrams are self-contained
    - 图中的每个模块必须有文字说明其职责
    - 图中的连线必须标注数据/控制流的方向和含义
    - 读者看图 + 看文字描述就能理解，不需要对照源码
@@ -572,6 +602,7 @@ Documents must be self-contained — readers should understand the entire projec
 | 代码行号 / Line numbers | "第 42-78 行" | 不写行号 |
 | 实现细节 / Implementation | "代码如下：`function foo()`..." | 用流程描述或简短伪代码 |
 | 架构证据 / Architecture evidence | "在 `package.json` 中可见" | "项目使用 TypeScript + pnpm workspace"（陈述事实即可，不引用文件） |
+| 接口路径 / API paths | "`POST /api/v1/users`" | "→ POST 创建用户"（见接口引用格式） |
 
 ### 通用质量规则 / General Quality Rules
 
