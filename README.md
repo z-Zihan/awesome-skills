@@ -69,8 +69,21 @@ openclaw skills update --all
 
 ### 版本管理
 
-- 日常 push 到 `main` → GitHub Actions 自动同步到 ClawHub
-- 正式发版：`git tag v1.0.0 && git push origin v1.0.0`
+**日常开发（自动发布）：**
+
+push 到 `main` 分支，GitHub Actions 自动检测 `SKILL.md` 变更并发布到 ClawHub，版本号自动递增，无需手动管理。
+
+**正式发版（手动）：**
+
+```bash
+# 1. 更新 CHANGELOG.md（记录本次变更）
+# 2. 打 tag 并推送
+git tag v1.0.0
+git push origin v1.0.0
+# 3. GitHub Actions 自动用 tag 作为版本号发布到 ClawHub
+```
+
+Tag 命名规范：`v<major>.<minor>.<patch>`，例如 `v1.0.0`、`v1.1.0`、`v1.1.1`
 
 ### 贡献
 
@@ -144,8 +157,21 @@ Input: page screenshot. Output: structured page analysis + an implementation pro
 
 ### Versioning
 
-- Push to `main` → GitHub Actions auto-syncs to ClawHub
-- Release: `git tag v1.0.0 && git push origin v1.0.0`
+**Daily development (auto-publish):**
+
+Push to `main` — GitHub Actions detects `SKILL.md` changes and auto-publishes to ClawHub with an auto-incrementing version. No manual version management needed.
+
+**Official release (manual):**
+
+```bash
+# 1. Update CHANGELOG.md
+# 2. Tag and push
+git tag v1.0.0
+git push origin v1.0.0
+# 3. GitHub Actions uses the tag as the version for ClawHub
+```
+
+Tag format: `v<major>.<minor>.<patch>` (e.g. `v1.0.0`)
 
 ### Contributing
 
