@@ -351,11 +351,19 @@ Diagrams are the most intuitive information carrier for both humans and AI. Text
 
 以下文档只有在仓库证据充分时才生成 / Only generate when repo has sufficient evidence:
 
-- `api-interface-map.md` — API 接口地图（有 API 时）/ API map (when APIs exist)
-- `data-model-documentation.md` — 数据模型（有 DB schema 时）/ Data model (when DB schema exists)
-- `configuration-reference.md` — 配置项说明（配置体系复杂时）/ Config reference (when config is complex)
-- `glossary.md` — 术语表（有领域术语时）/ Glossary (when domain terms exist)
-- `code-reading-map.md` — 代码阅读地图（新成员上手用）/ Code reading map (for new members)
+| 文档 / Document | 何时生成 / When to Generate | 放在哪个阶段 / Which Stage |
+|---|---|---|
+| `code-reading-map.md` 代码阅读地图 | 始终生成（新成员快速定位代码） | Phase 1 之后 |
+| `04-notable-code-examples.md` 优秀代码示例 | 发现值得学习的代码片段时 | Phase 3 之后 |
+| `api-interface-map.md` API 接口地图 | 有 API 定义时（routes/OpenAPI/swagger） | Phase 2 之后 |
+| `data-model-documentation.md` 数据模型 | 有 DB schema/migration 时 | Phase 2 之后 |
+| `testing-and-quality-analysis.md` 测试分析 | 有测试代码时，分析覆盖率、测试策略 | Phase 5 之后 |
+| `security-review.md` 安全审计 | 有 auth/权限/敏感数据处理时 | Phase 5 之后 |
+| `deployment-and-operations.md` 部署运维 | 有 Dockerfile/k8s/CI-CD 配置时 | Phase 5 之后 |
+| `troubleshooting-guide.md` 故障排查 | 有错误处理/日志/监控代码时 | Phase 5 之后 |
+| `configuration-reference.md` 配置说明 | 配置体系复杂时（多层配置、环境变量多） | Phase 1 或 Phase 2 |
+| `glossary.md` 术语表 | 有领域专用术语时 | 最后 |
+| `onboarding-guide.md` 新人上手 | 项目较复杂，新成员上手成本高时 | 最后 |
 
 ---
 
@@ -374,18 +382,24 @@ Diagrams are the most intuitive information carrier for both humans and AI. Text
 Desktop/<project-name>/
 ├── 00-project-overview.md              # Phase 1: 项目总览
 ├── 00-analysis-plan.md                 # Phase 1: 分析计划
-├── 01-runtime-and-core-flow.md         # Phase 2: 运行时主流程
-├── 02-data-flow-and-state.md           # Phase 2: 数据流与状态
-├── 03-business-semantics.md            # Phase 4: 业务语义
-├── 04-engineering-review.md            # Phase 5: 工程评价
-├── 05-risks-and-tech-debt.md           # Phase 5: 风险与技术债
+├── code-reading-map.md                 # 可选: 代码阅读地图
+├── 01-runtime-and-core-flow.md         # Phase 2: 运行时主流程（含架构图）
+├── 02-data-flow-and-state.md           # Phase 2: 数据流与状态（含数据流图）
 ├── deep-dives/                         # Phase 3: 复杂模块深挖
 │   ├── <module-name-1>.md
 │   ├── <module-name-2>.md
 │   └── ...
-├── api-interface-map.md                # 可选 / Optional
-├── data-model-documentation.md         # 可选 / Optional
-├── configuration-reference.md          # 可选 / Optional
-├── glossary.md                         # 可选 / Optional
-└── code-reading-map.md                 # 可选 / Optional
+├── 03-business-semantics.md            # Phase 4: 业务语义
+├── 04-engineering-review.md            # Phase 5: 工程评价
+├── 04-notable-code-examples.md         # 可选: 优秀代码示例
+├── 05-risks-and-tech-debt.md           # Phase 5: 风险与技术债
+├── api-interface-map.md                # 可选: API 接口地图
+├── data-model-documentation.md         # 可选: 数据模型
+├── testing-and-quality-analysis.md     # 可选: 测试分析
+├── security-review.md                  # 可选: 安全审计
+├── deployment-and-operations.md        # 可选: 部署运维
+├── troubleshooting-guide.md            # 可选: 故障排查
+├── configuration-reference.md          # 可选: 配置说明
+├── glossary.md                         # 可选: 术语表
+└── onboarding-guide.md                 # 可选: 新人上手指南
 ```
