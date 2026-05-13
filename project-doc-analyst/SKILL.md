@@ -83,6 +83,7 @@ These documents serve both human and AI readers. They are not traditional onboar
 
 文档必须 / Documents must:
 
+- 自成体系，无需源码即可理解 / Be self-contained — understandable without source code access
 - 低歧义 / Be low-ambiguity — precise language, no vague descriptions
 - 高语义密度 / Have high semantic density — information-rich, not filler-heavy
 - 明确边界 / Clearly define boundaries — module boundaries, responsibility boundaries
@@ -530,14 +531,56 @@ Documents are ordered by priority. Complete and confirm higher-priority docs bef
 - 风险 / 取舍 / Risks / trade-offs
 - 改进建议 / Improvement suggestions
 
-## 输出质量要求 / Output Quality Requirements
+### 文档独立性 / Document Independence
 
-1. 每个重要结论尽量引用文件路径、模块名、类名、函数名、配置名 / Cite file paths, module names, class names, function names, config names for important conclusions
-2. 明确区分：已确认事实、推断、未知 / Clearly distinguish: confirmed facts, inferences, unknowns
-3. 如果现有文档与代码冲突：以代码为准，显式指出差异 / If existing docs conflict with code: code takes precedence, explicitly note the difference
-4. 如果项目很大：先给出分析计划，再分阶段输出文档 / If project is large: present analysis plan first, then generate docs in phases
-5. 如果是 monorepo：先分别分析各子项目，再说明关系 / If monorepo: analyze sub-projects separately first, then explain relationships
-6. 不要伪精确：不知道就明确说明不知道 / Don't pretend to be precise: if you don't know, explicitly say so
+**文档必须自成体系，读者无需访问源码仓库即可理解整个项目。**
+Documents must be self-contained — readers should understand the entire project without needing to access the source repository.
+
+这意味着 / This means:
+
+1. **不要写仓库地址、Git URL、在线链接等依赖源码可访问性的信息** / Don't include repo URLs, Git addresses, or any links that assume source code is accessible
+   - ❌ "源码见 `packages/core/src/middleware.ts`"
+   - ✅ "核心中间件位于 core 包中，负责处理 5 个 HTTP 路由"
+   - ❌ "完整代码：https://github.com/user/repo/blob/main/src/foo.ts"
+   - ✅ "foo 模块的核心逻辑是通过 AST 遍历实现的"
+
+2. **文件路径只用于定位模块归属，不作为引用依据** / File paths are only for module attribution, not as citation basis
+   - ❌ "详见 `src/services/user.service.ts` 第 42-78 行"
+   - ✅ "用户服务的认证逻辑采用了 JWT 双 token 轮换机制"
+   - 允许 / Acceptable: "核心实现分布在 core 包的 middleware、source、providers 三个模块中"（只说明模块归属）
+
+3. **用"模块名 + 职责描述"替代"文件路径引用"** / Replace "file path citation" with "module name + responsibility description"
+   - 把 / Instead of: "在 `src/handlers/order.ts` 中，`createOrder()` 函数..."
+   - 写成 / Write: "订单创建流程由订单处理器负责，它执行以下步骤：校验参数 → 检查库存 → 创建订单 → 发送事件"
+
+4. **具体实现细节用伪代码或流程描述，不依赖读者去看源码** / Describe implementation details with pseudocode or flow descriptions, not by referencing source code
+   - ❌ "代码见 `resolveProxy()` 函数"
+   - ✅ "代理解析采用 4 级降级策略：插件配置 → 环境变量 → 系统代理 → 兜底直连"
+   - 允许 / Acceptable: 关键算法用简短的伪代码片段说明（10 行以内）
+
+5. **架构图和数据流图是自包含的** / Architecture and data flow diagrams are self-contained
+   - 图中的每个模块必须有文字说明其职责
+   - 图中的连线必须标注数据/控制流的方向和含义
+   - 读者看图 + 看文字描述就能理解，不需要对照源码
+
+### 引用策略调整 / Citation Strategy Adjustment
+
+| 维度 / Dimension | 之前 / Before | 现在 / Now |
+|---|---|---|
+| 模块定位 / Module location | "见 `src/middleware.ts`" | "中间件模块（middleware）负责..." |
+| 函数引用 / Function reference | "`resolveProxy()` 函数处理..." | "代理解析器按优先级逐级降级..." |
+| 代码行号 / Line numbers | "第 42-78 行" | 不写行号 |
+| 实现细节 / Implementation | "代码如下：`function foo()`..." | 用流程描述或简短伪代码 |
+| 架构证据 / Architecture evidence | "在 `package.json` 中可见" | "项目使用 TypeScript + pnpm workspace"（陈述事实即可，不引用文件） |
+
+### 通用质量规则 / General Quality Rules
+
+- 明确区分：已确认事实、推断、未知 / Clearly distinguish: confirmed facts, inferences, unknowns
+- 如果现有文档与代码冲突：以代码为准，显式指出差异 / If existing docs conflict with code: code takes precedence, explicitly note the difference
+- 如果项目很大：先给出分析计划，再分阶段输出文档 / If project is large: present analysis plan first, then generate docs in phases
+- 如果是 monorepo：先分别分析各子项目，再说明关系 / If monorepo: analyze sub-projects separately first, then explain relationships
+- 不要伪精确：不知道就明确说明不知道 / Don't pretend to be precise: if you don't know, explicitly say so
+- 优秀代码示例中允许使用简短伪代码（≤10 行），但不要贴大段源码 / Notable code examples may use short pseudocode (≤10 lines), but don't paste large source code blocks
 
 ## 图示要求 / Diagram Requirements
 
