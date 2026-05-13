@@ -2,20 +2,18 @@
 name: skill-prompt-generator
 homepage: https://github.com/z-Zihan/awesome-skills
 description: >
-  Generate production-ready prompts that can be directly used by other Agents,
-  Skills, AI workflows, or automation systems.
-  Transforms user ideas, workflows, requirements, or engineering scenarios
-  into structured, maintainable, multi-turn prompts optimized for AI system consumption.
-  Specialized in: agent prompts, skill prompts, workflow prompts,
-  system-style prompts, multi-agent workflows, engineering-oriented AI instructions.
-  Supports: Chinese & English prompt generation, staged interaction design,
-  workflow extraction, prompt architecture optimization.
-  NOT for: implementing features, writing business code, building applications,
-  executing workflows, generating runnable systems.
-  触发词：generate-agent-prompt, generate-skill-prompt, generate-system-prompt,
-  write-agent-prompt, write-skill-prompt, design-agent-prompt, design-system-prompt,
-  create-ai-prompt, prompt-for-agent, prompt-for-skill, prompt-for-workflow,
-  workflow-prompt, system-prompt, agent-prompt, skill-prompt.
+  生成可直接交给其他 Agent、Skill 或 AI Workflow 系统使用的 Prompt。
+  根据用户的想法、需求、流程或场景，生成结构化、工程化、支持多轮对话的 Agent Prompt / Skill Prompt / System Prompt。
+  支持中英双版本 Prompt 生成。
+  Generate production-ready prompts for Agents, Skills, and AI workflow systems.
+  Transforms user ideas, workflows, and requirements into structured, multi-turn, engineering-oriented prompts optimized for AI system usage.
+  Supports Chinese & English prompt generation.
+  触发词：生成 agent prompt, 生成 skill prompt, 生成 system prompt,
+  设计 agent prompt, 设计 skill prompt, 写个 agent prompt, 写个 skill prompt,
+  agent prompt, skill prompt, system prompt,
+  generate-agent-prompt, generate-skill-prompt, generate-system-prompt,
+  design-agent-prompt, design-skill-prompt, write-agent-prompt, write-skill-prompt,
+  agent-prompt, skill-prompt, system-prompt.
 ---
 
 # skill-prompt-generator — Skill Prompt 架构师 / Skill Prompt Architect
