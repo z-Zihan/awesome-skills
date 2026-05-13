@@ -77,23 +77,44 @@ For every code change, answer these questions:
 - 如果以上所有来源都没有提供明确背景，**主动询问用户**：本次变更是要实现什么需求或修复什么 bug？不要在不了解背景的情况下直接开始 review
 - 获取背景后再开始逐行审查，避免脱离需求盲目 review
 
-### 1. Line-by-Line + Context Analysis
+### 0.1 每次必须获取最新变更
+- **严禁使用过期的 diff 快照进行 review**
+- 每次 review 开始前，必须重新获取当前最新的变更状态：
+  1. 先 `git status` 确认工作区/暂存区状态
+  2. 再 `git diff`（或 `git diff --staged`、`git diff HEAD`）获取最新的实际改动
+  3. 如果用户提供的是文件内容而非 diff，直接分析文件内容，不要用旧 diff
+- 如果用户在对话过程中已经修改了代码（例如说"我改了一版"、"已经修了"），**必须重新拉取 diff**，用最新状态 review，不能用会话开头缓存的旧 diff
+- 如果无法确定当前是否为最新，主动问用户："我需要 review 的改动是当前最新的吗？"
+
+### 1. 只关注当前变更
+- Review 的核心对象是**本次变更的 diff**，不是整个文件、不是整个项目
+- **不要审查未修改的老代码**——即使用户的老代码有优化空间，也不是本次 review 的范围
+- 只有当新变更与老代码**产生联动并组合出现 bug** 时，才需要关注老代码。此时将老代码相关部分作为**上下文**引用，目的是判断新改动是否会破坏已有行为，而不是对老代码本身提 issue
+- 判断标准：如果去掉新改动，老代码本身是正常运行的，则不提老代码的问题
+
+### 1.1 结合上下文审查
+- 逐行审查 diff 时，**必须阅读修改点所在函数/模块的上下文代码**，不能只看 diff 本身
+- 结合上下文的目的是理解：这个改动在整体逻辑中处于什么位置、调用了什么、被什么调用、和上下游什么关系
+- 例如：diff 中改了一行条件判断，需要看整个 if-else 分支逻辑；改了一个函数签名，需要看所有调用处是否兼容
+- **上下文用于验证 diff 的正确性，不是用于审查上下文本身**
+
+### 2. Line-by-Line + Context Analysis
 - Examine each change line by line.
 - Do not do surface-level scanning. Must combine function semantics, module responsibility, and upstream/downstream relationships.
 
-### 2. Real Risks First
+### 3. Real Risks First
 - Prioritize issues that would cause: production incidents, mainline flow exceptions, regressions, compatibility breaks, data errors, state anomalies, performance degradation, security risks.
 - Do NOT output meaningless, overly nitpicky issues just to "appear to be reviewing."
 
-### 3. Mark Uncertainty Clearly
+### 4. Mark Uncertainty Clearly
 - If evidence is insufficient, do not make assertive claims.
 - Use: "Potential risk", "Needs upstream/downstream confirmation", "Cannot fully determine from this diff, but recommend focused verification."
 - Do not make unsupported conclusions.
 
-### 4. Focus on Behavioral Changes, Not Just Code Changes
+### 5. Focus on Behavioral Changes, Not Just Code Changes
 - Even small changes — judge whether they cause: result changes, semantic changes, default value changes, execution order changes, error handling changes, side effect changes, observability changes.
 
-### 5. Attention to Regression and Cascading Impact
+### 6. Attention to Regression and Cascading Impact
 - Especially focus on: public methods, base classes/utility classes/middleware, shared components, config center logic, shared models/DTOs/Schemas, core flow branching logic.
 - Small changes here can have large impact — must prioritize review.
 
