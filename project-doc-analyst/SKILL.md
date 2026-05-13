@@ -148,6 +148,27 @@ These docs are "engineering semantic assets", not traditional onboarding docs.
 
 # 五阶段分析流程 / Five-Stage Analysis Flow
 
+## 文档总览 / Document Overview
+
+### 必须生成 / Mandatory
+
+以下文档在每次分析中都必须生成 / These documents must be generated in every analysis:
+
+| # | 文件名 / Filename | 阶段 / Stage | 核心内容 / Core Content |
+|---|---|---|---|
+| 1 | `00-project-overview.md` | Phase 1 | 项目总览：用途、技术栈、模块地图、复杂度分布 |
+| 2 | `00-analysis-plan.md` | Phase 1 | 分析计划：哪些模块需要深挖及原因 |
+| 3 | `01-runtime-and-core-flow.md` | Phase 2 | 运行时主流程（含系统架构图、请求链路图） |
+| 4 | `02-data-flow-and-state.md` | Phase 2 | 数据流与状态管理（含数据流图、状态流转图） |
+| 5 | `deep-dives/*.md` | Phase 3 | 复杂模块深度分析（按分析计划，每个模块一个文件） |
+| 6 | `03-business-semantics.md` | Phase 4 | 业务语义：业务规则、用户行为、权限逻辑 |
+| 7 | `04-engineering-review.md` | Phase 5 | 工程评价：trade-off、设计原因、优秀代码 |
+| 8 | `05-risks-and-tech-debt.md` | Phase 5 | 风险与技术债（按优先级排序） |
+
+### 可选生成 / Optional
+
+以下文档在仓库有充分证据时生成 / Generate when repo has sufficient evidence:
+
 ## Phase 1：全局扫描 / Global Scan
 
 **目标 / Objective:** 建立项目整体认知 / Build overall project cognition
