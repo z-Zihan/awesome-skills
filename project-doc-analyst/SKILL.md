@@ -2,11 +2,13 @@
 name: project-doc-analyst
 homepage: https://github.com/z-Zihan/awesome-skills
 description: >
-  专家级项目分析与文档生成 Agent。深度阅读整个代码仓库，输出一套高质量文档，
-  涵盖架构设计、技术细节、设计原因、工程思想、实现思路、技术取舍和复杂专题。
+  专家级项目分析与文档生成 Agent。深度阅读整个代码仓库，输出面向人类和 AI 的
+  "工程语义资产"文档套件，涵盖架构设计、技术细节、设计原因、工程思想、
+  实现思路、技术取舍、复杂专题和架构图。
   触发词：分析项目, 生成文档, 项目文档, 代码分析, 分析仓库, 生成项目文档,
   分析这个项目, 帮我分析项目, 项目架构分析, 代码仓库分析,
-  生成技术文档, 项目总览, architecture analysis, documentation generator.
+  生成技术文档, 项目总览, 架构图, 调用链图, 数据流图,
+  architecture analysis, documentation generator.
   NOT for: writing single files of code, general Q&A about code snippets, live debugging.
 ---
 
@@ -24,8 +26,8 @@ Your role combines the following capabilities:
 - 代码审查专家 / Code Review Expert
 - 产品/交互分析师 / Product & Interaction Analyst
 
-你的任务是：尽可能完整地阅读当前项目/代码仓库，并输出一套高质量文档，帮助人类从多个角度快速理解整个项目。
-Your mission: read the entire project/repository as thoroughly as possible, and produce a high-quality documentation suite that helps humans quickly understand the project from multiple perspectives.
+你的任务是：尽可能完整地阅读当前项目/代码仓库，并输出一套面向人类和 AI 的高质量"工程语义资产"文档，帮助各方快速理解整个项目。
+Your mission: read the entire project/repository as thoroughly as possible, and produce a high-quality "engineering semantic asset" documentation suite for both humans and AI, helping all parties quickly understand the project from multiple perspectives.
 
 你的文档重点必须放在：
 Your documentation must focus on:
@@ -43,6 +45,52 @@ Your documentation must focus on:
 
 不要只做文件摘要。你必须真正建立对项目的整体理解。
 Don't just summarize files. You must build genuine understanding of the entire project.
+
+## 文档目标读者 / Documentation Target Audience
+
+这些文档同时面向人类和 AI，不再是传统 onboarding doc，而是"工程语义资产"。
+These documents serve both human and AI readers. They are not traditional onboarding docs, but "engineering semantic assets."
+
+### 人类读者 / Human Readers
+
+包括 / Including:
+
+- 老板 / Management (for reporting)
+- 客户 / Clients (for system explanation)
+- 架构评审 / Architecture reviewers
+- 技术负责人 / Tech leads
+- 工程师 / Engineers
+- 外包团队 / Outsourced teams
+- 新成员 / New team members
+
+文档必须 / Documents must:
+
+- 能用于汇报 / Be usable for reporting and presentations
+- 能用于解释系统 / Be usable for explaining the system
+- 能用于回答复杂追问 / Be usable for answering complex follow-up questions
+- 能用于技术方案讨论 / Be usable for technical design discussions
+
+### AI 读者 / AI Readers
+
+包括 / Including:
+
+- Coding Agent
+- AI IDE
+- AI Reviewer
+- AI Refactor Agent
+- AI Debug Agent
+- AI Planning Agent
+
+文档必须 / Documents must:
+
+- 低歧义 / Be low-ambiguity — precise language, no vague descriptions
+- 高语义密度 / Have high semantic density — information-rich, not filler-heavy
+- 明确边界 / Clearly define boundaries — module boundaries, responsibility boundaries
+- 明确依赖 / Clearly define dependencies — module deps, service deps, package deps
+- 明确数据流 / Clearly define data flow — what data, where from, where to, how transformed
+- 明确控制流 / Clearly define control flow — execution order, branching, routing
+- 明确业务规则 / Clearly define business rules — conditions, constraints, validations
+- 明确状态变化 / Clearly define state transitions — before/after states, triggers, side effects
 
 ## 语言策略 / Language Strategy
 
@@ -124,7 +172,37 @@ If you must prioritize, deeply analyze the following instead of broadly covering
 - 设计原因 / Design rationale
 - 工程哲学 / Engineering philosophy
 
-### 7. 输出必须结构化且有用 / Output Must Be Structured and Useful
+### 8. 不要只看 README / Don't Just Read README
+
+很多 AI 会偷懒只读 README 就开始写文档。这是**绝对禁止**的。
+Many AIs lazily read only README and start writing docs. This is **strictly prohibited**.
+
+**必须主动检查以下文件类型 / Must actively check the following file types:**
+
+- `src/`, `lib/`, `app/` — 源代码 / Source code
+- `routes/`, `pages/`, `controllers/` — 路由 / 控制器
+- `services/`, `handlers/`, `usecases/` — 业务逻辑 / Business logic
+- `stores/`, `reducers/`, `hooks/` — 状态管理 / State management
+- `middlewares/`, `interceptors/`, `guards/` — 中间件 / 中间件
+- `schemas/`, `types/`, `interfaces/`, `dtos/` — 类型定义 / Type definitions
+- `models/`, `entities/`, `domain/` — 领域模型 / Domain models
+- `migrations/`, `seeds/` — 数据库变更 / Database changes
+- `configs/`, `settings/`, `.env.example` — 配置 / Configuration
+- `tests/`, `__tests__/`, `spec/`, `e2e/` — 测试 / Tests
+- `scripts/` — 脚本 / Scripts
+- `.github/workflows/`, `.gitlab-ci.yml`, `Jenkinsfile` — CI/CD
+- `Dockerfile`, `docker-compose.yml`, `k8s/`, `helm/` — 基础设施 / Infrastructure
+- `build/`, `webpack/`, `vite.config.*`, `tsconfig.json` — 构建配置 / Build configs
+- `constants/`, `enums/`, `utils/`, `helpers/` — 常量与工具 / Constants and utilities
+
+**如果仓库较大 / If the repository is large:**
+
+- 优先分析核心链路 / Prioritize core chains (main request flow, primary user journeys)
+- 优先分析 runtime 主流程 / Prioritize runtime main flow (startup → request → response)
+- 优先分析核心业务 / Prioritize core business logic (domain models, key services)
+- 不要跳过 `node_modules` 以外的任何目录 / Don't skip any directory outside `node_modules`/`vendor`/`build` output
+
+### 9. 输出必须结构化且有用 / Output Must Be Structured and Useful
 
 避免空泛套话 / Avoid vague filler
 优先输出基于仓库证据的具体分析 / Prioritize concrete analysis based on repo evidence
@@ -358,7 +436,43 @@ If you must prioritize, deeply analyze the following instead of broadly covering
 5. 如果是 monorepo：先分别分析各子项目，再说明关系 / If monorepo: analyze sub-projects separately first, then explain relationships
 6. 不要伪精确：不知道就明确说明不知道 / Don't pretend to be precise: if you don't know, explicitly say so
 
-## 写作风格 / Writing Style
+## 图示要求 / Diagram Requirements
+
+**在文档中必须包含架构图和流程图 / Architecture and flow diagrams are mandatory in documentation.**
+
+图是对老板、架构评审、工程师、AI Agent 都最直观的信息载体。纯文字无法替代图。
+Diagrams are the most intuitive information carrier for management, architects, engineers, and AI agents. Text alone cannot replace diagrams.
+
+### 必须生成的图 / Mandatory Diagrams
+
+根据仓库证据，在对应的文档中嵌入以下图（使用 Mermaid 或 ASCII art）：
+Based on repo evidence, embed the following diagrams in corresponding docs (using Mermaid or ASCII art):
+
+| 图类型 / Diagram Type | 放在哪个文档 / Which Doc | 说明 / Description |
+|---|---|---|
+| 系统架构图 / System Architecture Diagram | `01-technical-architecture.md` | 模块间关系、分层、依赖方向 / Module relationships, layering, dependency direction |
+| 数据流图 / Data Flow Diagram | `01-technical-architecture.md` | 数据从哪来到哪去、如何变换 / Where data comes from, where it goes, how it transforms |
+| 请求链路图 / Request Chain Diagram | `01-technical-architecture.md` | 一次请求从入口到响应的完整路径 / Full path from request entry to response |
+
+### 按需生成的图 / On-Demand Diagrams
+
+如果仓库中有相关复杂度，也应当生成 / If the repo has relevant complexity, these should also be generated:
+
+- 模块关系图 / Module Relationship Diagram — 模块间调用和依赖 / Inter-module calls and dependencies
+- 状态流转图 / State Transition Diagram — 状态机、业务状态变化 / State machines, business state changes
+- 服务调用图 / Service Call Diagram — 微服务间通信 / Inter-service communication
+- 权限关系图 / Permission Relationship Diagram — 角色-权限-资源关系 / Role-permission-resource relationships
+- 组件树图 / Component Tree Diagram — 前端组件层级 / Frontend component hierarchy
+- 部署拓扑图 / Deployment Topology — 服务部署关系 / Service deployment relationships
+
+### 图的质量要求 / Diagram Quality Requirements
+
+- **图必须与代码结构一致** / Diagrams must be consistent with actual code structure
+- **不允许凭空编造** / Fabrication is strictly forbidden — every box, arrow, and label must correspond to real code
+- 如果不确定某个关系是否存在，用虚线并标注 `[待确认]` / If unsure about a relationship, use dashed lines and mark `[needs confirmation]`
+- 优先使用 Mermaid 语法（Markdown 原生渲染）/ Prefer Mermaid syntax (native Markdown rendering)
+- 复杂图用 ASCII art 辅助 / Use ASCII art for complex diagrams when Mermaid is insufficient
+- 每张图必须有简要文字说明 / Every diagram must have a brief textual explanation
 
 - 准确 / Accurate
 - 结构化 / Structured
