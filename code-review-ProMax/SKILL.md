@@ -2,14 +2,14 @@
 name: code-review-ProMax
 homepage: https://github.com/z-Zihan/awesome-skills
 description: >
+  高级代码审查 Agent。对用户提供的 diff、文件、commit、GitHub PR 或 GitLab MR 进行高质量、
+  上下文感知、回归风险导向的代码审查，输出可执行、结构化的审查结论，适合合入决策。
   Senior code review agent. Conducts high-quality, context-sensitive, regression-risk-focused
-  code reviews on user-provided diffs, files, or commits. Outputs actionable, structured
-  review conclusions suitable for merge decisions.
+  code reviews on user-provided diffs, files, commits, GitHub PRs, or GitLab MRs.
   触发词：code review, CR, 代码审查, 审查代码, review代码, review PR/diff/commit,
-  review修改, review当前的修改, 帮我review, 帮我看看代码, 看看有没有问题,
-  帮我检查一下代码, 代码有没有问题, 这段代码怎么样, 改动有没有风险,
-  能不能合入, review一下, 帮我过一遍代码, 检查一下改动,
-  需求完成度, 功能有没有做完, 有没有遗漏, bug修复完整吗, 边界情况.
+  review MR, review merge request, review修改, review当前的修改, 帮我review, 帮我看看代码,
+  看看有没有问题, 帮我检查一下代码, 代码有没有问题, 这段代码怎么样, 改动有没有风险,
+  能不能合入, review一下, 帮我过一遍代码, 检查一下改动, review这个PR, review这个MR.
   NOT for: general code questions, writing code, debugging live issues (those are different workflows).
 ---
 
@@ -68,6 +68,32 @@ For every code change, answer these questions:
 ## 审查方法论 / Review Methodology
 
 ### 0. 确认变更背景 / Confirm Change Background
+
+#### 变更来源识别 / Change Source Detection
+
+用户可能通过以下方式提供变更内容，按优先级处理：
+
+1. **直接提供 diff/文件内容** / User directly provides diff or file content → 直接审查
+2. **提供 Git commit hash** / User provides a Git commit hash → `git show <hash>` 或 `git diff <hash>~1 <hash>` 获取 diff
+3. **提供 GitHub PR 链接** / User provides a GitHub PR URL：
+   - 从 URL 提取 owner/repo/pr_number
+   - 使用 `gh pr diff <pr_number> -R <owner>/<repo>` 获取 diff
+   - 如果 `gh` CLI 不可用，使用 GitHub API：`https://api.github.com/repos/{owner}/{repo}/pulls/{number}` 获取 PR 信息和描述，`https://api.github.com/repos/{owner}/{repo}/pulls/{number}/files` 获取变更文件列表
+   - 同时获取 PR title、description 作为审查上下文
+4. **提供 GitLab MR 链接** / User provides a GitLab MR URL：
+   - 从 URL 提取 host/group/project/merge_request_number
+   - 使用 GitLab API：`https://{host}/api/v4/projects/{id}/merge_requests/{number}/changes` 获取 diff
+   - 需要先通过 `https://{host}/api/v4/projects?search={project}` 获取 project ID（URL encode project path）
+   - 同时获取 MR title、description 作为审查上下文
+   - 如果是内网 GitLab（如 gitlab.glm.ai），使用 `git` 命令克隆并 diff：`git fetch origin merge-requests/<number>/head:mr-<number> && git diff ...mr-<number>`
+5. **在本地 Git 仓库中** / User is in a local Git repo：
+   - `git diff` / `git diff --staged` / `git diff HEAD` 获取工作区/暂存区改动
+   - `git log --oneline -N` 查看最近提交
+   - `git show <hash>` 查看某次提交的详情
+
+> **GitHub 需要代理时**：如果 API 调用失败（网络超时/403），尝试配置代理 `https_proxy` 后重试。
+> **GitLab 内网直连**：内网 GitLab（如 gitlab.glm.ai）无需代理，直接访问。
+
 - 在开始审查前，先确认本次变更的背景：需求实现 / Bug 修复 / 重构优化
 - **上下文来源（按优先级）**：
   1. 用户提供的文档（需求文档、接口文档、设计稿链接等）→ 必须先仔细阅读，再对照代码
