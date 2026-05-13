@@ -1,18 +1,26 @@
 # 🧰 Awesome Skills
 
+[English](#english) | [中文](#中文)
+
+---
+
+<a id="中文"></a>
+
+## 中文
+
 通用 AI Agent 技能库。一个 skill 就是一份 `SKILL.md`，按需加载，开箱即用。
 
 适用于任何支持读取本地 Markdown 作为系统指令的 AI Agent（OpenClaw、Claude Desktop、Cursor、Cline 等）。
 
-## 安装
+### 安装
 
-### 方式一：Git Clone
+**Git Clone：**
 
 ```bash
 git clone https://github.com/z-Zihan/awesome-skills.git
 ```
 
-将 `SKILL.md` 放到你的 Agent 能扫描到的目录即可：
+将 `SKILL.md` 放到你的 Agent 能扫描到的目录：
 
 | Agent | 配置方式 |
 |---|---|
@@ -21,83 +29,138 @@ git clone https://github.com/z-Zihan/awesome-skills.git
 | Cursor | 在 `.cursorrules` 或项目 `.cursor/` 中配置 |
 | Cline | 在 `.clinerules` 中引用 |
 
-### 方式二：ClawHub 安装（OpenClaw 用户）
-
-> ⚠️ 首次需要先安装 ClawHub CLI 并登录：`npm i -g clawhub && clawhub login`
+**ClawHub（OpenClaw 用户）：**
 
 ```bash
 openclaw skills install code-review
 openclaw skills install fe-cli
 openclaw skills install screenshot-to-prompt
-```
-
-更新已安装的 skill：
-
-```bash
 openclaw skills update --all
 ```
 
----
+### Skill 一览
 
-## Skill 一览
+#### 🤖 code-review — 代码审查
 
-### 🤖 code-review — 代码审查
+多维度代码审查：需求完成度、回归风险、边界情况、上下游影响。输出结构化结论，含可发给 AI agent 的修复指令。
 
-资深代码审查专家。从正确性、回归风险、完成度、兼容性、安全性、上下游影响等多维度审查代码变更。输出结构化审查结论，含可复制给 AI agent 的修复指令。
+**触发词**：review 代码 / 帮我看看改动 / 代码有没有问题 / 改动有没有风险
 
-- **能力**：需求完成度分析、Bug 修复边界检查、旧功能影响评估、自动生成修复指令
-- **触发**："review 这段代码" / "帮我看看改动" / "审查代码" / "代码有没有问题"
+#### 🏗️ fe-cli — 前端项目脚手架
 
-### 🏗️ fe-cli — 前端项目脚手架
+一键创建规范化前端项目。支持 6 种类型：
 
-一键创建规范化前端项目，自动生成标准目录结构、共享代码层（请求封装 / 样式 / 工具函数 / 环境配置 / AI 可读文档）。
-
-| 子 Skill | 类型 | 触发关键词 |
+| 子 Skill | 类型 | 触发词 |
 |---|---|---|
-| `fe-cli-web` | Web SPA | 官网、网页、SPA |
-| `fe-cli-admin` | 后台管理 | 后台、管理、Admin、Dashboard |
-| `fe-cli-h5` | 移动端 H5 | 移动、H5、手机、微信 H5 |
-| `fe-cli-electron` | 桌面应用 | 桌面、Electron、客户端 |
-| `fe-cli-ssr` | 服务端渲染 | SSR、Next.js、Nuxt、SEO |
-| `fe-cli-miniapp` | 小程序 | 小程序、微信小程序、MiniApp |
+| `web` | Web SPA | 官网、SPA |
+| `admin` | 后台管理 | 后台、Admin |
+| `h5` | 移动端 H5 | H5、移动端 |
+| `electron` | 桌面应用 | Electron、桌面 |
+| `ssr` | 服务端渲染 | SSR、Next.js |
+| `miniapp` | 小程序 | 微信小程序 |
 
-**技术栈规范：** pnpm / Sass / native fetch / Vite + TypeScript / `@/` 路径别名
+**技术栈**：pnpm / Sass / native fetch / Vite + TypeScript
 
-### 📸 screenshot-to-prompt — 截图转实现 Prompt
+#### 📸 screenshot-to-prompt — 截图转实现 Prompt
 
-输入页面截图，输出结构化页面识别结果 + 可直接发给 coding agent 的实现 prompt。不是代码生成器，是截图翻译器。
+输入页面截图，输出页面结构识别 + 可发给 coding agent 的实现 prompt。不是代码生成器，是截图翻译器。
 
-- **能力**：页面结构识别、组件类型识别、文案字段提取、交互状态推断、多图状态归并
-- **UI 策略**：自动切换骨架模式 / 自由发挥 UI / 设计稿还原
-- **触发**：发截图说"帮我分析这个页面" / "生成实现 prompt" / "截图转实现"
+**触发词**：帮我分析这个页面 / 生成实现 prompt / 截图转实现
+
+### 版本管理
+
+- 日常 push 到 `main` → GitHub Actions 自动同步到 ClawHub
+- 正式发版：`git tag v1.0.0 && git push origin v1.0.0`
+
+### 贡献
+
+1. 创建文件夹 + `SKILL.md`，包含 YAML frontmatter
+2. Push 到 `main`，自动发布
 
 ---
 
-## 版本管理
+<a id="english"></a>
 
-- **日常更新**：push 到 `main` 分支，GitHub Actions 自动同步到 ClawHub（版本号自动递增）
-- **正式发版**：打 git tag（如 `v1.0.0`），Actions 使用 tag 作为版本号发布
+## English
+
+A universal AI Agent skill library. Each skill is a single `SKILL.md` file — load on demand, zero config.
+
+Compatible with any AI Agent that reads local Markdown as system instructions (OpenClaw, Claude Desktop, Cursor, Cline, etc.).
+
+### Installation
+
+**Git Clone:**
 
 ```bash
-# 日常开发，push 即自动发布
-git push origin main
-
-# 正式发版
-git tag v1.0.0
-git push origin v1.0.0
+git clone https://github.com/z-Zihan/awesome-skills.git
 ```
+
+Place `SKILL.md` in your Agent's skill directory:
+
+| Agent | Setup |
+|---|---|
+| OpenClaw | Symlink to `~/.openclaw-autoclaw/skills/` |
+| Claude Desktop | Reference path in `CLAUDE.md` |
+| Cursor | Add to `.cursorrules` or `.cursor/` |
+| Cline | Reference in `.clinerules` |
+
+**ClawHub (OpenClaw users):**
+
+```bash
+openclaw skills install code-review
+openclaw skills install fe-cli
+openclaw skills install screenshot-to-prompt
+openclaw skills update --all
+```
+
+### Skills
+
+#### 🤖 code-review — Code Review
+
+Multi-dimensional code review: requirement completion, regression risk, edge cases, upstream/downstream impact. Outputs structured report with AI-agent-ready fix instructions.
+
+**Triggers**: review this code / check my changes / any issues / is this safe to merge
+
+#### 🏗️ fe-cli — Frontend Scaffolding
+
+One-command project scaffolding with 6 templates:
+
+| Sub-skill | Type | Triggers |
+|---|---|---|
+| `web` | Web SPA | website, SPA |
+| `admin` | Dashboard | admin, dashboard |
+| `h5` | Mobile H5 | mobile, H5 |
+| `electron` | Desktop | Electron, desktop app |
+| `ssr` | Server-side | SSR, Next.js |
+| `miniapp` | Mini Program | WeChat miniapp |
+
+**Stack**: pnpm / Sass / native fetch / Vite + TypeScript
+
+#### 📸 screenshot-to-prompt — Screenshot to Implementation Prompt
+
+Input: page screenshot. Output: structured page analysis + an implementation prompt ready for any coding agent. Not a code generator — a screenshot translator.
+
+**Triggers**: analyze this page / generate implementation prompt / screenshot to prompt
+
+### Versioning
+
+- Push to `main` → GitHub Actions auto-syncs to ClawHub
+- Release: `git tag v1.0.0 && git push origin v1.0.0`
+
+### Contributing
+
+1. Create a folder + `SKILL.md` with YAML frontmatter
+2. Push to `main` — auto-published via GitHub Actions
 
 ---
 
-## 目录结构
+## Project Structure
 
 ```
 awesome-skills/
 ├── .github/workflows/
-│   └── publish.yml         # ClawHub 自动发布
-├── README.md
-├── code-review/
-│   └── SKILL.md
+│   └── publish.yml         # ClawHub auto-publish
+├── code-review/SKILL.md
 ├── fe-cli/
 │   ├── SKILL.md
 │   ├── references/
@@ -110,39 +173,5 @@ awesome-skills/
 │   ├── electron/SKILL.md
 │   ├── ssr/SKILL.md
 │   └── miniapp/SKILL.md
-└── screenshot-to-prompt/
-    └── SKILL.md
+└── screenshot-to-prompt/SKILL.md
 ```
-
----
-
-## 贡献新 Skill
-
-1. 创建文件夹 + `SKILL.md`：
-
-```
-my-skill/
-└── SKILL.md
-```
-
-2. 建议包含 YAML frontmatter（用于触发匹配）：
-
-```yaml
----
-name: my-skill
-description: >
-  一句话描述。列出触发关键词。
-  NOT for: 不适用的场景。
----
-```
-
-3. 提交 push，GitHub Actions 会自动发布到 ClawHub。
-
----
-
-## 设计原则
-
-- **按需加载**：Skill 内容只在触发时读入，不占用日常上下文
-- **独立触发**：每个子 Skill 独立可被发现和加载
-- **通用兼容**：纯 Markdown 格式，适配任何 AI Agent 工具
-- **自动发布**：push 即发布，无需手动管理版本号
