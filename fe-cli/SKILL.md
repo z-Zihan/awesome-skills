@@ -1,5 +1,6 @@
 ---
 name: fe-cli
+homepage: https://github.com/z-Zihan/awesome-skills
 description: >
   Frontend project scaffolding CLI. Initialize standardized frontend projects with React/Vue/Next.js,
   with Tailwind/Ant Design/MUI, Zustand/Redux, i18n, and more. Supports 6 project types: web SPA,

@@ -1,5 +1,6 @@
 ---
 name: screenshot-to-prompt
+homepage: https://github.com/z-Zihan/awesome-skills
 description: >
   Screenshot understanding + page structure extraction + implementation prompt generator.
   Input a page screenshot, output structured recognition results and a ready-to-use implementation
