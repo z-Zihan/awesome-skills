@@ -26,8 +26,8 @@ jobs:
           if [[ "$GITHUB_REF" == refs/tags/v* ]]; then
             VERSION="${GITHUB_REF#refs/tags/v}"
           else
-            COMMIT_COUNT=$(git rev-list --count HEAD)
-            VERSION="0.0.${COMMIT_COUNT}"
+            # run_number always increments, guaranteed unique
+            VERSION="0.1.${{ github.run_number }}"
           fi
           echo "version=${VERSION}" >> $GITHUB_OUTPUT
           echo "Publishing version: ${VERSION}"
