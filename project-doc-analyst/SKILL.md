@@ -482,15 +482,47 @@ Documents are ordered by priority. Complete and confirm higher-priority docs bef
 
 只收录真正值得分析的例子 / Only include truly noteworthy examples
 
-每个例子尽量说明 / For each example, try to explain:
+每个例子必须包含 / Each example must include:
 
 - 所在模块 / Which module it belongs to
 - 解决了什么问题 / What problem it solves
 - 为什么值得关注 / Why it's noteworthy
 - 体现了什么思想/模式 / What philosophy/pattern it embodies
+- **最小可运行代码示例** — 从核心实现中抽取关键逻辑，精简到最小可运行形态，用伪代码或接近真实的代码表达
+
+**最小可运行代码示例的要求 / Minimum runnable code example requirements:**
+
+- **必须可运行**：读者能直接理解执行逻辑，不是抽象描述，不是伪代码 / Must be executable — readers can directly understand the execution logic, not abstract descriptions
+- **必须最小**：只保留核心逻辑，去掉边界检查、日志、错误处理、注释等非核心部分 / Must be minimal — only core logic, strip boundary checks, logging, error handling, comments, etc.
+- **不要贴原始源码**：不要从仓库中复制粘贴大段代码 / Don't paste raw source code from the repo
+- **长度不限**：以能说清楚为准 / No length limit — as long as needed to be clear
+- **要有注释标注关键步骤**：在关键行用简短注释标注"这步在做什么" / Annotate key steps with brief comments
+- 如果涉及外部依赖，用简短的类型声明或接口说明替代 / If external deps are involved, use brief type declarations or interface descriptions instead
+
+示例 / Example:
+
+```
+// DOM 源码栈提取：从点击元素向上查找所有带 source 属性的父级
+function getSourceLayers(element) {
+  let current = element.closest('[data-ai-ins-source]')
+  const layers = []
+
+  while (current) {
+    layers.push({
+      name: current.tagName.toLowerCase(),
+      path: current.getAttribute('data-ai-ins-source'),  // "src/Button.tsx:15:7"
+    })
+    current = current.parentElement?.closest('[data-ai-ins-source]')  // 跳到上一层 source 元素
+  }
+
+  return layers
+}
+```
+
+每个例子还要说明 / Each example should also explain:
+
 - 是否值得复用 / Whether it's worth reusing
 - 有无局限 / Limitations (if any)
-- 用伪代码说明实现逻辑，长度以能说清楚为准 / Use pseudocode to explain implementation logic, as long as needed to be clear
 
 ### P1 — 接口文档 / API Documentation
 
