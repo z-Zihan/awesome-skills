@@ -556,7 +556,7 @@ Documents must be self-contained — readers should understand the entire projec
 4. **具体实现细节用伪代码或流程描述，不依赖读者去看源码** / Describe implementation details with pseudocode or flow descriptions, not by referencing source code
    - ❌ "代码见 `resolveProxy()` 函数"
    - ✅ "代理解析采用 4 级降级策略：插件配置 → 环境变量 → 系统代理 → 兜底直连"
-   - 允许 / Acceptable: 关键算法用简短的伪代码片段说明（10 行以内）
+   - 允许 / Acceptable: 关键算法用伪代码片段说明，长度以能说清楚为准
 
 5. **架构图和数据流图是自包含的** / Architecture and data flow diagrams are self-contained
    - 图中的每个模块必须有文字说明其职责
@@ -580,7 +580,7 @@ Documents must be self-contained — readers should understand the entire projec
 - 如果项目很大：先给出分析计划，再分阶段输出文档 / If project is large: present analysis plan first, then generate docs in phases
 - 如果是 monorepo：先分别分析各子项目，再说明关系 / If monorepo: analyze sub-projects separately first, then explain relationships
 - 不要伪精确：不知道就明确说明不知道 / Don't pretend to be precise: if you don't know, explicitly say so
-- 优秀代码示例中允许使用简短伪代码（≤10 行），但不要贴大段源码 / Notable code examples may use short pseudocode (≤10 lines), but don't paste large source code blocks
+- 优秀代码示例中允许使用伪代码说明实现逻辑，长度以能说清楚为准 / Notable code examples may use pseudocode to explain logic — use as many lines as needed to be clear
 
 ## 图示要求 / Diagram Requirements
 
