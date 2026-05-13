@@ -32,7 +32,7 @@ git clone https://github.com/z-Zihan/awesome-skills.git
 **ClawHub（OpenClaw 用户）：**
 
 ```bash
-openclaw skills install code-review
+openclaw skills install deep-code-review
 openclaw skills install fe-cli
 openclaw skills install screenshot-to-prompt
 openclaw skills update --all
@@ -120,7 +120,7 @@ Place `SKILL.md` in your Agent's skill directory:
 **ClawHub (OpenClaw users):**
 
 ```bash
-openclaw skills install code-review
+openclaw skills install deep-code-review
 openclaw skills install fe-cli
 openclaw skills install screenshot-to-prompt
 openclaw skills update --all
