@@ -72,29 +72,30 @@ For every code change, answer these questions:
 #### 变更来源识别 / Change Source Detection
 
 用户可能通过以下方式提供变更内容，按优先级处理：
+Users may provide changes in the following ways, processed in priority order:
 
-1. **直接提供 diff/文件内容** / User directly provides diff or file content → 直接审查
-2. **提供 Git commit hash** / User provides a Git commit hash → `git show <hash>` 或 `git diff <hash>~1 <hash>` 获取 diff
+1. **直接提供 diff/文件内容** / User directly provides diff or file content → 直接审查 / review directly
+2. **提供 Git commit hash** / User provides a Git commit hash → `git show <hash>` 或 `git diff <hash>~1 <hash>` 获取 diff / to get the diff
 3. **提供 GitHub PR 链接** / User provides a GitHub PR URL：
-   - 从 URL 提取 owner/repo/pr_number
-   - 使用 `gh pr diff <pr_number> -R <owner>/<repo>` 获取 diff
-   - 如果 `gh` CLI 不可用，使用 GitHub API：`https://api.github.com/repos/{owner}/{repo}/pulls/{number}` 获取 PR 信息和描述，`https://api.github.com/repos/{owner}/{repo}/pulls/{number}/files` 获取变更文件列表
-   - 同时获取 PR title、description 作为审查上下文
+   - 从 URL 提取 owner/repo/pr_number / Extract owner/repo/pr_number from URL
+   - 使用 `gh pr diff <pr_number> -R <owner>/<repo>` 获取 diff / Use to get the diff
+   - 如果 `gh` CLI 不可用，使用 GitHub API：`https://api.github.com/repos/{owner}/{repo}/pulls/{number}` 获取 PR 信息和描述，`https://api.github.com/repos/{owner}/{repo}/pulls/{number}/files` 获取变更文件列表 / If `gh` CLI is unavailable, use GitHub API to get PR info/description and changed files
+   - 同时获取 PR title、description 作为审查上下文 / Also fetch PR title and description as review context
 4. **提供 GitLab MR 链接** / User provides a GitLab MR URL：
-   - 从 URL 提取 host/group/project/merge_request_number
-   - 使用 GitLab API：`https://{host}/api/v4/projects/{id}/merge_requests/{number}/changes` 获取 diff
-   - 需要先通过 `https://{host}/api/v4/projects?search={project}` 获取 project ID（URL encode project path）
-   - 同时获取 MR title、description 作为审查上下文
-   - 如果是内网 GitLab（如 gitlab.glm.ai），使用 `git` 命令克隆并 diff：`git fetch origin merge-requests/<number>/head:mr-<number> && git diff ...mr-<number>`
+   - 从 URL 提取 host/group/project/merge_request_number / Extract host/group/project/merge_request_number from URL
+   - 使用 GitLab API：`https://{host}/api/v4/projects/{id}/merge_requests/{number}/changes` 获取 diff / Use GitLab API to get the diff
+   - 需要先通过 `https://{host}/api/v4/projects?search={project}` 获取 project ID（URL encode project path）/ Need to get project ID first via search API (URL encode project path)
+   - 同时获取 MR title、description 作为审查上下文 / Also fetch MR title and description as review context
+   - 如果是内网 GitLab（如 gitlab.glm.ai），使用 `git` 命令克隆并 diff：`git fetch origin merge-requests/<number>/head:mr-<number> && git diff ...mr-<number>` / For internal GitLab, use `git` commands to fetch and diff
 5. **在本地 Git 仓库中** / User is in a local Git repo：
-   - `git diff` / `git diff --staged` / `git diff HEAD` 获取工作区/暂存区改动
-   - `git log --oneline -N` 查看最近提交
-   - `git show <hash>` 查看某次提交的详情
+   - `git diff` / `git diff --staged` / `git diff HEAD` 获取工作区/暂存区改动 / to get working/staging area changes
+   - `git log --oneline -N` 查看最近提交 / to check recent commits
+   - `git show <hash>` 查看某次提交的详情 / to view a specific commit's details
 
-> **GitHub 需要代理时**：如果 API 调用失败（网络超时/403），尝试配置代理 `https_proxy` 后重试。
-> **GitLab 内网直连**：内网 GitLab（如 gitlab.glm.ai）无需代理，直接访问。
+> **GitHub 需要代理时**：如果 API 调用失败（网络超时/403），尝试配置代理 `https_proxy` 后重试。/ If GitHub API fails (timeout/403), try setting proxy `https_proxy` and retry.
+> **GitLab 内网直连**：内网 GitLab（如 gitlab.glm.ai）无需代理，直接访问。/ Internal GitLab doesn't need proxy, connect directly.
 
-- 在开始审查前，先确认本次变更的背景：需求实现 / Bug 修复 / 重构优化
+- 在开始审查前，先确认本次变更的背景：需求实现 / Bug 修复 / 重构优化 / Before starting the review, confirm the change background: feature implementation / bug fix / refactoring
 - **上下文来源（按优先级）**：
   1. 用户提供的文档（需求文档、接口文档、设计稿链接等）→ 必须先仔细阅读，再对照代码
   2. 用户在对话中发的文字描述（需求说明、bug 描述、补充要求等）→ 同等对待，作为审查依据
