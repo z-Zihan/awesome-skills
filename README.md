@@ -35,7 +35,9 @@ git clone https://github.com/z-Zihan/awesome-skills.git
 openclaw skills install code-review-ProMax
 openclaw skills install fe-cli
 openclaw skills install screenshot-to-prompt
-openclaw skills update --all
+openclaw skills install project-doc-analyst
+openclaw skills install project-onboarding
+openclaw skills install skill-prompt-generatoropenclaw skills update --all
 ```
 
 ### Skill 一览
@@ -66,6 +68,24 @@ openclaw skills update --all
 输入页面截图，输出页面结构识别 + 可发给 coding agent 的实现 prompt。不是代码生成器，是截图翻译器。
 
 **触发词**：帮我分析这个页面 / 生成实现 prompt / 截图转实现
+
+#### 📋 project-doc-analyst — 项目文档生成
+
+深度阅读代码仓库，输出面向人类和 AI 的工程语义资产文档套件。按优先级分阶段生成：P0（项目总览 + 技术架构）→ P1（设计原因 + 产品分析 + 代码示例），支持可选文档和复杂专题深挖。
+
+**触发词**：分析项目 / 生成文档 / 项目文档 / 代码分析 / 项目架构分析 / 架构图 / 调用链图 / 数据流图
+
+#### 🚀 project-onboarding — 项目接手指南
+
+帮助有经验的开发者快速接手陌生项目。分三阶段输出：快速总览（10 分钟建地图）→ 深入专项 → 定向开发辅助。覆盖开发流程、工程规范、API 集成、组件体系、环境部署、团队协作等。
+
+**触发词**：接手项目 / 项目上手 / 快速上手 / 新人接手 / onboarding / 如何开发 / 项目怎么跑
+
+#### 🎯 skill-prompt-generator — Skill Prompt 架构师
+
+根据用户想法、流程或需求，自动生成结构完整、工程化、可直接使用的 Skill Prompt。支持中英双语输出，根据 Skill 类型自动增强（开发/UI/文档/架构/测试等）。
+
+**触发词**：生成 skill / 创建 skill / 写个 prompt / 设计 skill / prompt 设计 / skill 架构
 
 ### 版本管理
 
@@ -122,7 +142,9 @@ Place `SKILL.md` in your Agent's skill directory:
 ```bash
 openclaw skills install code-review-ProMax
 openclaw skills install fe-cli
-openclaw skills install screenshot-to-prompt
+openclaw skills install project-doc-analyst
+openclaw skills install project-onboarding
+openclaw skills install skill-prompt-generatoropenclaw skills install screenshot-to-prompt
 openclaw skills update --all
 ```
 
@@ -154,6 +176,24 @@ One-command project scaffolding with 6 templates:
 Input: page screenshot. Output: structured page analysis + an implementation prompt ready for any coding agent. Not a code generator — a screenshot translator.
 
 **Triggers**: analyze this page / generate implementation prompt / screenshot to prompt
+
+#### 📋 project-doc-analyst — Project Documentation Generator
+
+Deep-read the entire codebase and generate engineering semantic asset documentation for both humans and AI. Staged by priority: P0 (project overview + technical architecture) → P1 (design rationale + product analysis + code examples), with optional docs and deep dives.
+
+**Triggers**: analyze project / generate docs / project documentation / code analysis / architecture analysis / architecture diagram
+
+#### 🚀 project-onboarding — Project Onboarding Guide
+
+Help experienced developers quickly onboard onto unfamiliar projects. Three-stage output: quick overview (10-min project map) → deep dive → targeted dev assistance. Covers dev workflow, engineering standards, API integration, component system, environment/deployment, team collaboration.
+
+**Triggers**: onboard / project handover / quick start / how to develop / how to run
+
+#### 🎯 skill-prompt-generator — Skill Prompt Architect
+
+Transforms vague ideas into structured, engineering-grade, ready-to-use Skill Prompts. Supports bilingual Chinese/English output with type-specific enhancements (dev, UI, docs, architecture, testing, etc.).
+
+**Triggers**: create skill / write a prompt / design skill / prompt design / skill architecture
 
 ### Versioning
 
@@ -200,4 +240,7 @@ awesome-skills/
 │   ├── ssr/SKILL.md
 │   └── miniapp/SKILL.md
 └── screenshot-to-prompt/SKILL.md
+├── project-doc-analyst/SKILL.md
+├── project-onboarding/SKILL.md
+└── skill-prompt-generator/SKILL.md
 ```
