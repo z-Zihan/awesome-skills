@@ -484,13 +484,63 @@ Documents are ordered by priority. Complete and confirm higher-priority docs bef
 
 每个例子尽量说明 / For each example, try to explain:
 
-- 文件路径 / File path
-- 所在上下文 / Context
+- 所在模块 / Which module it belongs to
 - 解决了什么问题 / What problem it solves
 - 为什么值得关注 / Why it's noteworthy
 - 体现了什么思想/模式 / What philosophy/pattern it embodies
 - 是否值得复用 / Whether it's worth reusing
 - 有无局限 / Limitations (if any)
+- 用伪代码说明实现逻辑，长度以能说清楚为准 / Use pseudocode to explain implementation logic, as long as needed to be clear
+
+### P1 — 接口文档 / API Documentation
+
+优先级：高 / Priority: High
+建议文件名 / Suggested filename: `05-api-documentation.md`
+
+**⚠️ 这不是传统意义上的 API 文档——它没有具体路径、没有 curl 示例。**
+This is NOT a traditional API doc — it has no actual paths, no curl examples.
+
+**它是一份"接口语义文档"：帮助读者理解系统暴露了哪些能力、数据的流向、前后端如何协作。**
+It's an "API semantic doc": helps readers understand what capabilities the system exposes, data flow directions, and how frontend/backend collaborate.
+
+**⚠️ 只有在项目中存在明显的接口调用时才生成 / Only generate when the project has significant API interactions**
+
+每个接口尽量说明 / For each API, try to include:
+
+- 接口名称（使用 `【接口：xxx】` 格式）/ API name (using `【接口：xxx】` format)
+- 调用方（`前端请求` / `后端调用` / `内部调用`）/ Caller (frontend request / backend call / internal call)
+- 功能说明 / Functionality description — 这个接口做什么
+- 入参说明 / Input description — 需要传什么参数、各参数含义
+- 输出说明 / Output description — 返回什么数据、数据结构含义
+- 特殊行为 / Special behaviors — 权限要求、缓存策略、限流、异步处理等
+- 错误处理 / Error handling — 常见错误场景和返回
+
+**组织方式 / Organization:**
+
+按业务模块分组，而不是按路径分组 / Group by business module, not by path:
+
+```
+## 用户模块
+
+### 【接口：用户登录】
+- 调用方：前端请求
+- 功能：验证用户凭据，返回认证令牌
+- 入参：用户名、密码、验证码 token
+- 输出：访问令牌（JWT）、刷新令牌、用户基本信息
+- 特殊行为：密码错误 5 次后锁定 15 分钟
+- 错误处理：密码错误返回 401，账户锁定返回 423
+
+### 【接口：获取用户信息】
+...
+```
+
+**不要写的内容 / Don't include:**
+
+- 具体路径（如 `/api/v1/users/login`）/ Actual paths
+- HTTP 方法（除非有语义区别，如 GET vs POST）/ HTTP methods (unless semantically significant)
+- curl 示例 / curl examples
+- 响应的 JSON 结构 / Response JSON structures（用文字描述即可）
+- 请求头信息（如 Content-Type）/ Request headers
 
 ## 可选文档 / Optional Documents
 
@@ -565,28 +615,29 @@ Documents must be self-contained — readers should understand the entire projec
 
    **接口引用格式 / API Reference Format:**
 
-   使用 `→` 前缀 + HTTP 方法 + 接口职责描述，一眼可识别：
-   Use `→` prefix + HTTP method + responsibility description, instantly recognizable:
+   使用 `【接口：功能描述】` 标记，前后端通用：
+   Use `【接口：description】` tag, works for both frontend and backend:
 
-   - `→ POST 提交 Agent 任务` （而不是 `POST /__ai-ins-agent`）
-   - `→ GET 获取任务实时输出（SSE）` （而不是 `GET /__ai-ins-agent/events`）
-   - `→ DELETE 删除/停止任务` （而不是 `DELETE /__ai-ins-agent/runs`）
-   - `→ GET 在编辑器中打开文件` （而不是 `GET /__open-in-editor`）
-   - `→ POST 创建用户会话` （而不是 `POST /api/v1/sessions`）
-   - `→ GET 查询用户信息` （而不是 `GET /api/v1/users/:id`）
+   - `前端请求 【接口：云机分配】` （而不是 `POST /api/v1/cloud/assign`）
+   - `前端请求 【接口：获取任务列表】`
+   - `后端调用 【接口：提交 Agent 任务】`
+   - `后端调用 【接口：获取实时输出（SSE）】`
+   - `后端调用 【接口：在编辑器中打开文件】`
 
    **批量列举接口时用表格 / When listing multiple APIs, use a table:**
 
-   | 接口 / API | 方法 / Method | 说明 / Description |
-   |---|---|---|
-   | → 提交 Agent 任务 | POST | 传入源码位置、用户 prompt、Agent 类型，返回任务 ID |
-   | → 获取任务输出（SSE） | GET | 订阅指定任务的实时输出流，通过 Server-Sent Events 推送 |
-   | → 查询任务列表 | GET | 返回所有任务的摘要信息（状态、创建时间、源码位置） |
+   | 接口 / API | 说明 / Description |
+   |---|---|
+   | 【接口：提交 Agent 任务】 | 前端传入源码位置、用户 prompt、Agent 类型，返回任务 ID |
+   | 【接口：获取实时输出】 | 前端订阅指定任务的实时输出流（SSE） |
+   | 【接口：查询任务列表】 | 前端获取所有任务的摘要（状态、创建时间、源码位置） |
+   | 【接口：删除任务】 | 前端请求删除或停止指定任务 |
 
    **原则 / Principles:**
-   - 读者看到格式就知道"这是一个接口调用"，不需要看到实际路径 / Readers recognize "this is an API call" from format alone, no actual path needed
+   - 读者看到 `【接口：xxx】` 格式就知道"这是一个接口调用"，不需要看到实际路径 / Readers recognize "this is an API call" from `【接口：xxx】` format alone
    - 接口描述包含：做什么事、传什么、返回什么 / Description includes: what it does, what it takes, what it returns
    - 路径中的动态参数（如 `:id`）转换为职责描述 / Dynamic params in paths become responsibility descriptions: "根据用户 ID 查询" not "/users/:id"
+   - 用 `前端请求` / `后端调用` 标注调用方，让读者理解数据流方向 / Use `前端请求` / `后端调用` to indicate caller, helping readers understand data flow direction
 
 6. **架构图和数据流图是自包含的** / Architecture and data flow diagrams are self-contained
    - 图中的每个模块必须有文字说明其职责
@@ -602,7 +653,7 @@ Documents must be self-contained — readers should understand the entire projec
 | 代码行号 / Line numbers | "第 42-78 行" | 不写行号 |
 | 实现细节 / Implementation | "代码如下：`function foo()`..." | 用流程描述或简短伪代码 |
 | 架构证据 / Architecture evidence | "在 `package.json` 中可见" | "项目使用 TypeScript + pnpm workspace"（陈述事实即可，不引用文件） |
-| 接口路径 / API paths | "`POST /api/v1/users`" | "→ POST 创建用户"（见接口引用格式） |
+| 接口路径 / API paths | "`POST /api/v1/users`" | "`前端请求 【接口：创建用户】`"（见接口引用格式） |
 
 ### 通用质量规则 / General Quality Rules
 
@@ -671,6 +722,7 @@ Desktop/<project-name>/
 ├── 02-design-rationale-and-engineering-philosophy.md  # P1
 ├── 03-product-and-interaction-analysis.md        # P1，仅在有充分证据时生成
 ├── 04-notable-code-examples.md                   # P1
+├── 05-api-documentation.md                       # P1，仅在有接口交互时生成
 ├── deployment-and-operations.md                  # 可选 / Optional
 ├── configuration-reference.md                    # 可选 / Optional
 └── deep-dives/
