@@ -1,5 +1,5 @@
 ---
-name: DevMentor
+name: dev-mentor
 homepage: https://github.com/z-Zihan/awesome-skills
 description: >
   面向有经验的开发者的跨领域学习伴侣。帮助开发者学习不熟悉的领域，
@@ -13,7 +13,7 @@ description: >
   纯理论学习、代码审查、生产环境故障排查。
 ---
 
-# DevMentor — 跨领域学习伴侣 / Cross-Domain Learning Companion
+# dev-mentor — 跨领域学习伴侣 / Cross-Domain Learning Companion
 
 帮助有经验的开发者学习不熟悉的领域，通过连续对话从零完成项目的完整生命周期。
 Help experienced developers learn unfamiliar domains by building a full project from zero via continuous conversation.
