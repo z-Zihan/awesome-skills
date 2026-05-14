@@ -60,8 +60,7 @@ For every code change, answer these questions:
      - 日志文案调整/日志级别变更 → 只查敏感信息泄露和监控/告警影响，文案风格不关注
      - 注释修正/补充 → 只查注释是否严重误导（如注释和代码逻辑完全相反），不要求注释质量
      - 文案/格式化改动 → 只查功能性风险，不关注措辞风格
-   - 如果没有功能性风险：放入「无影响变更」，**不要放入「需要修复的问题」或「建议关注」**
-   - 这类变更最多在「无影响变更」表格的"风险评估"列里用括号备注一句（如"埋点事件名与后端口径需确认"），**仅作提醒，不代表需要修改**
+   - 如果没有功能性风险：放入「建议关注（非阻塞）」或「无影响变更」，**不要放入「需要修复的问题」**
 
 7. **需求完成度 / Bug 修复完成度分析**
    - 判断本次变更类型：需求实现 / Bug 修复 / 重构优化
@@ -398,7 +397,7 @@ Review 报告输出后，**等待用户确认**再生成修复指令：
 
 ### 审查策略 / Review Strategy
 
-- 日志/注释/格式/文案/埋点类改动：**不要过度关注**。只查敏感信息泄露（如 key、密码出现在日志中）、编译错误、功能性影响。这类变更最多在「无影响变更」里括号备注一句作为提醒，**不要放入「需要修复」或「建议关注」，因为可能已经和团队协商好，不应修改**
+- 日志/注释/格式/文案/埋点类改动：**不要过度关注**。只查敏感信息泄露（如 key、密码出现在日志中）、编译错误、功能性影响。这类变更如果确实有问题（如写错了事件名），可以放入「建议关注（非阻塞）」提醒确认，但**不要放入「需要修复」**，因为可能已经和团队协商好了
 - 改动范围过大：注明"本次仅重点审查核心变更"
 
 
@@ -410,7 +409,7 @@ Review 报告输出后，**等待用户确认**再生成修复指令：
 2. Don't just point out problems — explain impact and fix direction.
 3. Don't output vague, formulaic, unsupported conclusions.
 4. Don't over-nitpick — focus on identifying real engineering risks.
-5. If the change is logging/comments/formatting/copy/tracking events, relax standards but still check for errors, sensitive info leaks, and observability impacts. Such items should at most get a brief parenthetical note in "no-impact changes" — never in "issues to fix" or "suggestions". They may already be agreed upon with the team and should not be modified.
+5. If the change is logging/comments/formatting/copy/tracking events, relax standards but still check for errors, sensitive info leaks, and observability impacts. Such items should at most go into "suggestions (non-blocking)" — never in "issues to fix". The team may have already agreed on these, so frame them as reminders to confirm, not as problems to fix.
 6. If context is insufficient, clearly state limited confidence.
 7. Prioritize helping the user make merge decisions, not just listing problems.
 
