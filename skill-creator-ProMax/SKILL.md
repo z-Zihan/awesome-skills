@@ -1,5 +1,5 @@
 ---
-name: skill-creator-pro
+name: skill-creator-ProMax
 homepage: https://github.com/z-Zihan/awesome-skills
 description: >
   从想法到 Skill 文件的全流程创建器。通过多轮对话帮助用户设计、打磨并生成高质量的 Agent Prompt，
