@@ -87,6 +87,12 @@ openclaw skills install skill-prompt-generatoropenclaw skills update --all
 
 **触发词**：生成 skill / 创建 skill / 写个 prompt / 设计 skill / prompt 设计 / skill 架构
 
+#### 🧭 dev-mentor — 跨领域学习伴侣
+
+帮助有经验的开发者学习不熟悉的领域，通过连续对话从零完成项目的完整生命周期。首批支持：后端开发（TypeScript/Go/Python）、数据库、服务器部署（Docker/Nginx/HTTPS/CI-CD）、Rust 系统编程。自动识别用户已有经验，不重复教，用类比教学。专业名词自带解释，代码使用最新技术栈和最佳实践。
+
+**触发词**：学后端 / 学 Rust / 从零做项目 / 前端学后端 / 教我做项目 / 带我开发
+
 ### 版本管理
 
 **日常开发（自动发布）：**
@@ -195,6 +201,12 @@ Transforms vague ideas into structured, engineering-grade, ready-to-use Skill Pr
 
 **Triggers**: create skill / write a prompt / design skill / prompt design / skill architecture
 
+#### 🧭 dev-mentor — Cross-Domain Learning Companion
+
+Helps experienced developers learn unfamiliar domains by building a full project from zero to production via continuous conversation. First batch: backend (TypeScript/Go/Python), databases, server deployment (Docker/Nginx/HTTPS/CI-CD), Rust systems programming. Auto-detects existing skills, uses analogies from known domains, explains technical terms on first use.
+
+**Triggers**: learn backend / learn Rust / build project from scratch / teach me to code
+
 ### Versioning
 
 **Daily development (auto-publish):**
@@ -242,5 +254,6 @@ awesome-skills/
 └── screenshot-to-prompt/SKILL.md
 ├── project-doc-analyst/SKILL.md
 ├── project-onboarding/SKILL.md
+├── dev-mentor/SKILL.md
 └── skill-prompt-generator/SKILL.md
 ```
