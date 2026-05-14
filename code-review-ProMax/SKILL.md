@@ -52,11 +52,15 @@ For every code change, answer these questions:
    - Must analyze beyond the diff itself. Consider: function context, module responsibility, callers/callees, public methods/components, config dependencies, database/cache/queue/RPC/HTTP interfaces, logging/monitoring/alerting/metrics.
    - Must determine direct impact, indirect cascading impact, or no significant impact.
 
-6. **Special handling for logging/metrics/comments/copy/formatting changes**
-   - If the change is primarily: logging, metrics, comments, copy text, formatting, non-functional refactoring without logic change
+6. **Special handling for logging/metrics/comments/copy/formatting/tracking events changes**
+   - If the change is primarily: logging, metrics, tracking/analytics events, comments, copy text, formatting, non-functional refactoring without logic change
    - Do NOT over-criticize. Do not apply core business change standards.
-   - Only check: compile failure risk, runtime error risk, logic change risk, obvious performance issues, sensitive info leakage, changes to log level/critical fields/print frequency that affect troubleshooting, monitoring, or alerting.
-   - If no obvious risks: explicitly state "This change is low-risk overall, acceptable."
+   - **这类变更一律视为低风险，不应当作为阻塞建议提出。** 具体来说：
+     - 埋点事件名/参数调整 → 只要和后端/数据团队对齐口径即可，事件命名"语义不准确"不属于代码问题
+     - 日志文案调整/日志级别变更 → 只查敏感信息泄露和监控/告警影响，文案风格不关注
+     - 注释修正/补充 → 只查注释是否严重误导（如注释和代码逻辑完全相反），不要求注释质量
+     - 文案/格式化改动 → 只查功能性风险，不关注措辞风格
+   - 如果没有功能性风险：放入「建议关注（非阻塞）」或「无影响变更」，**不要放入「需要修复的问题」**
 
 7. **需求完成度 / Bug 修复完成度分析**
    - 判断本次变更类型：需求实现 / Bug 修复 / 重构优化
@@ -393,7 +397,7 @@ Review 报告输出后，**等待用户确认**再生成修复指令：
 
 ### 审查策略 / Review Strategy
 
-- 日志/注释/格式/文案类改动：**不要过度关注**。只查敏感信息泄露（如 key、密码出现在日志中）、编译错误。日志文案调整、注释修正、日志级别变更等**一律视为低风险，不需要作为 issue 提出**
+- 日志/注释/格式/文案/埋点类改动：**不要过度关注**。只查敏感信息泄露（如 key、密码出现在日志中）、编译错误、功能性影响。日志文案调整、注释修正、日志级别变更、埋点事件名调整等**一律视为低风险，放入「建议关注（非阻塞）」，不要作为阻塞 issue 提出**
 - 改动范围过大：注明"本次仅重点审查核心变更"
 
 
@@ -405,7 +409,7 @@ Review 报告输出后，**等待用户确认**再生成修复指令：
 2. Don't just point out problems — explain impact and fix direction.
 3. Don't output vague, formulaic, unsupported conclusions.
 4. Don't over-nitpick — focus on identifying real engineering risks.
-5. If the change is logging/comments/formatting/copy, relax standards but still check for errors, sensitive info leaks, and observability impacts.
+5. If the change is logging/comments/formatting/copy/tracking events, relax standards but still check for errors, sensitive info leaks, and observability impacts. Such items should go into "suggestions (non-blocking)" section, never "issues to fix".
 6. If context is insufficient, clearly state limited confidence.
 7. Prioritize helping the user make merge decisions, not just listing problems.
 
