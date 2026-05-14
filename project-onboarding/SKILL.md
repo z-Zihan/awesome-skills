@@ -2,8 +2,8 @@
 name: project-onboarding
 homepage: https://github.com/z-Zihan/awesome-skills
 description: >
-  帮助有经验的开发者快速接手陌生项目，支持前端 Web、客户端（Electron/Tauri）、
-  后端服务、小程序、移动端等多种项目类型。自动识别项目类型，分阶段输出
+  帮助有经验的开发者快速接手陌生项目，支持前端 Web、后端服务、
+  客户端（Electron/Tauri）、小程序、移动端等多种项目类型。自动识别项目类型，分阶段输出
   项目概览、开发流程、工程规范、类型专项指南等，达到"可以开始安全开发"的状态。
   触发词：接手项目, 项目上手, 快速上手, 新人接手, 项目入门, onboarding,
   如何开发, 怎么启动项目, 项目怎么跑, 开发流程, onboarding guide,
@@ -23,8 +23,8 @@ description: >
 | 类型 | 识别信号 | 专项模块 |
 |---|---|---|
 | **前端 Web** | React/Vue/Svelte/Angular, webpack/vite/nextjs | 组件体系、路由、状态管理、CSS 方案、API 集成、浏览器兼容 |
-| **客户端** | Electron/Tauri/Capacitor, 主进程/渲染进程 | 主进程架构、渲染进程、IPC 通信、原生能力、签名与分发、自动更新 |
 | **后端服务** | Express/Nest/Django/Spring/Gin, ORM/migration | 数据库 Schema、ORM、中间件链、API 设计、认证鉴权、缓存与队列 |
+| **客户端** | Electron/Tauri/Capacitor, 主进程/渲染进程 | 主进程架构、渲染进程、IPC 通信、原生能力、签名与分发、自动更新 |
 | **小程序** | 微信/支付宝/抖音小程序, app.json/pages.json | 平台适配、分包策略、审核流程、原生能力调用、用户体系 |
 | **移动端** | React Native/Flutter/SwiftUI/Kotlin, podfile/gradle | 原生模块 Bridge、热更新、应用签名、应用商店发布、权限管理 |
 
@@ -245,7 +245,7 @@ Your role is not a code analyzer — it's a senior engineer helping an experienc
 
 ---
 
-### 三、客户端专项 / Desktop Client Specific
+### 三、后端服务专项 / Backend Service Specific
 
 当识别到 Electron / Tauri / Capacitor 等客户端项目时加载 / Load when Desktop Client project is detected:
 
@@ -308,7 +308,7 @@ Your role is not a code analyzer — it's a senior engineer helping an experienc
 
 ---
 
-### 四、后端服务专项 / Backend Service Specific
+### 四、客户端专项 / Desktop Client Specific
 
 当识别到后端服务项目时加载 / Load when Backend Service project is detected:
 
@@ -514,7 +514,7 @@ Your role is not a code analyzer — it's a senior engineer helping an experienc
 
 ### Stage 3 — 项目类型专项深入 / Type-Specific Deep Dive
 
-用户追问时展开对应项目类型的专项模块（前端 Web / 客户端 / 后端 / 小程序 / 移动端）。
+用户追问时展开对应项目类型的专项模块（前端 Web / 后端 / 客户端 / 小程序 / 移动端）。
 
 ### Stage 4 — 定向开发辅助 / Targeted Development Assistance
 
