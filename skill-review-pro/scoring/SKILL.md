@@ -42,7 +42,22 @@ skill-review-pro 的评分体系。总分 100 分，分两阶段。
 
 ### 动态权重 / Dynamic Weights
 
-根据 Skill 类型（由主控的路由模块识别），对应一级维度权重 ×1.5，其他 ×0.8。加权后需重新归一化，确保 Phase 1 总分仍为 50 分。
+根据 Skill 类型（由主控的路由模块识别），对应一级维度权重 ×1.5，其他 ×0.8。加权后重新归一化，确保 Phase 1 总分仍为 50 分。
+
+#### 预计算权重表 / Pre-calculated Weights
+
+原始分值：Reliability=16, Engineering=14, UX=12, Maintainability=8（总分50）
+
+| Skill 类型 | +权重维度 | 加权后 | 归一化后（总分50） |
+|---|---|---|---|
+| **engineering/coding** | Reliability, Engineering | 24, 18, 9.6, 6.4 | R=20, E=15, UX=8, M=7 |
+| **cognition/teaching** | UX, Reliability | 24, 11.2, 18, 6.4 | R=17, E=8, UX=22, M=3 |
+| **cognition/analysis** | Reliability, Engineering | 24, 18, 9.6, 6.4 | R=20, E=15, UX=8, M=7 |
+| **workflow/planner** | Maintainability, Reliability | 24, 11.2, 9.6, 12 | R=18, E=8, UX=7, M=17 |
+| **workflow/reviewer** | Reliability, UX | 24, 11.2, 18, 6.4 | R=17, E=8, UX=22, M=3 |
+| **仅 base** | 无 | 16, 14, 12, 8 | R=16, E=14, UX=12, M=8 |
+
+> 使用预计算值直接评分，无需 AI 自行推导归一化。
 
 | Skill 类型 | +权重维度 |
 |---|---|
