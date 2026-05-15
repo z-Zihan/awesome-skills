@@ -113,9 +113,9 @@ skill-review-pro 的评分体系。总分 100 分，分两阶段。
 
 ## 评分等级 / Grade Scale
 
-| 分数 / Score | 等级 / Grade | 结论 / Conclusion |
-|---|---|---|
-| 90-100 | ⭐ 优秀 / Excellent | 可直接发布 / Ready to publish |
-| 75-89 | ✅ 良好 / Good | 小幅改进后可发布 / Minor improvements needed |
-| 60-74 | ⚠️ 及格 / Pass | 需要较多修改 / Significant improvements needed |
-| <60 | ❌ 不及格 / Fail | 建议重新设计 / Recommend redesign |
+| 分数 / Score | 图标 / Icon | 中文等级 | English Grade | 结论 / Conclusion |
+|---|---|---|---|---|
+| 90-100 | ⭐ | 优秀 | Excellent | 可直接发布 / Ready to publish |
+| 75-89 | ✅ | 良好 | Good | 小幅改进后可发布 / Minor improvements needed |
+| 60-74 | ⚠️ | 合格 | Adequate | 需要较多修改 / Significant improvements needed |
+| <60 | ❌ | 不及格 | Fail | 建议重新设计 / Recommend redesign |
