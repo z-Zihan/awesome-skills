@@ -43,11 +43,37 @@ openclaw skills install dev-mentor
 openclaw skills update --all
 ```
 
+### 体系职责边界 / Skill Pipeline Architecture
+
+本项目不是零散 Skill 的集合，而是一个有职责分层的设计体系。各 Skill 严格遵循单一职责，通过协作流程串联：
+
+```
+skill-creator-ProMax（生成）
+        ↓
+  skill-review-pro（测评验证）
+        ↓ （不合格）
+  修复循环（review-pro 内置）
+        ↓ （合格）
+  发布就绪
+```
+
+| Skill | 职责 | NOT for |
+|-------|------|---------|
+| **skill-creator-ProMax** | 结构设计 + 多平台文件生成 + 测评引导 | 测试 / 评分 / 修复 |
+| **skill-review-pro** | 静态审查 + 行为测试（对抗/边界/歧义）+ 评分 + 修复 | 生成 / 设计 |
+| **code-review-ProMax** | 代码变更风险审查（不是 Skill 评审） | Skill 质量评审 |
+
+**架构原则**：
+- **各 Skill 不越界** — creator 不内置测试，reviewer 不生成 prompt
+- **模块化按需加载** — 每个 Skill 只在需要时加载相关子模块
+- **Stage 流程驱动** — 显式阶段 + 暂停确认 + 回退机制，避免一次性输出
+- **修复闭环** — 评审发现问题 → 用户确认 → 执行修复 → 回归验证
+
 ### Skill 一览
 
 #### 🤖 code-review-ProMax — 高级代码审查
 
-多维度代码审查：需求完成度、回归风险、边界情况、上下游影响。输出结构化结论，含可发给 AI agent 的修复指令。支持 Post-Review 确认和迭代审查流程。
+多维度代码审查：需求完成度、回归风险、边界情况、上下游影响。输出结构化结论，含可发给 AI agent 的修复指令。支持变更意图识别、风险推导链、审查置信度（HIGH/MEDIUM/LOW）、迭代审查和专项审查。
 
 **触发词**：review 代码 / 帮我看看改动 / 代码有没有问题 / 改动有没有风险
 
@@ -92,9 +118,9 @@ openclaw skills update --all
 
 #### 🔍 skill-review-pro — Skill 质量评审专家
 
-通过静态审查 + 真实测试执行，对 Skill 进行分阶段评分（100 分制），输出专业的评审报告和改进建议。Phase 1 静态审查（6 维度 50 分）→ Phase 2 测试执行（50 分）。含修复阶段，支持逐条确认后执行修复。
+模块化 Skill 评审 QA 系统。通过静态审查 + 行为测试 + 评分，对 Skill 进行专业评审。支持 5 种模式：完整评审、直接修复（轻量审查→修复报告）、意见验证（验证用户修复意见有效性）、修复执行、稳定性 Benchmark。基于 Policy Inheritance 架构，按 Skill 类型（engineering/cognition/workflow）匹配评审策略。
 
-**触发词**：评审 skill / 测评 skill / skill 评分 / skill 质量检查 / 审查 skill / skill review
+**触发词**：评审 skill / 测评 skill / 改进 skill / 验证修复意见 / skill 评分 / skill 质量检查
 
 #### 🧭 dev-mentor — 跨领域学习伴侣
 
@@ -166,11 +192,33 @@ openclaw skills install dev-mentor
 openclaw skills update --all
 ```
 
+### Architecture
+
+This is not a loose collection of Skills — it's a layered design system with clear responsibility boundaries:
+
+```
+skill-creator-ProMax (generate)
+        ↓
+  skill-review-pro (evaluate & verify)
+        ↓ (fails)
+  fix loop (built into review-pro)
+        ↓ (passes)
+  ready to publish
+```
+
+| Skill | Responsibility | NOT for |
+|-------|---------------|---------|
+| **skill-creator-ProMax** | Architecture design + multi-platform file generation + review guidance | Testing / Scoring / Fixing |
+| **skill-review-pro** | Static review + behavioral testing (adversarial/boundary/ambiguity) + scoring + fixing | Generation / Design |
+| **code-review-ProMax** | Code change risk review (not Skill review) | Skill quality evaluation |
+
+**Principles**: No boundary crossing between Skills. Modular on-demand loading. Stage-driven workflow with explicit pause/rollback. Fix loop with regression verification.
+
 ### Skills
 
 #### 🤖 code-review-ProMax — Advanced Code Review
 
-Multi-dimensional code review: requirement completion, regression risk, edge cases, upstream/downstream impact. Outputs structured report with AI-agent-ready fix instructions. Supports Post-Review confirmation and iterative review.
+Multi-dimensional code review: requirement completion, regression risk, edge cases, upstream/downstream impact. Outputs structured report with AI-agent-ready fix instructions. Supports change intent inference, risk derivation chains, review confidence levels (HIGH/MEDIUM/LOW), iterative review, and focused review.
 
 **Triggers**: review this code / check my changes / any issues / is this safe to merge
 
@@ -215,9 +263,9 @@ Full-cycle Skill creator from idea to file. Helps users design, iterate, and gen
 
 #### 🔍 skill-review-pro — Expert Skill Reviewer
 
-Evaluates Skills through static analysis + real test execution, with phased 100-point scoring system, producing professional review reports and improvement recommendations. Phase 1 static review (6 dimensions, 50 pts) → Phase 2 test execution (50 pts). Includes fix phase with per-item user confirmation.
+Modular Skill QA system. Evaluates Skills through static analysis + behavioral testing + scoring. Supports 5 modes: full review, direct fix (lightweight review → fix report), opinion validation (verify user-provided fix suggestions), fix execution, and stability benchmark. Uses Policy Inheritance architecture to match review strategies by Skill type (engineering/cognition/workflow).
 
-**Triggers**: review skill / evaluate skill / skill score / skill quality check / skill audit / skill review
+**Triggers**: review skill / evaluate skill / improve skill / validate fix suggestions / skill score / skill quality check
 
 #### 🧭 dev-mentor — Cross-Domain Learning Companion
 
