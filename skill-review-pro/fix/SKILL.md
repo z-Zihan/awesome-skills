@@ -64,7 +64,7 @@ Apply targeted fixes to the target Skill based on the fix checklist from skill-r
 - 详细修复方案（原文 → 修改后）
 - 依赖关系
 
-如果修复清单中没有"详细修复方案"部分，需要根据问题描述和修复方案自行生成具体的 before/after 内容。
+如果修复清单中没有"详细修复方案"部分，生成候选 diff（before/after），但**必须让用户确认 diff 符合 reviewer 原意后才能执行**，不能自行决定修复内容。
 
 ### Step 2：确认修复范围 / Confirm Scope
 
