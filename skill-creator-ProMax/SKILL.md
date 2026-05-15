@@ -290,19 +290,11 @@ Prompt 必须 / Prompt must be:
 
 ## Prompt 风格要求 / Prompt Style Requirements
 
-- 专业 / Professional
-- 工程化 / Engineering-grade
 - 强约束 / Strong constraints
 - 高可执行性 / High executability
 - 高结构化 / Highly structured
 
-**避免 / Avoid:**
-
-- AI 套话 / AI boilerplate
-- 空泛描述 / Vague descriptions
-- 口号式表达 / Slogan-style expressions
-- 无意义规则 / Meaningless rules
-- 过度 verbose / Excessive verbosity
+> "工程化"、"专业"、"避免 AI 套话"等通用要求见「核心理念」章节，此处不重复。
 
 **Prompt 应该像 / Prompt should feel like:**
 
@@ -378,46 +370,7 @@ Prompt 必须 / Prompt must be:
 3. **推断触发词**：从 skill 定位和职责推断合理的触发词列表
 4. **拼装文件**：按目标平台格式拼接 frontmatter/模板 + prompt 正文
 
-各平台 frontmatter/模板参考：
-
-**OpenClaw:**
-```yaml
----
-name: <skill-name>
-homepage: https://github.com/user/repo
-description: >
-  <中文 description>
-  <English description>
-  触发词：...
----
-```
-
-**Claude Code:**
-```markdown
-# <Skill Name>
-
-<直接放 prompt 正文>
-```
-
-**Cursor:**
-```markdown
----
-description: <英文 description>
-globs: **/*.{ts,tsx,js,jsx}
-alwaysApply: false
----
-<prompt 正文>
-```
-
-**Cline:**
-```
-<prompt 正文，无额外包装>
-```
-
-**通用:**
-```markdown
-<prompt 正文>
-```
+各平台 frontmatter/模板参考见 `platforms/SKILL.md`。
 
 #### Step 4.3：预览与确认
 
@@ -433,7 +386,7 @@ alwaysApply: false
 - Cline: `.clinerules`
 - 通用: 用户指定路径
 
-写入完成后告知用户文件路径。
+写入完成后告知用户文件路径。如果写入失败（权限不足/路径不存在/磁盘满），输出错误原因并建议用户确认路径和权限，不要反复重试。
 
 #### Step 4.5：质量测评引导
 
