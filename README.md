@@ -1,6 +1,6 @@
 # 🧰 Awesome Skills
 
-[English](#english) | [中文](#中文)
+[中文](#中文) | [English](#english)
 
 ---
 
@@ -37,14 +37,17 @@ openclaw skills install fe-cli
 openclaw skills install screenshot-to-prompt
 openclaw skills install project-doc-analyst
 openclaw skills install project-onboarding
-openclaw skills install skill-prompt-generatoropenclaw skills update --all
+openclaw skills install skill-creator-ProMax
+openclaw skills install skill-review-pro
+openclaw skills install dev-mentor
+openclaw skills update --all
 ```
 
 ### Skill 一览
 
-#### 🤖 code-review — 代码审查
+#### 🤖 code-review-ProMax — 高级代码审查
 
-多维度代码审查：需求完成度、回归风险、边界情况、上下游影响。输出结构化结论，含可发给 AI agent 的修复指令。
+多维度代码审查：需求完成度、回归风险、边界情况、上下游影响。输出结构化结论，含可发给 AI agent 的修复指令。支持 Post-Review 确认和迭代审查流程。
 
 **触发词**：review 代码 / 帮我看看改动 / 代码有没有问题 / 改动有没有风险
 
@@ -77,15 +80,21 @@ openclaw skills install skill-prompt-generatoropenclaw skills update --all
 
 #### 🚀 project-onboarding — 项目接手指南
 
-帮助有经验的开发者快速接手陌生项目。分三阶段输出：快速总览（10 分钟建地图）→ 深入专项 → 定向开发辅助。覆盖开发流程、工程规范、API 集成、组件体系、环境部署、团队协作等。
+帮助有经验的开发者快速接手陌生项目。分三阶段输出：快速总览（10 分钟建地图）→ 深入专项 → 定向开发辅助。覆盖开发流程、工程规范、API 集成、组件体系、环境部署、团队协作等。支持前端 Web、后端服务、客户端（Electron/Tauri）、小程序、移动端。
 
 **触发词**：接手项目 / 项目上手 / 快速上手 / 新人接手 / onboarding / 如何开发 / 项目怎么跑
 
-#### 🎯 skill-prompt-generator — Skill Prompt 架构师
+#### 🎯 skill-creator-ProMax — Skill 全流程创建器
 
-根据用户想法、流程或需求，自动生成结构完整、工程化、可直接使用的 Skill Prompt。支持中英双语输出，根据 Skill 类型自动增强（开发/UI/文档/架构/测试等）。
+从想法到 Skill 文件的全流程创建器。通过多轮对话帮助用户设计、打磨并生成高质量的 Agent Prompt，最终输出可直接使用的多平台 Skill 文件（OpenClaw、Claude Code、Cursor、Cline 等）。四阶段：定位 → 完整 Prompt → 迭代优化 → 文件生成。
 
-**触发词**：生成 skill / 创建 skill / 写个 prompt / 设计 skill / prompt 设计 / skill 架构
+**触发词**：生成 skill / 创建 skill / 设计 skill / 新建 skill / skill prompt / agent prompt
+
+#### 🔍 skill-review-pro — Skill 质量评审专家
+
+通过静态审查 + 真实测试执行，对 Skill 进行分阶段评分（100 分制），输出专业的评审报告和改进建议。Phase 1 静态审查（6 维度 50 分）→ Phase 2 测试执行（50 分）。含修复阶段，支持逐条确认后执行修复。
+
+**触发词**：评审 skill / 测评 skill / skill 评分 / skill 质量检查 / 审查 skill / skill review
 
 #### 🧭 dev-mentor — 跨领域学习伴侣
 
@@ -148,17 +157,20 @@ Place `SKILL.md` in your Agent's skill directory:
 ```bash
 openclaw skills install code-review-ProMax
 openclaw skills install fe-cli
+openclaw skills install screenshot-to-prompt
 openclaw skills install project-doc-analyst
 openclaw skills install project-onboarding
-openclaw skills install skill-prompt-generatoropenclaw skills install screenshot-to-prompt
+openclaw skills install skill-creator-ProMax
+openclaw skills install skill-review-pro
+openclaw skills install dev-mentor
 openclaw skills update --all
 ```
 
 ### Skills
 
-#### 🤖 code-review — Code Review
+#### 🤖 code-review-ProMax — Advanced Code Review
 
-Multi-dimensional code review: requirement completion, regression risk, edge cases, upstream/downstream impact. Outputs structured report with AI-agent-ready fix instructions.
+Multi-dimensional code review: requirement completion, regression risk, edge cases, upstream/downstream impact. Outputs structured report with AI-agent-ready fix instructions. Supports Post-Review confirmation and iterative review.
 
 **Triggers**: review this code / check my changes / any issues / is this safe to merge
 
@@ -191,15 +203,21 @@ Deep-read the entire codebase and generate engineering semantic asset documentat
 
 #### 🚀 project-onboarding — Project Onboarding Guide
 
-Help experienced developers quickly onboard onto unfamiliar projects. Three-stage output: quick overview (10-min project map) → deep dive → targeted dev assistance. Covers dev workflow, engineering standards, API integration, component system, environment/deployment, team collaboration.
+Help experienced developers quickly onboard onto unfamiliar projects. Three-stage output: quick overview (10-min project map) → deep dive → targeted dev assistance. Covers dev workflow, engineering standards, API integration, component system, environment/deployment, team collaboration. Supports frontend web, backend services, desktop apps (Electron/Tauri), mini programs, and mobile apps.
 
 **Triggers**: onboard / project handover / quick start / how to develop / how to run
 
-#### 🎯 skill-prompt-generator — Skill Prompt Architect
+#### 🎯 skill-creator-ProMax — Full-cycle Skill Creator
 
-Transforms vague ideas into structured, engineering-grade, ready-to-use Skill Prompts. Supports bilingual Chinese/English output with type-specific enhancements (dev, UI, docs, architecture, testing, etc.).
+Full-cycle Skill creator from idea to file. Helps users design, iterate, and generate production-ready Agent Prompts through multi-turn conversation, then outputs multi-platform Skill files (OpenClaw, Claude Code, Cursor, Cline, etc.). Four stages: positioning → complete Prompt → iteration → file generation.
 
-**Triggers**: create skill / write a prompt / design skill / prompt design / skill architecture
+**Triggers**: create skill / design skill / new skill / skill prompt / agent prompt / system prompt
+
+#### 🔍 skill-review-pro — Expert Skill Reviewer
+
+Evaluates Skills through static analysis + real test execution, with phased 100-point scoring system, producing professional review reports and improvement recommendations. Phase 1 static review (6 dimensions, 50 pts) → Phase 2 test execution (50 pts). Includes fix phase with per-item user confirmation.
+
+**Triggers**: review skill / evaluate skill / skill score / skill quality check / skill audit / skill review
 
 #### 🧭 dev-mentor — Cross-Domain Learning Companion
 
@@ -229,31 +247,3 @@ Tag format: `v<major>.<minor>.<patch>` (e.g. `v1.0.0`)
 
 1. Create a folder + `SKILL.md` with YAML frontmatter
 2. Push to `main` — auto-published via GitHub Actions
-
----
-
-## Project Structure
-
-```
-awesome-skills/
-├── .github/workflows/
-│   └── publish.yml         # ClawHub auto-publish
-├── code-review/SKILL.md
-├── fe-cli/
-│   ├── SKILL.md
-│   ├── references/
-│   │   ├── shared-base.md
-│   │   ├── shared-config.md
-│   │   └── ai-project-md.md
-│   ├── web/SKILL.md
-│   ├── admin/SKILL.md
-│   ├── h5/SKILL.md
-│   ├── electron/SKILL.md
-│   ├── ssr/SKILL.md
-│   └── miniapp/SKILL.md
-└── screenshot-to-prompt/SKILL.md
-├── project-doc-analyst/SKILL.md
-├── project-onboarding/SKILL.md
-├── dev-mentor/SKILL.md
-└── skill-prompt-generator/SKILL.md
-```
