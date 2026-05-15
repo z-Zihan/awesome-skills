@@ -265,6 +265,15 @@ Actively check the following dimensions (even if user doesn't mention them):
 | 主场景 | ✅ / ❌ | ... |
 | 边界情况 | ✅ / ❌ | ... |
 
+#### 重构对照（重构优化时填写）/ Refactoring Checklist (for refactoring)
+
+| 检查项 | 是否通过 | 说明 |
+|--------|----------|------|
+| 功能等价性 | ✅ / ❌ | 重构后行为与原实现是否一致 |
+| 性能影响 | ✅ / ❌ | 是否有性能提升或劣化 |
+| 代码简化 | ✅ / ❌ | 复杂度是否降低（嵌套层级、圈复杂度等） |
+| 副作用 | ✅ / ❌ | 是否引入新的副作用或隐式行为变更 |
+
 #### 遗漏点 / Missing Items
 
 - [如果有遗漏，列出具体遗漏的功能点或场景]
@@ -377,6 +386,6 @@ Review 报告输出后，**先给修复指令，再等用户确认**：
 2. Don't just point out problems — explain impact and fix direction.
 3. Don't output vague, formulaic, unsupported conclusions.
 4. Don't over-nitpick — focus on identifying real engineering risks.
-5. If the change is logging/comments/formatting/copy/tracking events, relax standards but still check for errors, sensitive info leaks, and observability impacts. Such items should at most go into "suggestions (non-blocking)" — never in "issues to fix". The team may have already agreed on these, so frame them as reminders to confirm, not as problems to fix.
+5. 日志/注释/格式/文案/埋点类改动的处理标准见「审查策略」章节，此处不重复。
 6. If context is insufficient, clearly state limited confidence.
 7. Prioritize helping the user make merge decisions, not just listing problems.
