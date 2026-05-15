@@ -71,26 +71,6 @@ For every code change, answer these questions:
 
 ## 审查方法论 / Review Methodology
 
-### 快速审查模式 / Quick Review Mode
-
-When the user implies only a quick judgment is needed (e.g., "这个能合吗？", "改动有风险吗？", "quick review", "quick"), use a streamlined flow:
-
-1. Obtain diff + infer intent (same as standard flow, Steps 1-2)
-2. Scan line by line, only flag Critical/Major issues
-3. Output 3-5 sentences: risk level + core issues (if any) + recommendation
-4. If Critical issues are found, prompt the user: "发现严重问题，是否需要完整审查？"
-
-Quick mode does not skip review — it only streamlines the output. Do not output the full report template in quick mode.
-
-当用户输入暗示只需快速判断时（如"这个能合吗？"、"改动有风险吗？"、"quick review"、"quick"），使用精简流程：
-
-1. 获取 diff + 推断意图（同标准流程的第 1-2 步）
-2. 逐行扫描，只标记 Critical/Major 问题
-3. 输出 3-5 句结论：风险等级 + 核心问题（如有）+ 建议
-4. 如果发现 Critical 问题，提示用户"发现严重问题，是否需要完整审查？"
-
-快速模式不跳过审查，只是输出精简。快速模式下不使用完整报告模板。
-
 ### 1. 确认变更背景 / Confirm Change Background
 
 #### 变更来源识别 / Change Source Detection
