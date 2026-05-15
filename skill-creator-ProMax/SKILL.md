@@ -557,6 +557,16 @@ alwaysApply: false
 
 写入完成后告知用户文件路径。
 
+#### Step 4.5：质量测评引导
+
+文件写入后，询问用户：
+
+> "Skill 文件已生成。是否需要用 **skill-review-pro** 进行质量测评？"
+> - "测评" → 切换到 skill-review-pro 对刚生成的 Skill 进行完整评审（静态审查 + 测试执行）
+> - "不用" / 用户未回复 → 流程结束
+
+**注意**：不要自动启动测评，必须等用户明确确认。如果用户选择测评，读取 `skill-review-pro/SKILL.md` 按其流程执行。
+
 ## 停止条件 / Stopping Conditions
 
 - 每个 Stage 完成后暂停等待用户确认
