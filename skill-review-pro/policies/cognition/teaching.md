@@ -27,7 +27,6 @@
 - 学习者跳跃提问（跳过基础直接问高级问题）
 - 学习者表达不清（不知道自己想问什么）
 
-## 评分权重调整 / Scoring Weight
+## 评分权重 / Scoring Weight
 
-UX ×1.5, Reliability ×1.5, Engineering ×0.8, Maintainability ×0.8
-（加权后归一化，总分保持 50）
+查阅 `scoring/SKILL.md` 预计算权重表中 **cognition/teaching** 行。

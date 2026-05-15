@@ -42,33 +42,32 @@ skill-review-pro 的评分体系。总分 100 分，分两阶段。
 
 ### 动态权重 / Dynamic Weights
 
-根据 Skill 类型（由主控的路由模块识别），对应一级维度权重 ×1.5，其他 ×0.8。加权后重新归一化，确保 Phase 1 总分仍为 50 分。
+根据 Skill 类型（由主控路由模块识别），对应域的一级维度权重 ×1.5，其余 ×0.8。**不要自行推导归一化**，直接查下表。
 
 #### 预计算权重表 / Pre-calculated Weights
 
 原始分值：Reliability=16, Engineering=14, UX=12, Maintainability=8（总分50）
 
-| Skill 类型 | +权重维度 | 加权后 | 归一化后（总分50） |
+| Skill 类型 | +权重维度 | 加权后 R, E, UX, M | 归一化后（总分50） |
 |---|---|---|---|
-| **engineering/coding** | Reliability, Engineering | 24, 18, 9.6, 6.4 | R=20, E=15, UX=8, M=7 |
-| **cognition/teaching** | UX, Reliability | 24, 11.2, 18, 6.4 | R=17, E=8, UX=22, M=3 |
-| **cognition/analysis** | Reliability, Engineering | 24, 18, 9.6, 6.4 | R=20, E=15, UX=8, M=7 |
-| **workflow/planner** | Maintainability, Reliability | 24, 11.2, 9.6, 12 | R=18, E=8, UX=7, M=17 |
-| **workflow/reviewer** | Reliability, UX | 24, 11.2, 18, 6.4 | R=17, E=8, UX=22, M=3 |
-| **仅 base** | 无 | 16, 14, 12, 8 | R=16, E=14, UX=12, M=8 |
+| **engineering/coding** | Reliability, Engineering | 24, 21, 9.6, 6.4 | R=20, E=17, UX=8, M=5 |
+| **cognition/teaching** | UX, Reliability | 24, 11.2, 18, 6.4 | R=20, E=9, UX=15, M=6 |
+| **cognition/analysis** | Reliability, Engineering | 24, 21, 9.6, 6.4 | R=20, E=17, UX=8, M=5 |
+| **workflow/planner** | Maintainability, Reliability | 24, 11.2, 9.6, 12 | R=21, E=10, UX=8, M=11 |
+| **workflow/reviewer** | Reliability, UX | 24, 11.2, 18, 6.4 | R=20, E=9, UX=15, M=6 |
+| **仅 base（未识别类型）** | 无 | 16, 14, 12, 8 | R=16, E=14, UX=12, M=8 |
 
-> 使用预计算值直接评分，无需 AI 自行推导归一化。
+#### 使用方法 / How to Use
 
-| Skill 类型 | +权重维度 |
-|---|---|
-| Coding | Reliability, Engineering |
-| Teaching | UX, Reliability |
-| Workflow | Maintainability, Reliability |
-| Analysis | Reliability, Engineering |
-| Planning | Maintainability, Engineering |
-| Review | Reliability, UX |
+1. 识别 Skill 类型 → 从上表找到对应行
+2. 按"归一化后"列的分数上限评分（如 engineering/coding 的 Reliability 满分 20）
+3. 四个维度分数相加，Phase 1 总分 = 50
+4. **严禁自行推导**：如果表中没有对应类型，使用"仅 base"行
 
-如果主控未识别到类型，使用默认权重。
+#### 计算方法（仅参考，不用于实际评分）
+
+公式：`归一化分 = 加权分 × (50 / 加权总分)`
+示例 engineering/coding：加权总分 = 24+21+9.6+6.4 = 61，R归一化 = 24 × (50/61) ≈ 20
 
 ### 评分锚点 / Scoring Anchors
 

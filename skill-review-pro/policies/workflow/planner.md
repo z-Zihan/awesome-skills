@@ -26,7 +26,6 @@
 - 重复执行（连续触发两次）
 - 并发冲突（两个流程同时运行）
 
-## 评分权重调整 / Scoring Weight
+## 评分权重 / Scoring Weight
 
-Maintainability ×1.5, Reliability ×1.5, Engineering ×0.8, UX ×0.8
-（加权后归一化，总分保持 50）
+查阅 `scoring/SKILL.md` 预计算权重表中 **workflow/planner** 行。

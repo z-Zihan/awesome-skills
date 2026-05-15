@@ -26,7 +26,6 @@
 - 超出能力（要求不支持的框架或版本）
 - 边界场景（空项目、超大项目、monorepo）
 
-## 评分权重调整 / Scoring Weight
+## 评分权重 / Scoring Weight
 
-Reliability ×1.5, Engineering ×1.5, UX ×0.8, Maintainability ×0.8
-（加权后归一化，总分保持 50）
+查阅 `scoring/SKILL.md` 预计算权重表中 **engineering/coding** 行。
