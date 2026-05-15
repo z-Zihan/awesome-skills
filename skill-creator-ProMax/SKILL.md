@@ -12,6 +12,7 @@ description: >
   生成 agent prompt, 设计 skill prompt, 写个 skill prompt,
   skill-creator, create skill, design skill,
   prompt to skill, skill creator, skill builder.
+  NOT for: reviewing existing skills (use skill-review-pro), writing code directly, general chat.
 ---
 
 # skill-creator — Skill 全流程创建器 / Full-cycle Skill Creator
@@ -258,107 +259,10 @@ Prompt 必须 / Prompt must be:
 
 ---
 
-## 特殊增强能力 / Special Enhancements
+## 扩展模块 / Extension Modules
 
-**根据 Skill 类型自动增强，不使用统一模板硬套。**
-**Auto-enhance based on Skill type. Never force-fit a single template.**
-
-必须根据不同类型补充不同维度的能力 / Must supplement different dimensions based on different Skill types:
-
-### 开发类 Skill / Development Skills
-
-自动增强 / Auto-enhance:
-
-- 工程实践 / 开发 workflow / 团队协作
-- 风险识别 / debug 策略 / CI/CD
-- API 流程 / 权限体系 / 状态管理 / 组件复用
-
-**重点 / Focus:** "开发者快速进入真实开发状态。" / "Help developers reach real dev state fast."
-
-### UI / 设计类 Skill / UI / Design Skills
-
-自动增强 / Auto-enhance:
-
-- 页面结构分析 / 布局拆解 / 组件层级推断
-- 响应式策略 / design system / 交互状态识别
-- 可复用组件识别 / 页面骨架生成
-
-**重点 / Focus:** "快速完成高质量 UI 实现。" / "Quickly complete high-quality UI implementation."
-
-### 文档类 Skill / Documentation Skills
-
-自动增强 / Auto-enhance:
-
-- 信息结构设计 / 摘要能力 / 分阶段输出
-- 可读性优化 / 重点提炼 / 推荐阅读顺序
-
-**重点 / Focus:** "降低阅读成本，提高信息获取效率。" / "Reduce reading cost, improve information efficiency."
-
-### 架构类 Skill / Architecture Skills
-
-自动增强 / Auto-enhance:
-
-- 模块关系 / 分层 / 数据流 / 调用链
-- 服务边界 / 微服务关系 / monorepo / 技术债识别
-
-**重点 / Focus:** "快速建立系统级认知。" / "Quickly build system-level understanding."
-
-### 测试类 Skill / Testing Skills
-
-自动增强 / Auto-enhance:
-
-- 测试策略 / 边界 case / mock 策略
-- fixture 设计 / 覆盖建议
-
-### Code Review 类 Skill / Code Review Skills
-
-自动增强 / Auto-enhance:
-
-- 风险识别 / 性能 / 安全 / 可维护性
-- anti-pattern 检测 / 潜在 bug / 边界条件
-
-### AI Workflow 类 Skill / AI Workflow Skills
-
-自动增强 / Auto-enhance:
-
-- Agent 边界 / Prompt chaining / Context 管理
-- 多 Agent 协作 / retry / fallback / hallucination reduction
-
-### 产品 / 需求类 Skill / PM / Product Skills
-
-自动增强 / Auto-enhance:
-
-- 需求拆解 / 用户场景 / 边界识别 / 技术影响
-- PRD 结构化 / 验收标准 / MVP 分析
-
-### 数据 / 分析类 Skill / Data / Analytics Skills
-
-自动增强 / Auto-enhance:
-
-- 指标体系 / 数据流 / 埋点 / dashboard
-- 数据质量风险 / 实验设计 / 分析维度
-
----
-
-## 自动增强原则 / Enhancement Principles
-
-增强能力必须 / Enhancements must:
-
-- 与 Skill 类型强相关 / Be strongly relevant to Skill type
-- 提升实际使用价值 / Improve practical value
-- 提升工程化程度 / Improve engineering quality
-- 提升 AI 输出稳定性 / Improve AI output stability
-
-**不要 / Don't:**
-
-- 无意义堆规则 / Stack meaningless rules
-- 增加 AI 套话 / Add AI boilerplate
-- 增加无关能力 / Add irrelevant capabilities
-- 让 Prompt 过度膨胀 / Bloat the Prompt
-
-**增强的目标 / Enhancement goal:**
-
-**"让 Prompt 更像真实生产环境中的专业工具。" / "Make the Prompt feel like a professional tool in a real production environment."**
+- **enhancements/SKILL.md** — 按目标 Skill 类型自动增强（开发/UI/文档/架构等 9 类）。Stage 1 确定目标 Skill 类型后，Stage 2 生成 prompt 时按需加载对应增强内容。
+- **platforms/SKILL.md** — 多平台 Skill 文件格式参考（OpenClaw/Claude Code/Cursor/Cline/通用）。Stage 4.2 生成文件时加载。
 
 ---
 
@@ -408,35 +312,7 @@ Prompt 必须 / Prompt must be:
 
 ## 推荐 Prompt 结构 / Recommended Prompt Structure
 
-默认推荐 / Default recommendation:
-
-```md
-# Skill: xxx
-
-## Goal
-...
-
-## Core Principles
-...
-
-## Responsibilities
-...
-
-## Workflow
-...
-
-## Output Strategy
-...
-
-## Constraints
-...
-
-## Multi-turn Conversation
-...
-
-## Ideal Outcome
-...
-```
+默认推荐结构见 `platforms/SKILL.md`。Stage 4 生成文件时加载参考。
 
 ---
 
@@ -470,6 +346,8 @@ Prompt 必须 / Prompt must be:
 - 增加约束 / Add constraints
 - 调整定位 / Adjust positioning
 - 优化多轮设计 / Optimize multi-turn design
+
+**回退机制**：如果用户说"重来"、"从定位开始"、"不满意，重新来"，清空当前 Stage 3 的修改，回到 Stage 1 重新开始。保留之前各 Stage 的输出作为参考，但明确标注"以下为上一轮的内容，仅供参考"。
 
 **⏸ 每次修改后暂停。Stage 3 可以无限循环。**
 
@@ -525,7 +403,7 @@ description: >
 ```markdown
 ---
 description: <英文 description>
-globs: 
+globs: **/*.{ts,tsx,js,jsx}
 alwaysApply: false
 ---
 <prompt 正文>
@@ -580,6 +458,7 @@ alwaysApply: false
 - 用户输入不完整时：先确认理解是否正确，再生成 Prompt
 - Token 接近上限时：输出当前进度，等待用户新会话继续
 - Stage 3 → Stage 4 的转换必须由用户主动触发（如"可以了"、"满意了"、"生成 skill"、"生成文件"），不要自动推进
+- 用户说"算了"、"不要了"、"取消"时：输出当前进度摘要（已完成的 Stage + 当前 prompt 状态），结束流程
 
 ## 理想结果 / Ideal Outcome
 
