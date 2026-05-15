@@ -108,7 +108,7 @@ The following cases require proactive clarification or graceful degradation inst
 收到截图后，自动完成以下步骤。
 After receiving a screenshot, automatically complete the following steps.
 
-# 1. 页面结构识别 / Page Structure Recognition
+## 1. 页面结构识别 / Page Structure Recognition
 
 识别页面的信息架构与区块关系 / Recognize the information architecture and block relationships：
 - 页面整体布局 / Overall page layout
@@ -131,7 +131,7 @@ After receiving a screenshot, automatically complete the following steps.
 
 ---
 
-# 2. 组件识别 / Component Recognition
+## 2. 组件识别 / Component Recognition
 
 识别页面中的 UI 组件 / Recognize UI components in the screenshot：
 - input、select、checkbox、radio、switch
@@ -148,7 +148,7 @@ After receiving a screenshot, automatically complete the following steps.
 
 ---
 
-# 3. 文案与字段识别 / Text & Field Recognition
+## 3. 文案与字段识别 / Text & Field Recognition
 
 提取截图中的 / Extract from the screenshot：
 - 页面标题 / Page title
@@ -166,7 +166,7 @@ After receiving a screenshot, automatically complete the following steps.
 
 ---
 
-# 4. 状态与交互识别 / State & Interaction Recognition
+## 4. 状态与交互识别 / State & Interaction Recognition
 
 识别 / Recognize：
 - 当前激活项 / Active item
@@ -185,7 +185,7 @@ After receiving a screenshot, automatically complete the following steps.
 
 ---
 
-# 5. 多图状态归并 / Multi-Image State Merging
+## 5. 多图状态归并 / Multi-Image State Merging
 
 如果用户提供多张截图 / If the user provides multiple screenshots：
 
@@ -214,7 +214,7 @@ After receiving a screenshot, automatically complete the following steps.
 
 ---
 
-# 6. 布局与视觉层级 / Layout & Visual Hierarchy
+## 6. 布局与视觉层级 / Layout & Visual Hierarchy
 
 识别 / Recognize：
 - 主视觉区域 / Primary visual area
@@ -231,7 +231,7 @@ Help the coding agent organize page structure and visual hierarchy reasonably, e
 
 ---
 
-# 7. 可复用区块识别 / Reusable Block Recognition
+## 7. 可复用区块识别 / Reusable Block Recognition
 
 识别适合组件化的区域 / Identify areas suitable for componentization：
 - 筛选区 / Filter area
@@ -248,7 +248,7 @@ Help the coding agent make reasonable component splits.
 
 ---
 
-# 8. 实现意图抽取 / Implementation Intent Extraction
+## 8. 实现意图抽取 / Implementation Intent Extraction
 
 将截图翻译成实现导向描述 / Translate the screenshot into implementation-oriented descriptions：
 
@@ -339,12 +339,12 @@ Focus: Help the coding agent understand "how should this page be implemented".
 
 默认输出两部分 / Output two parts by default。
 
-# 第一部分：截图结构识别结果 / Part 1: Screenshot Structure Recognition
+## 第一部分：截图结构识别结果 / Part 1: Screenshot Structure Recognition
 
 使用结构化、工程化方式输出 / Use a structured, engineering-oriented format。
 建议使用表格 / Tables are recommended。
 
-## 页面整体结构 / Page Overview
+### 页面整体结构 / Page Overview
 
 | 项 / Item | 内容 / Content |
 |---|---|
@@ -356,7 +356,7 @@ Focus: Help the coding agent understand "how should this page be implemented".
 
 ---
 
-## 区块拆解 / Block Breakdown
+### 区块拆解 / Block Breakdown
 
 | 区块 / Block | 组件 / Components | 文案/字段 / Text/Fields | 当前状态 / Current State | 可推断交互 / Inferred Interactions |
 |---|---|---|---|---|
@@ -364,21 +364,21 @@ Focus: Help the coding agent understand "how should this page be implemented".
 
 ---
 
-## 状态与交互 / States & Interactions
+### 状态与交互 / States & Interactions
 
 -
 -
 
 ---
 
-## 实现意图 / Implementation Intent
+### 实现意图 / Implementation Intent
 
 用 2~5 句话总结这个页面主要需要实现什么。
 Summarize in 2-5 sentences what this page needs to implement.
 
 ---
 
-# 第二部分：可直接发给 coding agent 的 prompt / Part 2: Prompt for Coding Agent
+## 第二部分：可直接发给 coding agent 的 prompt / Part 2: Prompt for Coding Agent
 
 prompt 必须 / The prompt must：
 - 可直接复制 / Be directly copyable
@@ -387,7 +387,7 @@ prompt 必须 / The prompt must：
 - 不空泛 / Not be vague
 - 不扩展无关业务 / Not expand into unrelated business
 
-## Prompt 模板 / Prompt Template
+### Prompt 模板 / Prompt Template
 
 ```md
 你需要根据截图实现一个页面/页面局部区域。

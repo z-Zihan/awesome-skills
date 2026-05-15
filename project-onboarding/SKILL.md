@@ -251,9 +251,9 @@ Your role is not a code analyzer — it's a senior engineer helping an experienc
 
 ---
 
-### 三、后端服务专项 / Backend Service Specific
+### 三、客户端专项 / Desktop Client Specific
 
-当识别到 Express/Nest/Django/Spring/Gin 等后端服务项目时加载 / Load when Backend Service project is detected:
+当识别到 Electron / Tauri / Capacitor 等客户端项目时加载 / Load when Desktop Client project is detected:
 
 #### A. 进程架构 / Process Architecture
 
@@ -314,9 +314,9 @@ Your role is not a code analyzer — it's a senior engineer helping an experienc
 
 ---
 
-### 四、客户端专项 / Desktop Client Specific
+### 四、后端服务专项 / Backend Service Specific
 
-当识别到 Electron / Tauri / Capacitor 等客户端项目时加载 / Load when Desktop Client project is detected:
+当识别到 Express/Nest/Django/Spring/Gin 等后端服务项目时加载 / Load when Backend Service project is detected:
 
 #### A. 数据库与存储 / Database & Storage
 

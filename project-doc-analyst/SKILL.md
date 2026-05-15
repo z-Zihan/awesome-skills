@@ -321,10 +321,11 @@ Don't actively read unless there's a clear need:
    - 用户必须指定项目目录或仓库路径。如果未指定，主动询问："请提供要分析的项目目录路径或仓库地址"
    - 如果用户指令模糊（如"帮我搞一下""分析一下"），应询问：1) 目标项目路径 2) 有无特别关注的模块或方面
    - 如果用户提供了仓库 URL 而非本地路径，提示用户先 clone 到本地
+   - 如果用户提供了本地路径但目录不存在或无法访问，告知用户："指定的路径 [路径] 不存在或无法访问，请检查路径是否正确"并等待用户更正
 1. 识别项目名称 / Identify the project name:
    - 从仓库根目录名、`package.json`、`Cargo.toml`、`go.mod`、`pom.xml` 等 package 信息识别 / Identify from root dir name, package files, workspace configs
    - 如果无法可靠识别，优先使用仓库根目录名 / If unclear, prefer root directory name
-1.5. 识别项目类型 / Identify the project type:
+2. 识别项目类型 / Identify the project type:
    - 根据依赖、配置和目录结构判断 / Infer from dependencies, configs, and directory structure:
      - **前端应用** / Frontend app: 有 `vite.config.*`/`next.config.*`/`webpack.config.*` + `src/components/`/`src/pages/`
      - **后端服务** / Backend service: 有 `routes/`/`controllers/`/`services/` + 数据库相关配置
@@ -333,8 +334,8 @@ Don't actively read unless there's a clear need:
      - **全栈应用** / Full-stack app: 同时有前端和后端目录结构
      - **Monorepo** / Monorepo: 有 `pnpm-workspace.yaml`/`lerna.json`/`turbo.json` 或多 `package.json`
    - 项目类型影响后续分析策略（如库更关注导出 API，CLI 更关注命令流程）
-2. 决定输出语言 / Decide output language (see Language Strategy above)
-3. 给出简要分析计划 / Present a brief analysis plan:
+3. 决定输出语言 / Decide output language (see Language Strategy above)
+4. 给出简要分析计划 / Present a brief analysis plan:
    - 列出需要重点分析的模块 / List modules that need deep analysis
    - 按优先级列出预计会生成哪些文档，以及为什么 / List planned documents by priority and rationale
    - 标注哪些文档因证据不足会被跳过 / Mark documents that will be skipped due to insufficient evidence
@@ -785,3 +786,29 @@ Desktop/<project-name>/
     ├── plugin-or-extension-architecture.md        # 仅在有充分证据时生成
     └── ...
 ```
+
+## 扩展指南 / Extension Guide
+
+维护者在扩展本文档时，参考以下指引：
+
+### 新增文档类型 / Adding a New Document Type
+
+1. 在"必须生成的文档"或"可选文档"节中添加条目，包含：优先级（P0/P1/可选）、建议文件名、内容要求
+2. 在"推荐目录结构"中添加对应文件
+3. 在阶段三的执行流程中确认该文档的生成顺序合理
+4. 如果该文档有新的质量要求，在"通用质量规则"中补充
+
+### 新增 Deep Dive 专题 / Adding a New Deep Dive Topic
+
+1. 在"复杂专题深挖"的候选主题列表中添加条目
+2. 确保该专题的内容要求遵循现有的统一格式（解决什么问题→涉及哪些模块→核心机制→代码示例→执行流程→设计原因→难点→风险→改进建议）
+
+### 修改文件过滤规则 / Modifying File Filtering Rules
+
+1. 在"必须跳过的文件"或"应该跳过的文件"表格中添加/修改条目
+2. 确保修改不会遗漏高信号文件（参考"高信号文件"优先级列表）
+3. 如果新增的过滤规则影响优先级判断，同步更新 P0/P1/P2 分级
+
+### 修改引用格式 / Modifying Citation Format
+
+引用格式（如 `【接口：xxx】`、模块定位方式等）在"文档独立性"和"引用策略调整"节统一管理。修改时应同步更新两处，确保一致。
