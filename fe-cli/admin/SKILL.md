@@ -281,7 +281,6 @@ import NotFound from '@/pages/NotFound';
 
 // Auth guard component
 import { useAuthStore } from '@/stores/authStore';
-import { Navigate } from 'react-router-dom';
 
 function AuthGuard({ children }: { children: React.ReactNode }) {
   const token = useAuthStore((s) => s.token);

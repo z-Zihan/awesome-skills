@@ -85,6 +85,12 @@ skill-review-pro/
 
 读取模块时，读取对应 `SKILL.md` 的完整内容作为当前阶段的补充指令。
 
+**模块加载降级策略 / Module Loading Fallback**：
+- scoring/SKILL.md 不可用 → 终止评审，提示用户检查安装完整性
+- policies/base/ 任一文件不可用 → 使用其余可用文件继续评审，降级对应维度的覆盖范围
+- policies/<domain>/ 文件不可用 → 降级为仅 base 评审，报告中标注"域策略加载失败"
+- 所有模块可用 → 正常流程
+
 **继承约束 / Inheritance Constraint**：domain policy 禁止重复 base 已定义的规则。domain 只允许写该域特有要求（如 determinism、pedagogy），不允许重新定义 reliability、maintainability、ux 相关规则。
 
 ### 类型路由规则 / Policy Routing
@@ -95,7 +101,8 @@ skill-review-pro/
 2. **Domain 层**（按类型加载）：`policies/` 下对应域的专属策略
 
 域识别与优先级：
-- 如果 Skill 同时满足多个域特征（如"评审代码的 Skill"），选择其**主任务类型**（workflow/reviewer > engineering/coding）
+- 如果 Skill 同时满足多个域特征（如"评审代码的 Skill"），选择其**主任务类型**
+- 判断方法：看 Skill 的**核心动词**——"生成/搭建/审查代码"→ engineering，"教学/讲解/引导"→ cognition/teaching，"分析/解读"→ cognition/analysis，"自动化/编排"→ workflow/planner，"评审/评分/检查"→ workflow/reviewer
 - **reviewer 类优先**于其他域 — 评审类 Skill 的稳定性更重要
 - 如果无法明确判断，只加载 base 层（不加载 domain 层）
 - 如果用户明确指定了类型，以用户指定为准

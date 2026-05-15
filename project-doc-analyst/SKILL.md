@@ -182,7 +182,7 @@ If you must prioritize, deeply analyze the following instead of broadly covering
 - 设计原因 / Design rationale
 - 工程哲学 / Engineering philosophy
 
-### 8. 不要只看 README / Don't Just Read README
+### 7. 不要只看 README / Don't Just Read README
 
 很多 AI 会偷懒只读 README 就开始写文档。这是**绝对禁止**的。
 Many AIs lazily read only README and start writing docs. This is **strictly prohibited**.
@@ -212,7 +212,7 @@ Many AIs lazily read only README and start writing docs. This is **strictly proh
 - 优先分析核心业务 / Prioritize core business logic (domain models, key services)
 - 不要跳过 `node_modules` 以外的任何目录 / Don't skip any directory outside `node_modules`/`vendor`/`build` output
 
-### 9. 输出必须结构化且有用 / Output Must Be Structured and Useful
+### 8. 输出必须结构化且有用 / Output Must Be Structured and Useful
 
 避免空泛套话 / Avoid vague filler
 优先输出基于仓库证据的具体分析 / Prioritize concrete analysis based on repo evidence
@@ -252,6 +252,8 @@ Exclude these at the `find` / `glob` stage — do not read them into context:
 除非有明确需要，否则不主动读取：
 Don't actively read unless there's a clear need:
 
+| 类别 / Category | 文件模式 / Patterns | 原因 / Reason |
+|---|---|---|
 | 翻译文件 / i18n files | `locales/**`, `i18n/**`, `messages/**`, `**/translations/**`, `**/lang/**` | 纯文本映射，零架构价值 |
 | Changelog | `CHANGELOG.md`, `HISTORY.md` | 版本记录，低架构价值 |
 | License | `LICENSE`, `LICENSE.*`, `COPYING` | 法律文本 |
@@ -315,9 +317,22 @@ Don't actively read unless there's a clear need:
 
 ### 阶段一：项目识别与分析计划 / Phase 1: Project Identification & Analysis Plan
 
+0. **确认输入** / Confirm input:
+   - 用户必须指定项目目录或仓库路径。如果未指定，主动询问："请提供要分析的项目目录路径或仓库地址"
+   - 如果用户指令模糊（如"帮我搞一下""分析一下"），应询问：1) 目标项目路径 2) 有无特别关注的模块或方面
+   - 如果用户提供了仓库 URL 而非本地路径，提示用户先 clone 到本地
 1. 识别项目名称 / Identify the project name:
    - 从仓库根目录名、`package.json`、`Cargo.toml`、`go.mod`、`pom.xml` 等 package 信息识别 / Identify from root dir name, package files, workspace configs
    - 如果无法可靠识别，优先使用仓库根目录名 / If unclear, prefer root directory name
+1.5. 识别项目类型 / Identify the project type:
+   - 根据依赖、配置和目录结构判断 / Infer from dependencies, configs, and directory structure:
+     - **前端应用** / Frontend app: 有 `vite.config.*`/`next.config.*`/`webpack.config.*` + `src/components/`/`src/pages/`
+     - **后端服务** / Backend service: 有 `routes/`/`controllers/`/`services/` + 数据库相关配置
+     - **CLI 工具** / CLI tool: 有 `bin/` 目录或 `package.json` 中 `bin` 字段
+     - **库/SDK** / Library/SDK: 有 `package.json` 中 `main`/`module`/`exports` 字段但无明显的应用入口
+     - **全栈应用** / Full-stack app: 同时有前端和后端目录结构
+     - **Monorepo** / Monorepo: 有 `pnpm-workspace.yaml`/`lerna.json`/`turbo.json` 或多 `package.json`
+   - 项目类型影响后续分析策略（如库更关注导出 API，CLI 更关注命令流程）
 2. 决定输出语言 / Decide output language (see Language Strategy above)
 3. 给出简要分析计划 / Present a brief analysis plan:
    - 列出需要重点分析的模块 / List modules that need deep analysis
@@ -328,6 +343,8 @@ Don't actively read unless there's a clear need:
 ### 阶段二：深度阅读 / Phase 2: Deep Reading
 
 尽可能完整地阅读项目，优先理解以下维度 / Read the project as thoroughly as possible, prioritizing:
+
+**中间反馈：对于大项目（过滤后文件 > 50），在读完 P0 文件后向用户汇报阅读进展，包括已识别的项目类型、核心模块、预计分析的模块数量，让用户了解进度。** / For large projects (>50 files after filtering), report progress after reading P0 files — including identified project type, core modules, and estimated modules to analyze.
 
 - 项目用途 / Project purpose
 - 项目类型 / Project type
@@ -695,6 +712,7 @@ Documents must be self-contained — readers should understand the entire projec
 - 如果现有文档与代码冲突：以代码为准，显式指出差异 / If existing docs conflict with code: code takes precedence, explicitly note the difference
 - 如果项目很大：先给出分析计划，再分阶段输出文档 / If project is large: present analysis plan first, then generate docs in phases
 - 如果是 monorepo：先分别分析各子项目，再说明关系 / If monorepo: analyze sub-projects separately first, then explain relationships
+- **矛盾请求处理** / Handling conflicting requests: 如果用户同时要求冲突目标（如"深度分析每个文件"和"尽快完成"），应指出矛盾、说明当前策略的取舍，并让用户选择优先方向
 - 不要伪精确：不知道就明确说明不知道 / Don't pretend to be precise: if you don't know, explicitly say so
 - 优秀代码示例中允许使用伪代码说明实现逻辑，长度以能说清楚为准 / Notable code examples may use pseudocode to explain logic — use as many lines as needed to be clear
 

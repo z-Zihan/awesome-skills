@@ -70,12 +70,43 @@ Screenshot Understanding → Page Structure Extraction → State Recognition →
 
 ---
 
+# 异常处理 / Edge Cases
+
+以下情况需要主动澄清或降级处理，而非盲目执行。
+The following cases require proactive clarification or graceful degradation instead of blind execution.
+
+## 无截图 / No Screenshot Provided
+
+- 主动询问用户提供截图 / Proactively ask the user to provide a screenshot
+- 不可凭文字描述编造页面结构 / Do NOT fabricate page structure from text alone
+- 如果用户想用 URL 或描述代替截图，提示截图效果最佳 / If the user wants to use a URL or description instead, note that screenshots work best
+
+## 截图模糊 / 模糊请求 / Unclear Request
+
+- 截图质量低导致关键细节不可辨时：识别可见部分，明确标注不确定区域
+  When image quality is too low to identify key details: recognize what's visible, explicitly mark uncertain areas
+- 用户请求模糊（如"帮我搞一下"）且无截图时：要求补充截图和具体需求
+  When the request is vague (e.g., "just do it") and no screenshot is provided: ask for a screenshot and specific requirements
+
+## 矛盾请求 / Contradictory Requirements
+
+- 指出矛盾点并请求用户澄清 / Point out contradictions and ask the user to clarify
+  - 例：用户同时要求"高保真还原"和"自由发挥 UI" → 提示两者冲突，请确认优先级
+    E.g., user requests both "high-fidelity restoration" and "free UI design" → note the conflict and ask to confirm priority
+
+## 图片分析失败 / Image Analysis Failure
+
+- 如果无法识别截图内容：明确告知用户并建议提供更清晰的截图或补充文字描述
+  If screenshot content cannot be recognized: inform the user and suggest providing a clearer screenshot or supplementary text description
+- 部分识别成功时：输出已识别部分，标注无法识别的区域
+  When partially recognized: output recognized parts and mark unrecognized areas
+
+---
+
 # 工作流程 / Workflow
 
 收到截图后，自动完成以下步骤。
 After receiving a screenshot, automatically complete the following steps.
-
----
 
 # 1. 页面结构识别 / Page Structure Recognition
 
@@ -150,18 +181,7 @@ After receiving a screenshot, automatically complete the following steps.
 - 行高亮 / Row highlight
 - 条件展示内容 / Conditional content
 
-允许轻度合理推断 / Allowed (lightweight reasonable inference)：
-- 基础状态切换 / Basic state toggles
-- 表单联动 / Form field linkage
-- 列表联动 / List linkage
-- 基础校验 / Basic validation
-- 数据选择行为 / Data selection behavior
-
-不允许 / NOT allowed：
-- 编造复杂业务逻辑 / Fabricating complex business logic
-- 擅自扩展功能模块 / Unilaterally adding feature modules
-- 凭空定义接口规则 / Inventing API rules
-- 脱离截图扩展系统 / Extending the system beyond what's shown
+允许轻度合理推断，详见下方「合理推断边界」表 / Allowed lightweight reasonable inference, see the "Reasonable Inference Boundaries" table below。
 
 ---
 
@@ -249,7 +269,12 @@ Focus: Help the coding agent understand "how should this page be implemented".
 
 # UI 策略 / UI Strategy
 
-根据用户要求自动切换 / Automatically switch based on user requirements。
+根据用户要求选择策略。用户未明确指定时，默认使用策略 A（骨架模式）/ Select strategy based on user requirements. When user doesn't specify, default to Strategy A (Skeleton Mode).
+
+选择依据 / Selection criteria：
+- 用户提到"先搭骨架" / "不要求精细" → 策略 A
+- 用户提到"自由发挥" / "优化视觉" / "可正式使用" → 策略 B
+- 用户提到"Figma" / "高还原" / "尽量还原" → 策略 C
 
 ---
 
@@ -268,8 +293,6 @@ Focus: Help the coding agent understand "how should this page be implemented".
 - 不要求高保真 / High fidelity not required
 - 后续可继续精修 / Can be refined later
 
----
-
 ## 策略 B：自由发挥 UI / Strategy B: Free UI Design
 
 适用于 / For：
@@ -284,8 +307,6 @@ Focus: Help the coding agent understand "how should this page be implemented".
 - 保持现代、统一、简洁 / Keep it modern, unified, and clean
 - 状态完整 / Complete state support
 - 留白与层级合理 / Reasonable whitespace and hierarchy
-
----
 
 ## 策略 C：设计稿还原 / Strategy C: Design Restoration
 
@@ -318,14 +339,10 @@ Focus: Help the coding agent understand "how should this page be implemented".
 
 默认输出两部分 / Output two parts by default。
 
----
-
 # 第一部分：截图结构识别结果 / Part 1: Screenshot Structure Recognition
 
 使用结构化、工程化方式输出 / Use a structured, engineering-oriented format。
 建议使用表格 / Tables are recommended。
-
----
 
 ## 页面整体结构 / Page Overview
 
@@ -369,8 +386,6 @@ prompt 必须 / The prompt must：
 - 面向页面搭建 / Be focused on page construction
 - 不空泛 / Not be vague
 - 不扩展无关业务 / Not expand into unrelated business
-
----
 
 ## Prompt 模板 / Prompt Template
 
@@ -466,7 +481,10 @@ Do NOT expand into complex business logic not shown in the screenshot.
 
 ### UI 策略 / UI Strategy
 
-根据当前情况选择 / Choose based on current situation：
+根据上述策略选择结果，在 prompt 中仅包含对应的策略说明，不要同时列出三个策略。
+Based on the strategy selection result, include only the corresponding strategy description in the prompt. Do NOT list all three.
+
+<!-- 根据实际情况选择以下一种，删除其余两种 -->
 
 #### 骨架模式 / Skeleton Mode
 

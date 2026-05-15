@@ -71,7 +71,27 @@ For every code change, answer these questions:
 
 ## 审查方法论 / Review Methodology
 
-### 0. 确认变更背景 / Confirm Change Background
+### 快速审查模式 / Quick Review Mode
+
+When the user implies only a quick judgment is needed (e.g., "这个能合吗？", "改动有风险吗？", "quick review", "quick"), use a streamlined flow:
+
+1. Obtain diff + infer intent (same as standard flow, Steps 1-2)
+2. Scan line by line, only flag Critical/Major issues
+3. Output 3-5 sentences: risk level + core issues (if any) + recommendation
+4. If Critical issues are found, prompt the user: "发现严重问题，是否需要完整审查？"
+
+Quick mode does not skip review — it only streamlines the output. Do not output the full report template in quick mode.
+
+当用户输入暗示只需快速判断时（如"这个能合吗？"、"改动有风险吗？"、"quick review"、"quick"），使用精简流程：
+
+1. 获取 diff + 推断意图（同标准流程的第 1-2 步）
+2. 逐行扫描，只标记 Critical/Major 问题
+3. 输出 3-5 句结论：风险等级 + 核心问题（如有）+ 建议
+4. 如果发现 Critical 问题，提示用户"发现严重问题，是否需要完整审查？"
+
+快速模式不跳过审查，只是输出精简。快速模式下不使用完整报告模板。
+
+### 1. 确认变更背景 / Confirm Change Background
 
 #### 变更来源识别 / Change Source Detection
 
@@ -95,8 +115,10 @@ Users may provide changes in the following ways, processed in priority order:
    - `git diff` / `git diff --staged` / `git diff HEAD` 获取工作区/暂存区改动 / to get working/staging area changes
    - `git log --oneline -N` 查看最近提交 / to check recent commits
    - `git show <hash>` 查看某次提交的详情 / to view a specific commit's details
+   - 如果 `git diff` 返回空（工作区和暂存区均无改动），告知用户："当前工作区和暂存区均无改动。你是否想审查某个 commit？请提供 commit hash。" 不应输出空报告 / If `git diff` is empty, tell the user and ask if they want to review a specific commit. Do not output an empty report.
 
-> **GitHub 需要代理时**：如果 API 调用失败（网络超时/403），尝试配置代理 `https_proxy` 后重试。/ If GitHub API fails (timeout/403), try setting proxy `https_proxy` and retry.
+> **GitHub 需要代理时**：如果 API 调用失败（网络超时），尝试配置代理 `https_proxy` 后重试。/ If GitHub API fails (timeout), try setting proxy `https_proxy` and retry.
+> **GitHub 认证失败时**：如果 API 调用因认证失败（401/403 非 rate limit），明确告知用户："GitHub API 认证失败，请设置 `GITHUB_TOKEN` 环境变量或使用 `gh auth login` 登录。" 不应静默跳过。/ If GitHub API fails with auth error (401/403), clearly tell the user to set `GITHUB_TOKEN` or run `gh auth login`. Do not silently skip.
 > **GitLab 内网直连**：内网 GitLab（如 gitlab.glm.ai）无需代理，直接访问。/ Internal GitLab doesn't need proxy, connect directly.
 
 **多来源并存时**：按上述编号顺序选择第一个可用的输入源（diff > commit hash > GitHub PR > GitLab MR > 本地 git）。如果多种来源同时可用，优先使用 diff 或 commit hash。
@@ -134,7 +156,15 @@ Users may provide changes in the following ways, processed in priority order:
 | 安全修复 | 检查修复完整性、是否遗漏同类漏洞、修复副作用 |
 | 临时 hotfix | 平衡修复时效性和代码质量，关注是否引入新风险 |
 
-### 0.1 每次必须获取最新变更 / Always Fetch Latest Changes
+#### 矛盾请求处理 / Contradictory Request Handling
+
+If the user provides conflicting instructions (e.g., "全面审查" + "只看安全问题"), do not silently pick one. Instead:
+
+- Clearly point out the contradiction
+- Ask which takes priority, or suggest a reasonable combined approach
+- Example: "你要求全面审查又只关注安全，建议：先做全面审查，在报告中特别标注安全问题；或只做安全专项审查。你倾向哪种？"
+
+### 2. 每次必须获取最新变更 / Always Fetch Latest Changes
 
 - **严禁使用过期的 diff 快照进行 review** / Never use stale diff snapshots for review
 - 每次 review 开始前，必须重新获取当前最新的变更状态 / Before each review, must re-fetch the current latest change state:
@@ -144,41 +174,41 @@ Users may provide changes in the following ways, processed in priority order:
 - 如果用户在对话过程中已经修改了代码（例如说"我改了一版"、"已经修了"），**必须重新拉取 diff**，用最新状态 review，不能用会话开头缓存的旧 diff / If the user has already modified code during the conversation (e.g. "I made changes", "already fixed"), **must re-fetch diff**, review with the latest state, cannot use the stale diff cached at the start of the session
 - 如果无法确定当前是否为最新，主动问用户："我需要 review 的改动是当前最新的吗？" / If unsure whether current is the latest, proactively ask the user: "Are the changes I'm reviewing the current latest version?"
 
-### 1. 只关注当前变更 / Only Focus on Current Changes
+### 3. 只关注当前变更 / Only Focus on Current Changes
 
 - Review 的核心对象是**本次变更的 diff**，不是整个文件、不是整个项目 / The core subject of review is **the current diff**, not the entire file or project
 - **不要审查未修改的老代码**——即使用户的老代码有优化空间，也不是本次 review 的范围 / **Do NOT review unmodified old code** — even if the user's old code has room for optimization, it's not within the scope of this review
 - 只有当新变更与老代码**产生联动并组合出现 bug** 时，才需要关注老代码。此时将老代码相关部分作为**上下文**引用，目的是判断新改动是否会破坏已有行为，而不是对老代码本身提 issue / Only when new changes and old code **interact and combine to cause bugs**, do you need to look at old code. In this case, use the relevant old code as **context** to judge whether the new change breaks existing behavior, not to raise issues about the old code itself
 - 判断标准：如果去掉新改动，老代码本身是正常运行的，则不提老代码的问题 / Rule of thumb: if the old code runs fine without the new change, don't raise issues about the old code
 
-### 1.1 结合上下文审查 / Context-Aware Review
+### 4. 结合上下文审查 / Context-Aware Review
 
 - 逐行审查 diff 时，**必须阅读修改点所在函数/模块的上下文代码**，不能只看 diff 本身 / When reviewing diff line by line, **must read the surrounding function/module context**, not just the diff itself
 - 结合上下文的目的是理解：这个改动在整体逻辑中处于什么位置、调用了什么、被什么调用、和上下游什么关系 / The purpose of using context is to understand: where this change sits in the overall logic, what it calls, what calls it, and its upstream/downstream relationships
 - 例如：diff 中改了一行条件判断，需要看整个 if-else 分支逻辑；改了一个函数签名，需要看所有调用处是否兼容 / Example: if the diff changes one condition, read the entire if-else branch logic; if it changes a function signature, check all call sites for compatibility
 - **上下文用于验证 diff 的正确性，不是用于审查上下文本身** / **Context is used to verify the diff's correctness, NOT to review the context itself**
 
-### 2. 逐行分析结合上下文 / Line-by-Line + Context Analysis
+### 5. 逐行分析结合上下文 / Line-by-Line + Context Analysis
 - Examine each change line by line.
 - Do not do surface-level scanning. Must combine function semantics, module responsibility, and upstream/downstream relationships.
 
-### 3. 真实风险优先 / Real Risks First
+### 6. 真实风险优先 / Real Risks First
 - Prioritize issues that would cause: production incidents, mainline flow exceptions, regressions, compatibility breaks, data errors, state anomalies, performance degradation, security risks.
 - Do NOT output meaningless, overly nitpicky issues just to "appear to be reviewing."
 
-### 4. 明确标注不确定项 / Mark Uncertainty Clearly
+### 7. 明确标注不确定项 / Mark Uncertainty Clearly
 - If evidence is insufficient, do not make assertive claims.
 - Use: "Potential risk", "Needs upstream/downstream confirmation", "Cannot fully determine from this diff, but recommend focused verification."
 - Do not make unsupported conclusions.
 
-### 5. 关注行为变更而非仅代码变更 / Focus on Behavioral Changes, Not Just Code Changes
+### 8. 关注行为变更而非仅代码变更 / Focus on Behavioral Changes, Not Just Code Changes
 - Even small changes — judge whether they cause: result changes, semantic changes, default value changes, execution order changes, error handling changes, side effect changes, observability changes.
 
-### 6. 关注回归与级联影响 / Attention to Regression and Cascading Impact
+### 9. 关注回归与级联影响 / Attention to Regression and Cascading Impact
 - Especially focus on: public methods, base classes/utility classes/middleware, shared components, config center logic, shared models/DTOs/Schemas, core flow branching logic.
 - Small changes here can have large impact — must prioritize review.
 
-### 7. 风险推导链 / Risk Derivation Chain
+### 10. 风险推导链 / Risk Derivation Chain
 
 不要只发现单个问题然后列表输出。对于每个发现的风险，**显式推导影响链**：
 
@@ -233,16 +263,28 @@ Actively check the following dimensions (even if user doesn't mention them):
 
 输出一份 **结构化 Markdown 报告**。人类可读，AI 可直接理解和继续处理。
 
-### 格式要求 / Format Requirements
+### 格式规则 / Format Rules
 
 - 表格 + 列表为主，每个 issue 精简到 2-3 行
 - 不确定的内容标注 `[待确认]`
 - 无明显问题时写"未发现缺陷"并列出建议关注的点
 - 超过 10 个 issue 时，Minor 归并总结，优先列出 Critical/Major
+- **空 section**：如果某个 section 没有内容，直接删除整个 section（标题 + 内容），不留空位
+- 如果全部变更都无影响，可以只输出「无影响变更」section + 最终结论，省略后续内容
+- 如果「需要修复的问题」为空，省略修复指令 section
+- **置信度说明**：
+  - **HIGH** — 确定是问题，有明确的代码证据或逻辑推理支撑
+  - **MEDIUM** — 很可能是问题，但缺乏完整上下文确认（如无法确定上游调用方式）
+  - **LOW** — 疑似问题，可能是合理的实现选择，建议团队确认
+  - LOW 置信度的问题应使用"可能"、"疑似"等措辞，不应使用"必须"、"一定会"等确定性语言
+- **整体审查置信度**：
+  - **High** — diff 上下文充分，意图明确，所有结论都有充分依据
+  - **Medium** — diff 上下文基本充分，但部分结论需要进一步确认
+  - **Low** — 缺少关键上下文（无需求文档、无项目背景、diff 不完整），审查结论仅供参考
+- **注意**：日志文案调整、注释修正、日志级别变更等不属于需要提出的问题。
+- **补充上下文**：需要补充上下文的 issue，在对应行下方用引用块追加 1-2 句分析
 
 ### 输出模板 / Output Template
-
-**空 section 统一规则**：如果某个 section 没有内容，直接删除整个 section（标题 + 内容），不留空位。不要输出"没有则省略此 section"之类的占位说明。
 
 ```markdown
 ## Code Review
@@ -260,8 +302,6 @@ Actively check the following dimensions (even if user doesn't mention them):
 |---|------|----------|----------|
 | 1 | 文件:函数 | 具体改了什么 | 无风险 / 低风险：原因 |
 
-> 如果全部变更都无影响，可以只输出此 section + 最终结论，省略后续内容。
-
 ---
 
 ### 2. 建议关注（可选改进，非阻塞）
@@ -271,8 +311,6 @@ Actively check the following dimensions (even if user doesn't mention them):
 | # | 位置 | 说明 |
 |---|------|------|
 | 1 | 文件:函数 | 具体说明 |
-
-> 如果没有建议关注项，省略此 section。
 
 ---
 
@@ -284,21 +322,6 @@ Actively check the following dimensions (even if user doesn't mention them):
 |---|--------|--------|------|----------|----------|
 | 1 | Critical | HIGH | 文件:函数:行号 | 具体问题 | 修复方向 |
 | 2 | Major | 文件:函数 | 具体问题 | 修复方向 |
-
-> [需要补充上下文的 issue，在对应行下方用引用块追加 1-2 句分析]
->
-> **置信度说明**：
-> - **HIGH** — 确定是问题，有明确的代码证据或逻辑推理支撑
-> - **MEDIUM** — 很可能是问题，但缺乏完整上下文确认（如无法确定上游调用方式）
-> - **LOW** — 疑似问题，可能是合理的实现选择，建议团队确认
-> - LOW 置信度的问题应使用"可能"、"疑似"等措辞，不应使用"必须"、"一定会"等确定性语言
->
-> **整体审查置信度**：
-> - **High** — diff 上下文充分，意图明确，所有结论都有充分依据
-> - **Medium** — diff 上下文基本充分，但部分结论需要进一步确认
-> - **Low** — 缺少关键上下文（无需求文档、无项目背景、diff 不完整），审查结论仅供参考
->
-> **注意**：日志文案调整、注释修正、日志级别变更等不属于需要提出的问题。
 
 ### 完成度分析 / Completion Analysis
 
@@ -395,10 +418,6 @@ Review 报告输出后，**先给修复指令，再等用户确认**：
 ---
 
 ### 修复指令（可直接发给 AI agent）/ Fix Instructions (可直接发给 AI agent)
-
-> **修复指令紧跟在报告之后输出，包含所有「需要修复的问题」的修复方案**
-> 用户确认哪些符合预期后，剩余问题可按修复指令直接执行。
-> 如果「需要修复的问题」本身为空，则**省略此 section**。
 
 以下内容可直接复制，发给 coding agent 进行修复（**仅包含用户确认需要修复的问题**）：
 

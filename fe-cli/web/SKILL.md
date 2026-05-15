@@ -121,9 +121,17 @@ export default class ErrorBoundary extends Component<Props, State> {
 
 `components/PageLoading.tsx`:
 ```tsx
-import { Spin } from 'antd'; // or custom spinner if no Ant Design
+// Pure CSS spinner — works regardless of UI library choice
 export default function PageLoading() {
-  return <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}><Spin size="large" /></div>;
+  return (
+    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+      <div style={{
+        width: 32, height: 32, border: '3px solid #e8e8e8', borderTopColor: '#1677ff',
+        borderRadius: '50%', animation: 'spin 0.8s linear infinite',
+      }} />
+      <style>{`@keyframes spin { to { transform: rotate(360deg) } }`}</style>
+    </div>
+  );
 }
 ```
 

@@ -235,13 +235,65 @@ export const config = {
 
 ### Step 6: Nuxt-Specific
 
-For Nuxt, use Nuxt modules and composables instead of Next.js patterns. Key files:
+For Nuxt, use Nuxt modules and composables instead of Next.js patterns.
+
+**`nuxt.config.ts`:**
+```typescript
+export default defineNuxtConfig({
+  devtools: { enabled: true },
+  modules: [
+    '@nuxtjs/tailwindcss',   // if Tailwind selected
+    '@nuxtjs/i18n',           // if i18n selected
+  ],
+  runtimeConfig: {
+    public: {
+      apiBase: process.env.NUXT_PUBLIC_API_URL || 'http://localhost:3000',
+    },
+  },
+  css: ['~/assets/styles/main.scss'],
+});
+```
+
+**`app.vue`:**
+```vue
+<template>
+  <NuxtPage />
+</template>
+```
+
+Key file mapping (Nuxt → concept):
 - `nuxt.config.ts` — Module registration, runtime config
 - `app.vue` — Root app component
-- `pages/` — File-based routing
-- `server/api/` — API routes
+- `pages/` — File-based routing (auto-import)
+- `server/api/` — API routes (Nitro)
 - `composables/` — Shared composables (useFetch wrapper, useAuth, etc.)
-- `middleware/` — Route middleware
+- `middleware/` — Route middleware (auth redirect, i18n)
+- `layouts/` — Layout components (default, auth, etc.)
+
+**`composables/useRequest.ts`** (Nuxt equivalent of React useRequest):
+```typescript
+import { ref } from 'vue';
+
+export function useRequest<T>(fetcher: () => Promise<T>) {
+  const data = ref<T>();
+  const loading = ref(true);
+  const error = ref<Error>();
+
+  async function run() {
+    loading.value = true;
+    error.value = undefined;
+    try {
+      data.value = await fetcher();
+    } catch (e) {
+      error.value = e as Error;
+    } finally {
+      loading.value = false;
+    }
+  }
+
+  return { data, loading, error, run };
+}
+```
 
 ### Step 7: Shared Layer + Final
 

@@ -46,6 +46,21 @@ Shared entry point for all frontend project types. Routes to type-specific sub-s
 
 如果不确定，询问："这是什么类型的项目？Web SPA / 后台管理 / 移动H5 / Electron桌面 / SSR / 小程序"
 
+### 输入澄清 / Input Clarification
+
+当用户请求模糊时，**必须先澄清再执行**：
+- **模糊输入**（如"帮我搞一下"、"新建项目"）→ 询问项目名称 + 类型 + 技术栈偏好
+- **矛盾请求**（如"用 React 和 Vue"）→ 指出矛盾，请求确认使用哪一个
+- **越界请求**（如"帮我部署到服务器"）→ 拒绝并说明："fe-cli 只负责本地项目初始化，部署请使用其他工具"
+- **非前端请求**（如"写一个 Python 后端"）→ 拒绝并重定向："fe-cli 仅支持前端项目脚手架"
+
+### 降级策略 / Degradation Strategy
+
+- `pnpm create vite` 失败 → 提示用户手动创建：`pnpm init vite@latest`，或检查网络/Node 版本
+- 依赖安装失败 → 提示检查网络代理、npm registry 配置，提供淘宝镜像命令
+- 目标目录已存在 → 询问："目录已存在，覆盖 / 合并 / 取消？"
+- 模板中引用的包版本不存在 → 提示用户手动指定版本，不阻塞流程
+
 ## 路由到子技能 / Routing to Sub-Skills
 
 类型识别后，读取对应子技能的 SKILL.md：
@@ -153,13 +168,47 @@ This file is for AI agents to quickly understand the project.
 - **环境文件**：始终生成 `.env`、`.env.development`、`.env.test`、`.env.production`
 - **日志**：始终生成 `services/logger.ts` + `services/log-export.ts`。使用 `Logger.child("Module")` 模式。最大存储 5MB 自动清理。仅开发模式控制台输出。上报端点为占位符（待定）。
 - **Node 版本**：目标 Node 18+
-- **pnpm 构建脚本**：在 package.json 中使用 `pnpm.onlyBuiltDependencies` 自动批准原生构建（如 `@parcel/watcher`）。构建命令（`build:prod`、`build:test`）不应包含 `tsc -b`——Vite 处理 TS 转译；类型检查是独立的 `typecheck` 脚本。
+- **pnpm 构建脚本**：在 package.json 中使用 `pnpm.onlyBuiltDependencies` 自动批准原生构建（如 `@parcel/watcher`）。Vite 渲染层构建命令（`build:prod`、`build:test`）不应包含 `tsc -b`——Vite 处理 TS 转译；类型检查是独立的 `typecheck` 脚本。**Electron 主进程例外**：`electron/main.ts` 和 `preload.ts` 在 Node 环境运行，需要 `tsc -p tsconfig.electron.json` 编译。
 
 ## 已有项目审查 / Existing Project Audit
 
 当用户要求检查已有项目时："检查这个前端项目"、"审查项目规范性"：
 
-1. 读取 `package.json` → 检查必要依赖和脚本 / Read → check required dependencies and scripts
-2. 检查 vite.config / tsconfig / eslint / prettier 配置 / Check for config files
-3. 对照上述标准检查 src 目录结构 / Check src directory structure against the standard above
-4. 报告缺失项并给出改进建议 / Report what's missing and suggest improvements
+### 审查步骤 / Audit Steps
+
+1. 读取 `package.json` → 检查必要依赖和脚本
+2. 检查 vite.config / tsconfig / eslint / prettier 配置
+3. 对照上述标准检查 src 目录结构
+4. 输出审查报告
+
+### 审查报告格式 / Audit Report Format
+
+```markdown
+## 项目审查报告
+
+### ✅ 符合项
+- [列出符合标准的条目]
+
+### ❌ 缺失项
+- [缺失项]：描述 + 建议修复方案
+- ...
+
+### ⚠️ 建议项
+- [可选改进]：描述
+```
+
+### 审查检查项 / Audit Checklist
+
+| 检查项 / Check | 标准 / Standard |
+|---|---|
+| 包管理器 | 使用 pnpm |
+| 路径别名 | tsconfig + vite.config 中 `@/` → `src/` |
+| CSS 预处理器 | 配置 Sass (SCSS) |
+| 环境文件 | 存在 `.env` / `.env.development` / `.env.test` / `.env.production` |
+| 请求封装 | `services/request.ts` 使用 fetch wrapper（非 axios） |
+| 日志 | `services/logger.ts` 存在，使用 `Logger.child("Module")` 模式 |
+| 全局样式 | `styles/global.scss` + `reset.scss` + `variables.scss` |
+| 工具函数 | `utils/index.ts` + `storage.ts` + `format.ts` + `validate.ts` |
+| 类型声明 | `types/global.d.ts` 含 ImportMetaEnv |
+| Scripts | 含 dev / build:prod / build:test / lint / typecheck |
+| .ai/PROJECT.md | 存在且与实际项目结构一致 |

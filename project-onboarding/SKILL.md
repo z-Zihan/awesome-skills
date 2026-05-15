@@ -30,6 +30,12 @@ description: >
 
 **多类型混合项目**（如 Electron + Vue、Tauri + React）：同时加载对应专项模块，按优先级排序。
 
+> **扩展指南**：新增项目类型时，需要同步更新三个位置：
+> 1. 上方「支持的项目类型」表格
+> 2. 「项目类型自动识别」信号列表
+> 3. 对应的专项模块章节（新增或复用）
+> 建议保持模块命名和排序的一致性。
+
 ## 这个 Skill 不是 / This Skill Is NOT
 
 - 面向编程新手 / Not for beginners
@@ -247,7 +253,7 @@ Your role is not a code analyzer — it's a senior engineer helping an experienc
 
 ### 三、后端服务专项 / Backend Service Specific
 
-当识别到 Electron / Tauri / Capacitor 等客户端项目时加载 / Load when Desktop Client project is detected:
+当识别到 Express/Nest/Django/Spring/Gin 等后端服务项目时加载 / Load when Backend Service project is detected:
 
 #### A. 进程架构 / Process Architecture
 
@@ -310,7 +316,7 @@ Your role is not a code analyzer — it's a senior engineer helping an experienc
 
 ### 四、客户端专项 / Desktop Client Specific
 
-当识别到后端服务项目时加载 / Load when Backend Service project is detected:
+当识别到 Electron / Tauri / Capacitor 等客户端项目时加载 / Load when Desktop Client project is detected:
 
 #### A. 数据库与存储 / Database & Storage
 
@@ -528,8 +534,38 @@ Your role is not a code analyzer — it's a senior engineer helping an experienc
 ## 每个阶段的停止条件 / Stage Stopping Conditions
 
 - 当前阶段内容输出完毕后，**⏸ 暂停等待用户确认或追问**
+- 每个阶段结束时，给出明确的下一步提示，例如：
+  - Stage 1 结束：*"以上是项目快速总览。如需深入了解工程规范、目录导航等，请告诉我。如需查看[项目类型]专项指南，请说「专项」。如要开始某个具体开发任务，直接说即可。"*
+  - Stage 2 结束：*"通用模块已展开。如需查看[项目类型]专项指南，请说「专项」。或直接问具体的开发问题。"*
+  - Stage 3 结束：*"专项指南已展开。可以直接问具体开发问题，如「新增页面怎么做」「发版流程是什么」等。"*
 - 证据不足的内容：简单说明后跳过，不要强行填充
 - Token/上下文接近上限时：输出当前进度和剩余计划
+
+## 输入验证 / Input Validation
+
+### 信息不足时 / When Information Is Insufficient
+
+如果用户只说了"帮我搞一下"或类似模糊请求，不要猜测或胡乱执行：
+1. 至少需要以下信息之一：**项目路径 / Git 仓库地址 / 已打开的工作目录**
+2. 询问："请问要分析哪个项目？请提供项目路径或仓库地址。"
+3. 如果用户提供了路径但项目为空或无法访问：明确告知并请求确认
+
+### 矛盾请求处理 / Handling Contradictory Requests
+
+当用户同时提出冲突目标时（如"给我完整架构报告"但又要求"保持简洁"）：
+1. 指出矛盾："完整架构报告与简洁输出存在矛盾"
+2. 建议折中方案：优先 Stage 1（快速总览），再按需深入
+3. 让用户选择优先级
+
+### 项目无法分析时 / When Project Cannot Be Analyzed
+
+以下情况应明确告知用户并停止分析，不要强行输出：
+- 指定路径不存在或无访问权限
+- 项目目录为空
+- 无法识别项目类型（无任何已知信号）
+- 关键配置文件（如 package.json）损坏或不可读
+
+---
 
 ## 重要限制 / Important Constraints
 

@@ -103,6 +103,15 @@ User input may be very incomplete. You must proactively infer:
 - 最佳职责 / Optimal responsibilities
 - 输出方式 / Output approach
 - 多轮交互设计 / Multi-turn interaction design
+- **潜在矛盾** / **Potential conflicts**（如"要简洁但又要全面"、"快速完成但要高质量"——检测到矛盾时应明确指出，请用户排定优先级）
+
+如果用户输入包含明显矛盾或冲突需求：
+If user input contains apparent contradictions or conflicting requirements:
+
+- 不要默默选择其一执行 / Do not silently pick one to execute
+- 明确指出矛盾所在 / Explicitly identify the contradiction
+- 提供取舍建议或排定优先级 / Suggest trade-offs or ask user to prioritize
+- 等待用户确认后再继续 / Wait for user confirmation before proceeding
 
 ---
 
@@ -153,8 +162,21 @@ Skill 名字应该像 / Skill names should look like:
 
 ### 3. Prompt 架构设计 / Prompt Architecture Design
 
-自动生成完整 Prompt，尽量包含：
-Auto-generate complete Prompt, including as many as applicable:
+自动生成完整 Prompt。以下按优先级分为两级 / Auto-generate complete Prompt. Items below are prioritized:
+
+**核心项（必须包含 / Required）：**
+- Goal / 目标
+- Core Principles / 核心原则
+- Responsibilities / 主要职责
+- Workflow / 执行流程
+- Output Strategy / 输出策略
+- Constraints / 约束与限制
+
+**按需项（Skill 类型适用时包含 / Include when applicable）：**
+- Multi-turn Conversation / 多轮对话设计
+- Best Practices / 最佳实践
+- Anti-patterns / 反模式
+- Ideal Outcome / 理想结果
 
 - Goal / 目标
 - Core Principles / 核心原则
@@ -212,7 +234,12 @@ Prompt 必须 / Prompt must be:
 
 ### 6. 工程化增强 / Engineering Enhancement
 
-如果合适 / When appropriate:
+如果 Skill 的目标场景涉及以下要素，则应主动增强 / When the Skill's target scenario involves the following, proactively enhance:
+
+- 具体技术栈或工具链 / Specific tech stack or toolchain
+- 团队协作流程 / Team collaboration workflows
+- 质量保证环节（测试/Review/CI） / Quality assurance steps (testing/review/CI)
+- 复杂状态管理或数据流 / Complex state management or data flow
 
 - 工程最佳实践 / Engineering best practices
 - workflow 建议 / Workflow suggestions
