@@ -13,7 +13,7 @@ Apply targeted fixes to the target Skill based on the fix checklist from skill-r
 
 ## 输入 / Input
 
-从 skill-review-pro 的最终报告中提取修复清单。修复清单位于 `<!-- SKILL-REVIEW-FIX-LIST-START -->` 和 `<!-- SKILL-REVIEW-FIX-LIST-END -->` 标记之间，包含：
+从 skill-review-pro 的最终报告中提取修复清单。修复清单位于 `<!-- FIX_CHECKLIST_START -->` 和 `<!-- FIX_CHECKLIST_END -->` 标记之间，包含：
 - 目标 Skill 名称和文件路径
 - 问题列表（每条包含：问题描述、修复方案、优先级、风险、影响维度、预估提分）
 - 详细修复方案（每条包含：原文引用、修改后内容、文件位置、依赖关系）

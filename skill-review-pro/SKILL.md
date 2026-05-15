@@ -15,7 +15,6 @@ description: >
 
 对目标 Skill 进行完整的专业评审：静态审查 → 测试用例设计 → 多模式执行 → 执行评估 → 综合评分。
 Conduct comprehensive professional review: static review → test case design → multi-mode execution → evaluation → composite scoring.
-Conduct comprehensive professional review: static review → test case design → real execution → evaluation → composite scoring.
 
 ## 核心定位 / Core Positioning
 
@@ -128,7 +127,7 @@ skill-review-pro/
 #### Step 2.2：执行测试
 
 对每个测试用例：
-1. 读取被测 Skill 完整文件
+1. 读取被测 Skill；若触发 Context 优化（超过 8000 字符），按 `execution/SKILL.md` 的结构索引读取相关章节
 2. 提取 frontmatter 之后的 prompt 正文
 3. 按执行模式执行（真实/模拟/受限），标注模式
 4. 记录完整输出
