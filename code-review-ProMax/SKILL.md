@@ -110,6 +110,30 @@ Users may provide changes in the following ways, processed in priority order:
 - 如果以上所有来源都没有提供明确背景，**主动询问用户**：本次变更是要实现什么需求或修复什么 bug？不要在不了解背景的情况下直接开始 review
 - 获取背景后再开始逐行审查，避免脱离需求盲目 review
 
+#### 变更意图推断 / Change Intent Inference
+
+在获取背景和 diff 后、逐行审查前，**必须先输出一段变更意图总结**（不跳过，不省略）：
+
+```
+**变更意图**：[需求实现 / Bug 修复 / 重构优化 / 兼容适配 / 性能优化 / 安全修复 / 临时 hotfix / 其他]
+**涉及模块**：[列出涉及的模块/组件/文件]
+**影响范围**：[核心链路 / 普通功能 / 基础设施 / 配置/非功能性]
+**初始风险等级**：Low / Medium / High
+**意图说明**：1-2 句话概括本次改动要达成什么目标
+```
+
+不同意图对应不同的审查侧重：
+
+| 意图 | 审查侧重 |
+|------|----------|
+| 需求实现 | 对照需求文档，逐条检查实现完整性，关注新代码质量 |
+| Bug 修复 | 对照 bug 描述，检查是否完整覆盖问题场景，关注边界情况 |
+| 重构优化 | 检查功能等价性，关注是否引入隐式行为变更 |
+| 兼容适配 | 重点检查接口契约、数据格式、向后兼容性 |
+| 性能优化 | 关注优化是否有效、是否引入副作用、基准数据支撑 |
+| 安全修复 | 检查修复完整性、是否遗漏同类漏洞、修复副作用 |
+| 临时 hotfix | 平衡修复时效性和代码质量，关注是否引入新风险 |
+
 ### 0.1 每次必须获取最新变更 / Always Fetch Latest Changes
 
 - **严禁使用过期的 diff 快照进行 review** / Never use stale diff snapshots for review
@@ -153,6 +177,23 @@ Users may provide changes in the following ways, processed in priority order:
 ### 6. 关注回归与级联影响 / Attention to Regression and Cascading Impact
 - Especially focus on: public methods, base classes/utility classes/middleware, shared components, config center logic, shared models/DTOs/Schemas, core flow branching logic.
 - Small changes here can have large impact — must prioritize review.
+
+### 7. 风险推导链 / Risk Derivation Chain
+
+不要只发现单个问题然后列表输出。对于每个发现的风险，**显式推导影响链**：
+
+```
+[具体改动点]
+→ [直接后果]（如：缓存 key 变更导致旧缓存无法命中）
+→ [级联影响]（如：并发请求打到数据库，可能触发限流）
+→ [最坏场景]（如：高流量时段数据库过载，影响所有依赖该服务的功能）
+```
+
+推导原则：
+- **从改动出发，不是从问题出发**。先理解"这个改动做了什么"，再推导"可能导致什么"
+- 每个高风险问题（Major/Critical）**必须附带推导链**，不能只写一句结论
+- Minor 问题可以简化推导，但至少说明"为什么这是个问题"
+- 推导链帮助用户理解**风险的来源和路径**，而不只是接受一个"有问题"的结论
 
 ## 必查清单 / Mandatory Checklist
 
@@ -207,6 +248,7 @@ Actively check the following dimensions (even if user doesn't mention them):
 ## Code Review
 
 **风险等级**: Low / Medium / High
+**审查置信度**: High / Medium / Low（见下方说明）
 **结论**: 可直接合入 / 修复后合入 / 建议进一步验证
 **摘要**: 1-3 句总结变更内容、核心风险、是否影响已有功能。
 
@@ -238,13 +280,24 @@ Actively check the following dimensions (even if user doesn't mention them):
 
 会带来风险或 bug 的变更，必须修复后才能合入。
 
-| # | 严重度 | 位置 | 问题描述 | 修复建议 |
-|---|--------|------|----------|----------|
-| 1 | Critical | 文件:函数:行号 | 具体问题 | 修复方向 |
+| # | 严重度 | 置信度 | 位置 | 问题描述 | 修复建议 |
+|---|--------|--------|------|----------|----------|
+| 1 | Critical | HIGH | 文件:函数:行号 | 具体问题 | 修复方向 |
 | 2 | Major | 文件:函数 | 具体问题 | 修复方向 |
 
 > [需要补充上下文的 issue，在对应行下方用引用块追加 1-2 句分析]
-
+>
+> **置信度说明**：
+> - **HIGH** — 确定是问题，有明确的代码证据或逻辑推理支撑
+> - **MEDIUM** — 很可能是问题，但缺乏完整上下文确认（如无法确定上游调用方式）
+> - **LOW** — 疑似问题，可能是合理的实现选择，建议团队确认
+> - LOW 置信度的问题应使用"可能"、"疑似"等措辞，不应使用"必须"、"一定会"等确定性语言
+>
+> **整体审查置信度**：
+> - **High** — diff 上下文充分，意图明确，所有结论都有充分依据
+> - **Medium** — diff 上下文基本充分，但部分结论需要进一步确认
+> - **Low** — 缺少关键上下文（无需求文档、无项目背景、diff 不完整），审查结论仅供参考
+>
 > **注意**：日志文案调整、注释修正、日志级别变更等不属于需要提出的问题。
 
 ### 完成度分析 / Completion Analysis
