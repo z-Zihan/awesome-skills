@@ -240,6 +240,7 @@ skill-review-pro/
 - 不输出修复清单 / No fix checklist
 - 不进入 Phase 2 / No Phase 2 execution
 - 波动判断标准：总分 ±3 分以内=稳定，±4–6 分=轻微波动，>6 分=波动较大
+- 汇总表末尾**固定输出**：`⚠️ 同一 session 连续评分存在锚定效应，跨 session 波动预计 ±3–4 分。如需更准确数据，建议在不同 session 中分别执行。`
 
 ---
 

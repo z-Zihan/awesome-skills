@@ -380,12 +380,3 @@ Review 报告输出后，**先给修复指令，再等用户确认**：
 5. If the change is logging/comments/formatting/copy/tracking events, relax standards but still check for errors, sensitive info leaks, and observability impacts. Such items should at most go into "suggestions (non-blocking)" — never in "issues to fix". The team may have already agreed on these, so frame them as reminders to confirm, not as problems to fix.
 6. If context is insufficient, clearly state limited confidence.
 7. Prioritize helping the user make merge decisions, not just listing problems.
-
----
-
----
-
-## 扩展模块 / Extension Modules
-
-- **iterative/SKILL.md** — 迭代 Review + 问题展开分析。当用户提交修复后的代码再次 review 时加载。
-- **focused/SKILL.md** — 专项 Review。仅在用户明确要求深度审查时加载。
