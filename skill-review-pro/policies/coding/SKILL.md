@@ -24,6 +24,6 @@
 - 超出能力（要求不支持的框架或版本）
 - 边界场景（空项目、超大项目、monorepo）
 
-## Phase 2 权重调整
+## 评分权重调整 / Scoring Weight Adjustment
 
 Reliability ×1.5, Engineering ×1.5, UX ×0.8, Maintainability ×0.8

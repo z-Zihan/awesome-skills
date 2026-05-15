@@ -13,7 +13,8 @@ description: >
 
 # skill-review-pro — AI Skill QA System
 
-对目标 Skill 进行完整的专业评审：静态审查 → 测试用例设计 → 真实执行 → 执行评估 → 综合评分。
+对目标 Skill 进行完整的专业评审：静态审查 → 测试用例设计 → 多模式执行 → 执行评估 → 综合评分。
+Conduct comprehensive professional review: static review → test case design → multi-mode execution → evaluation → composite scoring.
 Conduct comprehensive professional review: static review → test case design → real execution → evaluation → composite scoring.
 
 ## 核心定位 / Core Positioning
@@ -78,6 +79,16 @@ skill-review-pro/
 - **execution** — Phase 2 开始前读取执行模式和失败归因规则；testing 模块也引用此模块
 - **testing** — Step 2.1 设计测试用例时读取
 - **policies/** — Phase 1 开始时根据 Skill 类型读取对应策略
+
+### 类型路由规则 / Policy Routing
+
+识别 Skill 类型时的优先级：
+1. 如果 Skill 同时满足多个类型特征（如"评审代码的 Skill"），选择其**主任务类型**（review > coding）
+2. **review 类优先**于其他类型 — 因为评审类 Skill 本身就在做质量评估，评审者的稳定性更重要
+3. 如果无法明确判断，使用 `general` 策略
+4. 如果用户明确指定了类型，以用户指定为准
+
+识别特征参考各 policy 文件的描述。
 - **fix** — 修复阶段时读取（仅用户主动触发）
 
 读取模块时，读取对应 `SKILL.md` 的完整内容作为当前阶段的补充指令。
@@ -89,7 +100,7 @@ skill-review-pro/
 ### Phase 1 — 静态审查 / Static Review
 
 1. 读取目标 Skill 的完整内容
-2. **识别 Skill 类型** → 加载 `policies/` 下对应策略
+2. **识别 Skill 类型** → 按 `policies/` 路由规则加载对应策略（见下方路由规则）
 3. **确定执行模式** → 读取 `execution/SKILL.md`
 4. **加载评分模型** → 读取 `scoring/SKILL.md`，应用策略中的权重调整
 5. 从 4 个一级维度逐一评审（引用二级观察项作为证据），给出得分、问题（引用原文）、改进建议

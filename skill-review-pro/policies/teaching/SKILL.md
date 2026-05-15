@@ -25,6 +25,6 @@
 - 学习者跳跃提问（跳过基础直接问高级问题）
 - 学习者表达不清（不知道自己想问什么）
 
-## Phase 2 权重调整
+## 评分权重调整 / Scoring Weight Adjustment
 
 UX ×1.5, Reliability ×1.5, Engineering ×0.8, Maintainability ×0.8

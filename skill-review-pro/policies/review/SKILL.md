@@ -25,6 +25,6 @@
 - 评审一个功能正确但格式混乱的 Skill
 - 评审一个超长 Skill（测试 context 处理）
 
-## Phase 2 权重调整
+## 评分权重调整 / Scoring Weight Adjustment
 
 Reliability ×1.5, UX ×1.5, Engineering ×0.8, Maintainability ×0.8

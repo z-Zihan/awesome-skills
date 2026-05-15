@@ -24,6 +24,6 @@
 - 重复执行（连续触发两次）
 - 并发冲突（两个流程同时运行）
 
-## Phase 2 权重调整
+## 评分权重调整 / Scoring Weight Adjustment
 
 Maintainability ×1.5, Reliability ×1.5, Engineering ×0.8, UX ×0.8
