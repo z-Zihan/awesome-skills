@@ -59,16 +59,23 @@ skill-review-pro 采用模块化架构，主控只负责编排和路由：
 
 ```
 skill-review-pro/
-├── SKILL.md                    ← 你在这里（主控）
+├── SKILL.md                    ← 你在这里（主控：编排 + 路由）
 ├── scoring/SKILL.md            ← 评分模型（维度 + 锚点 + 等级）
 ├── execution/SKILL.md          ← 执行模式（Real/Simulated/Restricted + 失败归因）
 ├── testing/SKILL.md            ← 测试设计（正常 + 对抗 + 回归）
 ├── policies/
-│   ├── coding/SKILL.md         ← 开发类策略
-│   ├── teaching/SKILL.md       ← 教学类策略
-│   ├── workflow/SKILL.md       ← 工作流策略
-│   ├── review/SKILL.md         ← 评审类策略
-│   └── general/SKILL.md        ← 通用策略（默认）
+│   ├── base/                   ← 基础层（所有类型共享）
+│   │   ├── reliability.md
+│   │   ├── maintainability.md
+│   │   └── ux.md
+│   ├── engineering/            ← 工程域
+│   │   └── coding.md
+│   ├── cognition/              ← 认知域
+│   │   ├── teaching.md
+│   │   └── analysis.md
+│   └── workflow/               ← 流程域
+│       ├── planner.md
+│       └── reviewer.md
 └── fix/SKILL.md                ← 修复执行器
 ```
 
@@ -77,20 +84,37 @@ skill-review-pro/
 - **scoring** — Phase 1 和最终报告时读取评分模型
 - **execution** — Phase 2 开始前读取执行模式和失败归因规则；testing 模块也引用此模块
 - **testing** — Step 2.1 设计测试用例时读取
-- **policies/** — Phase 1 开始时根据 Skill 类型读取对应策略
+- **policies/base/** — Phase 1 必加载（所有类型共享基础）
+- **policies/<domain>/** — Phase 1 按类型加载域专属策略
 - **fix** — 修复阶段时读取（仅用户主动触发）
 
 读取模块时，读取对应 `SKILL.md` 的完整内容作为当前阶段的补充指令。
 
 ### 类型路由规则 / Policy Routing
 
-识别 Skill 类型时的优先级：
-1. 如果 Skill 同时满足多个类型特征（如"评审代码的 Skill"），选择其**主任务类型**（review > coding）
-2. **review 类优先**于其他类型 — 因为评审类 Skill 本身就在做质量评估，评审者的稳定性更重要
-3. 如果无法明确判断，使用 `general` 策略
-4. 如果用户明确指定了类型，以用户指定为准
+**两级路由**：先加载 base 层，再加载 domain 层。
 
-识别特征参考各 policy 文件的描述。
+1. **Base 层**（必加载）：`policies/base/` 下的 `reliability.md`、`maintainability.md`、`ux.md` — 所有类型共享的基础评审标准
+2. **Domain 层**（按类型加载）：`policies/` 下对应域的专属策略
+
+域识别与优先级：
+- 如果 Skill 同时满足多个域特征（如"评审代码的 Skill"），选择其**主任务类型**（workflow/reviewer > engineering/coding）
+- **reviewer 类优先**于其他域 — 评审类 Skill 的稳定性更重要
+- 如果无法明确判断，只加载 base 层（不加载 domain 层）
+- 如果用户明确指定了类型，以用户指定为准
+
+域映射：
+
+| Skill 特征 | 域 / Domain | 策略文件 |
+|---|---|---|
+| 生成代码、搭建项目、代码审查、scaffolding | `engineering` | `engineering/coding.md` |
+| 学习伴侣、教程生成、知识讲解、新手引导 | `cognition` | `cognition/teaching.md` |
+| 分析项目、评审文档、数据解读 | `cognition` | `cognition/analysis.md` |
+| 自动化流程、审批链、多步骤操作 | `workflow` | `workflow/planner.md` |
+| 质量检查、评分、验收 | `workflow` | `workflow/reviewer.md` |
+| 无法明确归类 | （仅 base） | 无 |
+
+读取模块时，读取对应 `.md` 文件的完整内容作为当前阶段的补充指令。
 
 ---
 
@@ -99,7 +123,7 @@ skill-review-pro/
 ### Phase 1 — 静态审查 / Static Review
 
 1. 读取目标 Skill 的完整内容
-2. **识别 Skill 类型** → 按 `policies/` 路由规则加载对应策略（见下方路由规则）
+2. **加载评审策略** → 先加载 `policies/base/`（必选），再按路由规则加载 `policies/<domain>/`（可选）
 3. **确定执行模式** → 读取 `execution/SKILL.md`
 4. **加载评分模型** → 读取 `scoring/SKILL.md`，应用策略中的权重调整
 5. 从 4 个一级维度逐一评审（引用二级观察项作为证据），给出得分、问题（引用原文）、改进建议
