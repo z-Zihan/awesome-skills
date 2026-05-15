@@ -90,6 +90,8 @@ skill-review-pro/
 
 读取模块时，读取对应 `SKILL.md` 的完整内容作为当前阶段的补充指令。
 
+**继承约束 / Inheritance Constraint**：domain policy 禁止重复 base 已定义的规则。domain 只允许写该域特有要求（如 determinism、pedagogy），不允许重新定义 reliability、maintainability、ux 相关规则。如果某个 base 观察项在某域需要不同侧重点，在 domain 中只写"侧重差异"，不重写基础定义。
+
 ### 类型路由规则 / Policy Routing
 
 **两级路由**：先加载 base 层，再加载 domain 层。
