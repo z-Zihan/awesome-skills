@@ -1,6 +1,6 @@
 ---
 name: project-doc-analyst
-version: "1.1.0"
+version: "1.2.0"
 homepage: https://github.com/z-Zihan/awesome-skills
 description: >
   专家级项目分析与文档生成 Agent。深度阅读整个代码仓库，输出面向人类和 AI 的
@@ -133,7 +133,7 @@ description: >
 - 优先分析核心链路（主请求流、主要用户旅程）
 - 优先分析 runtime 主流程（启动 → 请求 → 响应）
 - 优先分析核心业务（领域模型、关键服务）
-- 不要跳过 `node_modules` 以外的任何目录
+- 不要跳过上述过滤规则保留下的任何目录。确保覆盖核心链路和业务逻辑
 
 ### 8. 输出必须结构化且有用
 
@@ -205,6 +205,7 @@ description: >
    - 如果用户指令模糊，应询问：1) 目标项目路径 2) 有无特别关注的模块或方面
    - 如果用户提供了仓库 URL 而非本地路径，提示用户先 clone 到本地
    - 如果用户提供了本地路径但目录不存在或无法访问，告知用户并等待更正
+   - 询问输出目录，默认为 `<project-parent>/<project-name>-docs/`（不硬编码 Desktop）
 1. 识别项目名称：
    - 从仓库根目录名、`package.json`、`Cargo.toml`、`go.mod`、`pom.xml` 等识别
    - 如果无法可靠识别，优先使用仓库根目录名
@@ -216,6 +217,9 @@ description: >
    - 列出需要重点分析的模块
    - 按优先级列出预计会生成哪些文档
    - 标注哪些文档因证据不足会被跳过
+   - **⏸ 停在此处，等待用户确认计划后再继续**
+
+**快速模式**：用户说"快速"/"简洁"/"只看核心"时，跳过计划确认，直接生成 P0 文档（overview + architecture 合并为一份），P1 文档合并输出，不逐份确认。
    - **⏸ 停在此处，等待用户确认计划后再继续**
 
 ### 阶段二：深度阅读
@@ -282,6 +286,13 @@ description: >
 3. 如果需要新增文档，按 P0→P1 优先级评估
 4. 反馈驱动的补充同样遵循"证据优先"原则
 5. 每轮反馈修改后再次等待用户确认
+
+### 矛盾请求处理
+
+当用户提出矛盾需求时（如"全面深度分析" + "5分钟内完成"，或"严格按模板" + "灵活发挥"）：
+1. 指出矛盾点
+2. 建议折中方案（如：先快速生成 P0，后续按需深入）
+3. 让用户选择优先级
 
 ## 必须生成的文档
 
@@ -506,7 +517,7 @@ description: >
 ## 推荐目录结构
 
 ```
-Desktop/<project-name>/
+<output-dir>/<project-name>/
 ├── 00-project-overview.md                        # P0
 ├── 01-technical-architecture.md                 # P0
 ├── 02-design-rationale-and-engineering-philosophy.md  # P1

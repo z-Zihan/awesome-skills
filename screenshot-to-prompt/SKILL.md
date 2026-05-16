@@ -95,6 +95,11 @@ description: >
 - 指出矛盾点并请求用户澄清
   - 例：用户同时要求"高保真还原"和"自由发挥 UI" → 提示两者冲突，请确认优先级
 
+## 图像分析能力不可用
+
+- 当前环境无 vision model 或图像分析工具不可用时：明确告知用户"当前环境不支持图像分析"
+- 替代方案：建议用户将截图中的 UI 元素文字描述出来，基于文字描述生成 prompt
+
 ## 图片分析失败
 
 - 如果无法识别截图内容：明确告知用户并建议提供更清晰的截图或补充文字描述
@@ -179,7 +184,7 @@ description: >
 - 行高亮
 - 条件展示内容
 
-允许轻度合理推断，详见下方「合理推断边界」表。
+允许轻度合理推断，详见下方「合理推断边界」表。**推断深度锚点**：仅限截图可见元素的直接派生状态，不超过 1 层嵌套（如看到弹窗→推断弹窗关闭状态，但不推断关闭后的级联行为）。
 
 ---
 
@@ -590,6 +595,11 @@ The following cases require proactive clarification or graceful degradation inst
 
 - If screenshot content cannot be recognized: inform the user and suggest providing a clearer screenshot or supplementary text description
 - When partially recognized: output recognized parts and mark unrecognized areas
+
+## Vision Model Unavailable
+
+- If current environment lacks vision model or image analysis tools: inform user "Current environment does not support image analysis"
+- Alternative: suggest user describe UI elements from screenshot in text, generate prompt based on text description
 
 ---
 

@@ -106,6 +106,10 @@ description: >
 
 **多来源并存时**：按上述编号顺序选择第一个可用的输入源（diff > commit hash > GitHub PR > GitLab MR > 本地 git）。如果多种来源同时可用，优先使用 diff 或 commit hash。
 
+**git 不可用时的降级**：如果用户环境中没有安装 git 或当前目录不是 git 仓库：
+1. 告知用户："当前环境无 git 或非 git 仓库，无法自动获取 diff。"
+2. 提供替代方案："请直接粘贴 diff 内容或提供文件路径，我可以直接审查。"
+
 - 在开始审查前，先确认本次变更的背景：需求实现 / Bug 修复 / 重构优化
 - **上下文来源（按优先级）**：
   1. 用户提供的文档（需求文档、接口文档、设计稿链接等）→ 必须先仔细阅读，再对照代码
@@ -273,17 +277,21 @@ description: >
 风险等级: 低/中/高 | 审查置信度: 高/中/低 | 结论: 可直接合入/修复后合入/建议进一步验证
 摘要: 1-3句
 
-### 结论判定（量化规则，不允许主观）
-- 可直接合入: 需修复=0；或仅低严重度+置信度非确定
-- 修复后合入: 需修复≥1且最高≥中；或低严重度≥3
-- 建议验证: 存在≥高严重度+≤可能置信度
-- 边界: 1个中+可能→可直接合入；同模式3处+→合并为1个中
+### 结论判定（判定树，按优先级从高到低匹配，匹配即停）
+
+1. 存在≥高严重度 且 置信度≤可能 → **建议进一步验证**（证据不足，需上下游确认）
+2. 存在≥中严重度 且 置信度=确定 → **修复后合入**
+3. 低严重度≥3 且 置信度=确定 → **修复后合入**
+4. 仅1个中严重度 且 置信度=可能 → **可直接合入**（放入建议关注，缺充分证据）
+5. 需修复=0；或仅低严重度+置信度非确定 → **可直接合入**
+6. 同模式重复3处+ → 合并为1个中严重度，再按上述规则判定
 
 ### 严重度锚定（相同模式=相同严重度）
 定时器/监听器未清理=低 | CORS/网络兼容=中 | 绕过统一封装=中
 状态/表单生命周期不同步=高 | 硬编码IP=低(内网)/中(公网)
 全局副作用(locale等)=中 | catch空=低 | null/undefined=低
-环境感知: 内网地址→判定内网工具→安全/网络问题降一级
+环境感知: 内网工具判定标准——仅当代码注释、README 或配置文件中**明确标注**为内部工具/内网部署时才判定为内网工具并降级。仅凭 IP 地址段不足以降级（可能是公网产品的内网部署）。不确定时→询问用户确认
+兜底规则: 未匹配任何锚定模式时，按影响面（单函数/模块/全局）+ 可恢复性（可回滚/需热修/不可逆）二维判定：单函数+可回滚=低，模块+需热修=中，全局+不可逆=高
 
 ### 1. 无影响变更
 | # | 位置 | 变更内容 | 风险评估 |
@@ -363,11 +371,20 @@ Correctness · Boundary & exceptions · Regression risk · State & side effects 
 - Log/comment/format/i18n changes: Low-risk by default, no over-review
 - Diff < 50 lines: Lean toward "可直接合入" unless evidence of breakage
 - Diff > 500 lines: Focus on core paths, skip peripheral changes
-- Internal tools (private network): Downgrade security/network severity by 1 level
+- Internal tools: Downgrade security/network severity by 1 level ONLY when code comments/README explicitly marks as internal tool. Uncertain → ask user
 - Compliance/safety risks: Never downgrade regardless of change type
+
+### Verdict Decision Tree (priority order, match and stop)
+1. ≥High severity + ≤Possible confidence → **建议进一步验证**
+2. ≥Medium severity + Confident → **修复后合入**
+3. Low≥3 + Confident → **修复后合入**
+4. Only 1 Medium + Possible → **可直接合入** (move to advisory)
+5. Must-fix=0; or only Low+non-confident → **可直接合入**
+6. Same pattern 3x+ → merge as 1 Medium, then re-evaluate
 
 ### Input Sources (priority order)
 1. Direct diff/file content → 2. Git commit hash → 3. GitHub PR → 4. GitLab MR → 5. Local git
+- **Git not available**: Ask user to paste diff or provide file paths directly
 
 ### Language
 - Output language follows user's language

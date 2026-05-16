@@ -1,6 +1,6 @@
 ---
 name: skill-review-pro
-version: "1.1.0"
+version: "1.2.0"
 homepage: https://github.com/z-Zihan/awesome-skills
 description: >
   AI Skill 质量评审系统。通过静态审查对 Skill 进行评分（100分制），
@@ -93,7 +93,7 @@ skill-review-pro/
 读取模块时，读取对应 `SKILL.md` 的完整内容作为当前阶段的补充指令。
 
 **模块加载降级策略**：
-- scoring/SKILL.md 不可用 → 终止评审，提示用户检查安装完整性
+- scoring/SKILL.md 不可用（文件不存在或内容为空）→ 终止评审，提示用户检查安装完整性
 - policies/base/ 任一文件不可用 → 使用其余可用文件继续评审，降级对应维度的覆盖范围
 - policies/<domain>/ 文件不可用 → 降级为仅 base 评审，报告中标注"域策略加载失败"
 - 模块文件可读取但内容格式异常（如 YAML frontmatter 解析失败、markdown 结构不完整）→ 尝试提取可用内容继续评审，报告中标注"模块格式异常，部分规则降级"
@@ -136,6 +136,8 @@ skill-review-pro/
 2. **扫描目标 Skill 的子目录**：用 `find` 或 `ls` 列出所有子目录及文件，识别模块结构。对每个子目录中的 `SKILL.md` 或其他 `.md` 文件，逐个读取内容
    - 目的：子目录文件是 Skill 的有机组成部分（评分模型、策略文件、专项模式等），其质量直接影响 Skill 整体表现
    - 子目录文件同样参与 4 维度评审，问题标注位置时需注明文件路径（如 `scoring/SKILL.md:第3节`）
+   - **文件类型**：以 `.md` 为主，`.json`/`.yaml` 配置文件可选读取
+   - **目录深度**：最多 3 层（如 `policies/base/reliability.md`）
 3. **加载评审策略** → 先加载 `policies/base/`（必选），再按路由规则加载 `policies/<domain>/`（可选）
 4. **加载评分模型** → 读取 `scoring/SKILL.md`，应用策略中的权重调整
 5. 从 4 个一级维度逐一评审（引用二级观察项作为证据），给出得分、问题（引用原文）、改进建议
@@ -251,7 +253,7 @@ skill-review-pro/
 **前置条件**：必须已完成至少一次完整评审
 
 1. 默认 3 轮，最多 5 轮。首轮基准分数取最近一次完整评审的评分；如无历史评审，首轮分数即为基准，后续轮次与其对比。
-2. 每轮独立评审，清除上一轮的评分记忆，仅基于 Skill 文件本身重新独立判断
+2. 每轮独立评审：每轮开头声明"本轮独立评审，不参考前轮评分"，强制从文件重新读取并重新判断，不依赖前轮结论
 3. 每轮输出：`第 N 轮：R=XX / E=XX / UX=XX / M=XX → 总分 XX`
 4. 汇总输出区间表和波动判断（±3=稳定，±4-6=轻微波动，>6=波动较大）
 5. 固定提醒：`⚠️ 同一 session 连续评分存在锚定效应，跨 session 波动预计 ±3–4 分。`
@@ -525,7 +527,7 @@ Judgment conclusion for each suggestion:
 **Prerequisite**: Must have completed at least one full review
 
 1. Default 3 rounds, max 5 rounds. First round baseline score is taken from the most recent full review; if no historical review, first round score is the baseline, subsequent rounds compare against it.
-2. Each round reviews independently, clears previous round's scoring memory, only re-judges based on the Skill file itself
+2. Each round reviews independently: declare at the start "This round is an independent review, not referencing previous scores", force re-reading from file and re-judging, do not rely on previous round conclusions
 3. Each round outputs: `Round N: R=XX / E=XX / UX=XX / M=XX → Total XX`
 4. Summary output with range table and fluctuation judgment (±3=stable, ±4-6=slight fluctuation, >6=significant fluctuation)
 5. Fixed reminder: `⚠️ Consecutive scoring in the same session has anchoring effects. Cross-session fluctuation is expected at ±3-4 points.`

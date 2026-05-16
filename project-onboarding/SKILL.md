@@ -1,6 +1,6 @@
 ---
 name: project-onboarding
-version: "1.1.0"
+version: "1.2.0"
 homepage: https://github.com/z-Zihan/awesome-skills
 description: >
   帮助有经验的开发者快速接手陌生项目，支持前端 Web、后端服务、
@@ -125,6 +125,74 @@ description: >
 - 只分析与当前项目类型相关的模块
 - 不要给后端项目讲组件体系，不要给前端项目讲 ORM
 - 混合项目按优先级排序专项模块
+
+## 执行工具指引
+
+本 Skill 的每个分析步骤都应配合具体工具执行，而非凭空"编"输出：
+
+### 项目类型识别 — 执行动作
+
+1. `read {project}/package.json` → 提取 dependencies 和 devDependencies，匹配前端/客户端/Node 后端信号
+2. `exec find {project} -maxdepth 2 -name "*.config.*" -o -name "go.mod" -o -name "Cargo.toml" -o -name "pom.xml" -o -name "app.json"` → 识别后端/小程序/移动端信号
+3. `exec ls {project}/src-tauri/ {project}/electron/ 2>/dev/null` → 客户端信号
+4. `exec ls {project}/android/ {project}/ios/ 2>/dev/null` → 移动端信号
+5. 多信号命中时 → 按混合项目处理，所有匹配的专项模块均加载
+
+### Stage 1 快速总览 — 执行动作
+
+1. `read {project}/package.json` 或 `Cargo.toml` 或 `go.mod` → 技术栈
+2. `exec ls {project}/` → 目录结构概览
+3. `read {project}/README.md` → 项目用途（如存在）
+4. `read {project}/.env.example` → 环境变量（如存在）
+5. `exec find {project} -name "*.config.*" -maxdepth 1` → 构建配置
+
+### Stage 2 通用模块深入 — 执行动作
+
+1. `exec find {project}/src -type d -maxdepth 2` → 目录结构
+2. `read {project}/src/index.*` 或 `main.*` → 入口文件
+3. `exec find {project} -name ".eslintrc*" -o -name ".prettierrc*" -o -name "tsconfig.json" -maxdepth 1` → 工程规范
+4. `exec find {project} -name "Dockerfile" -o -name "docker-compose*" -o -name ".github" -type d -maxdepth 2` → 部署配置
+5. `exec find {project} -name "*.test.*" -o -name "*.spec.*" | head -5` → 测试结构
+
+### Stage 3 专项模块 — 按类型选择执行
+
+**前端 Web：**
+- `exec find {project}/src -name "router*" -o -name "routes*" | head -5` → 路由
+- `exec find {project}/src -name "store*" -o -name "*reducer*" | head -5` → 状态管理
+- `exec find {project}/src -name "request*" -o -name "api*" -o -name "http*" | head -5` → API 层
+
+**后端：**
+- `exec find {project} -path "*/migration*" -o -path "*/schema*" | head -5` → 数据库
+- `exec find {project} -path "*/middleware*" -o -path "*/guard*" | head -5` → 中间件
+- `exec find {project} -path "*/route*" -o -name "controller*" | head -5` → 路由/控制器
+
+**客户端：**
+- `read {project}/electron/main.*` 或 `{project}/src-tauri/src/main.rs` → 主进程
+- `exec find {project} -name "preload*" -o -name "bridge*" | head -5` → IPC
+
+### 大项目策略
+
+当 `exec find {project} -type f | wc -l` 超过 200 时：
+1. 先用 `find` + `ls` 建立文件索引，不全量读取
+2. 只读 P0 文件（package.json、入口、README）
+3. 核心链路深入（入口 → 中间件 → 服务 → 数据），其余跳过
+
+### 输出格式定义
+
+每个 Stage 的输出应使用以下 Markdown 结构：
+
+```markdown
+# [项目名] — Stage N: [阶段名]
+
+## 项目类型
+[类型]（识别信号：[列出检测到的信号]）
+
+## [各分析维度]
+...
+
+## ⏸ 下一步
+[提示用户可以深入的方向]
+```
 
 ---
 
@@ -1178,6 +1246,41 @@ Clearly inform user and stop analysis in these cases; do not force output:
 - Core focus on development efficiency
 - Tailor content by project type, only load relevant modules
 - Emphasize engineering practices and actual development workflows
+- Emphasize "how to actually start developing"
+- Support multi-round progressive exploration
+
+## Execution Tool Guide
+
+Every analysis step should be backed by concrete tool execution, not fabricated output:
+
+### Project Type Detection — Actions
+1. `read {project}/package.json` → extract dependencies, match frontend/client/Node backend signals
+2. `exec find {project} -maxdepth 2 -name "*.config.*" -o -name "go.mod" -o -name "Cargo.toml" -o -name "pom.xml" -o -name "app.json"` → backend/miniapp/mobile signals
+3. `exec ls {project}/src-tauri/ {project}/electron/ 2>/dev/null` → desktop client signals
+4. `exec ls {project}/android/ {project}/ios/ 2>/dev/null` → mobile signals
+5. Multiple signals → treat as mixed project, load all matching modules
+
+### Stage 1 Quick Overview — Actions
+1. `read {project}/package.json` or `Cargo.toml` or `go.mod` → tech stack
+2. `exec ls {project}/` → directory structure overview
+3. `read {project}/README.md` → project purpose (if exists)
+4. `read {project}/.env.example` → environment variables (if exists)
+
+### Stage 2 Universal Modules — Actions
+1. `exec find {project}/src -type d -maxdepth 2` → directory structure
+2. `read {project}/src/index.*` or `main.*` → entry file
+3. `exec find {project} -name "Dockerfile" -o -name "docker-compose*" | head -3` → deployment
+
+### Stage 3 Type-Specific — Select by Type
+**Frontend Web:** `find` for router/store/api files
+**Backend:** `find` for migration/middleware/controller files
+**Desktop Client:** `read` main process entry + `find` preload/bridge
+
+### Large Project Strategy
+When `exec find {project} -type f | wc -l` exceeds 200: build index first, only read P0 files, deep-dive core chain only.
+
+### Output Format
+Each Stage: `# [Project Name] — Stage N: [Title]` with structured headings + `## ⏸ Next Steps` at end.
 - Emphasize "how to actually start developing"
 - Support multi-round progressive exploration
 

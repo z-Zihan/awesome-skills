@@ -58,7 +58,7 @@ async function requestInterceptor(config: RequestConfig): Promise<RequestConfig>
 async function responseInterceptor<T>(response: Response): Promise<T> {
   if (response.status === 401) {
     localStorage.removeItem(TOKEN_KEY);
-    window.location.href = '/login';
+    window.location.href = LOGIN_PATH; // LOGIN_PATH 为可配置常量，默认 '/login'
     throw new RequestError(401, 'Unauthorized');
   }
 

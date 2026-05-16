@@ -175,6 +175,10 @@ export function useRequest<T>(
   const [loading, setLoading] = useState(!manual);
   const [error, setError] = useState<Error>();
   const fetcherRef = useRef(fetcher);
+  const onSuccessRef = useRef(onSuccess);
+  const onErrorRef = useRef(onError);
+  onSuccessRef.current = onSuccess;
+  onErrorRef.current = onError;
 
   const run = useCallback(async () => {
     setLoading(true);
@@ -182,14 +186,14 @@ export function useRequest<T>(
     try {
       const result = await fetcherRef.current();
       setData(result);
-      onSuccess?.(result);
+      onSuccessRef.current?.(result);
     } catch (e) {
       setError(e as Error);
-      onError?.(e as Error);
+      onErrorRef.current?.(e as Error);
     } finally {
       setLoading(false);
     }
-  }, [onSuccess, onError]);
+  }, []);
 
   useEffect(() => { if (!manual) run(); }, [manual, run]);
 

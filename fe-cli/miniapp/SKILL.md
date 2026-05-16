@@ -215,7 +215,7 @@ export const storage = {
 ```tsx
 import { View, Text } from '@tarojs/components';
 import Taro from '@tarojs/taro';
-import { ArrowLeft } from '@taroify/icons'; // or custom icon
+import { ArrowLeft } from '@taroify/icons'; // 需安装: pnpm add @taroify/icons
 
 interface Props { title?: string; showBack?: boolean; }
 export default function NavBar({ title = '', showBack = true }: Props) {

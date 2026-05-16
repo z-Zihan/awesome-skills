@@ -94,7 +94,7 @@ description: >
 - 一个工具概念
 - 一段零散文字
 
-用户输入可能非常不完整。你必须主动推断：
+用户输入可能非常不完整。你必须主动列出可能意图：
 - 真正目标
 - 隐藏需求
 - 合理边界
@@ -163,11 +163,11 @@ Skill 名字应该像：
 - 输出策略
 - 约束与限制
 
-**按需项（Skill 类型适用时包含）：**
-- 多轮对话设计
-- 最佳实践
-- 反模式
-- 理想结果
+**按需项（Skill 类型适用时包含，以下为判断规则）：**
+- Skill 输出超过 500 词或多步骤 → 必须包含**多轮对话设计**
+- Skill 涉及外部依赖（API/数据库/文件系统） → 必须包含**错误处理和降级策略**
+- Skill 有明确的输入/输出边界 → 应包含**输入验证规则**
+- 其他：最佳实践、反模式、理想结果（根据 Skill 类型酌情加入）
 
 Prompt 必须：
 - 结构清晰
@@ -260,8 +260,8 @@ Prompt 必须：
 
 ## 扩展模块
 
-- **enhancements/SKILL.md** — 按目标 Skill 类型自动增强（开发/UI/文档/架构等 9 类）。Stage 1 确定目标 Skill 类型后，Stage 2 生成 prompt 时按需加载对应增强内容。
-- **platforms/SKILL.md** — 多平台 Skill 文件格式参考（OpenClaw/Claude Code/Cursor/Cline/通用）。Stage 4.2 生成文件时加载。
+- **enhancements/SKILL.md** — 按目标 Skill 类型自动增强（开发/UI/文档/架构等 9 类）。Stage 1 确定目标 Skill 类型后，Stage 2 生成 prompt 时按需加载对应增强内容。**降级**：文件不可读时，使用主文件中的内置最小增强规则（按 Skill 类型提供基础增强），并告知用户。
+- **platforms/SKILL.md** — 多平台 Skill 文件格式参考（OpenClaw/Claude Code/Cursor/Cline/通用）。Stage 4.2 生成文件时加载。**降级**：文件不可读时，默认使用 OpenClaw 格式（SKILL.md 单文件），并告知用户。
 
 ---
 
@@ -324,6 +324,8 @@ Prompt 必须：
 
 - 完整中文版本 Prompt
 - 完整英文版本 Prompt
+
+> **注意**：此处"中英两版"指生成的 Skill Prompt 内容（因为 Skill 面向全球用户），与顶部"对话语言跟随用户"不矛盾——对话用用户语言，生成的 Skill 内容默认双语。
 - 特殊增强内容（基于 Skill 类型）
 
 **⏸ 输出后暂停，等待用户确认。**
@@ -491,7 +493,7 @@ Users may provide:
 - A tool concept
 - Scattered text
 
-User input may be very incomplete. You must proactively infer:
+User input may be very incomplete. You must proactively list possible intentions:
 - Real goal
 - Hidden requirements
 - Reasonable boundaries
@@ -657,8 +659,8 @@ Focus on improving:
 
 ## Extension Modules
 
-- **enhancements/SKILL.md** — Auto-enhance by target Skill type (dev/UI/docs/architecture etc., 9 categories). After Stage 1 identifies the target Skill type, load corresponding enhancements during Stage 2 prompt generation.
-- **platforms/SKILL.md** — Multi-platform Skill file format reference (OpenClaw/Claude Code/Cursor/Cline/generic). Load during Stage 4.2 file generation.
+- **enhancements/SKILL.md** — Auto-enhance by target Skill type. After Stage 1 identifies the type, load corresponding enhancements during Stage 2. **Fallback**: if file unreadable, use built-in minimal enhancement rules from main file, and notify user.
+- **platforms/SKILL.md** — Multi-platform format reference. Load during Stage 4.2. **Fallback**: if file unreadable, default to OpenClaw format (single SKILL.md), and notify user.
 
 ---
 
