@@ -50,10 +50,10 @@ description: >
 
 ## 如何指定被测 Skill
 
-1. **文件路径** — "评审 `~/skills/xxx/SKILL.md`" → 直接读取
+1. **文件路径** — "评审 `~/skills/xxx/SKILL.md`" → 直接读取，并自动扫描同目录下的子目录文件
 2. **当前对话中的 Skill** — 如果用户刚生成了 Skill，直接评当前生成的
-3. **已安装 Skill 名称** — "评审 screenshot-to-prompt" → 在本地 skills 目录查找
-4. **粘贴内容** — 用户直接贴 Skill 内容 → 直接评审
+3. **已安装 Skill 名称** — "评审 screenshot-to-prompt" → 在本地 skills 目录查找，并扫描子目录
+4. **粘贴内容** — 用户直接贴 Skill 内容 → 只评审贴出的内容（无法扫描子目录）
 
 如果用户只说"评审 skill"没有指定目标，询问："请提供要评审的 Skill 文件路径或名称。"
 
@@ -132,16 +132,20 @@ skill-review-pro/
 
 ### 静态审查
 
-1. 读取目标 Skill 的完整内容
-2. **加载评审策略** → 先加载 `policies/base/`（必选），再按路由规则加载 `policies/<domain>/`（可选）
-3. **加载评分模型** → 读取 `scoring/SKILL.md`，应用策略中的权重调整
-4. 从 4 个一级维度逐一评审（引用二级观察项作为证据），给出得分、问题（引用原文）、改进建议
-5. **执行对抗检查** — 按 `reliability.md` 的对抗检查清单（A1-A5）逐一快速检查
-6. **标注问题类型** — 按 `scoring/SKILL.md` 的 Failure Taxonomy 标注每个问题的高频类型
-7. 注意维度去重：同一问题只在一个维度扣分
-8. 输出评审报告
+1. **读取目标 Skill 的主文件**（根目录 `SKILL.md`）
+2. **扫描目标 Skill 的子目录**：用 `find` 或 `ls` 列出所有子目录及文件，识别模块结构。对每个子目录中的 `SKILL.md` 或其他 `.md` 文件，逐个读取内容
+   - 目的：子目录文件是 Skill 的有机组成部分（评分模型、策略文件、专项模式等），其质量直接影响 Skill 整体表现
+   - 子目录文件同样参与 4 维度评审，问题标注位置时需注明文件路径（如 `scoring/SKILL.md:第3节`）
+3. **加载评审策略** → 先加载 `policies/base/`（必选），再按路由规则加载 `policies/<domain>/`（可选）
+4. **加载评分模型** → 读取 `scoring/SKILL.md`，应用策略中的权重调整
+5. 从 4 个一级维度逐一评审（引用二级观察项作为证据），给出得分、问题（引用原文）、改进建议
+   - 主文件和子目录文件统一评审，不分开出报告
+6. **执行对抗检查** — 按 `reliability.md` 的对抗检查清单（A1-A5）逐一快速检查
+7. **标注问题类型** — 按 `scoring/SKILL.md` 的 Failure Taxonomy 标注每个问题的高频类型
+8. 注意维度去重：同一问题只在一个维度扣分
+9. 输出评审报告
 
-**如果 Skill 超过 8000 字符**，首次全量读取建立结构索引，评审时只引用需要的章节。
+**如果 Skill 总内容（主文件 + 子目录）超过 8000 字符**，首次全量读取建立结构索引，评审时只引用需要的章节。子目录文件较多时，优先评审与核心功能直接相关的模块。
 
 ---
 
@@ -320,10 +324,10 @@ You are an expert Skill reviewer. You complete both review and verification:
 
 ## How to Specify the Target Skill
 
-1. **File path** — "Review `~/skills/xxx/SKILL.md`" → Read directly
+1. **File path** — "Review `~/skills/xxx/SKILL.md`" → Read directly, and auto-scan subdirectory files in the same directory
 2. **Skill in current conversation** — If user just generated a Skill, review the current one
-3. **Installed Skill name** — "Review screenshot-to-prompt" → Search in local skills directory
-4. **Pasted content** — User pastes Skill content directly → Review directly
+3. **Installed Skill name** — "Review screenshot-to-prompt" → Search in local skills directory, and scan subdirectories
+4. **Pasted content** — User pastes Skill content directly → Review pasted content only (cannot scan subdirectories)
 
 If user only says "review skill" without specifying a target, ask: "Please provide the Skill file path or name to review."
 
@@ -402,16 +406,20 @@ Domain mapping:
 
 ### Static Review
 
-1. Read the target Skill's full content
-2. **Load review policies** → Load `policies/base/` first (required), then `policies/<domain>/` by routing rules (optional)
-3. **Load scoring model** → Read `scoring/SKILL.md`, apply weight adjustments from policies
-4. Review across 4 primary dimensions one by one (cite secondary observation items as evidence), give scores, issues (cite original text), improvement suggestions
-5. **Execute adversarial checks** — Quick check each item in `reliability.md` adversarial checklist (A1-A5)
-6. **Tag issue types** — Tag each issue's high-frequency type per `scoring/SKILL.md` Failure Taxonomy
-7. Deduplicate across dimensions: same issue only deducted in one dimension
-8. Output review report
+1. **Read the target Skill's main file** (root `SKILL.md`)
+2. **Scan the target Skill's subdirectories**: Use `find` or `ls` to list all subdirectories and files, identify module structure. Read each `SKILL.md` or other `.md` file in subdirectories
+   - Purpose: Subdirectory files are integral parts of the Skill (scoring models, policy files, specialized modes, etc.) and their quality directly affects overall Skill performance
+   - Subdirectory files are reviewed under the same 4 dimensions; issues must note the file path (e.g., `scoring/SKILL.md:Section 3`)
+3. **Load review policies** → Load `policies/base/` first (required), then `policies/<domain>/` by routing rules (optional)
+4. **Load scoring model** → Read `scoring/SKILL.md`, apply weight adjustments from policies
+5. Review across 4 primary dimensions one by one (cite secondary observation items as evidence), give scores, issues (cite original text), improvement suggestions
+   - Main file and subdirectory files are reviewed together, not in separate reports
+6. **Execute adversarial checks** — Quick check each item in `reliability.md` adversarial checklist (A1-A5)
+7. **Tag issue types** — Tag each issue's high-frequency type per `scoring/SKILL.md` Failure Taxonomy
+8. Deduplicate across dimensions: same issue only deducted in one dimension
+9. Output review report
 
-**If the Skill exceeds 8000 characters**, do a full read first to build a structural index, then only reference needed sections during review.
+**If the Skill total content (main + subdirectories) exceeds 8000 characters**, do a full read first to build a structural index, then only reference needed sections during review. When subdirectory files are numerous, prioritize reviewing modules directly related to core functionality.
 
 ---
 
