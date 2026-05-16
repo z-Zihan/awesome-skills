@@ -43,7 +43,7 @@ openclaw skills install project-onboarding
 openclaw skills install skill-creator-ProMax
 openclaw skills install skill-review-pro
 openclaw skills install dev-mentor
-openclaw skills install todo-list-pro
+openclaw skills install todo-list-promax
 openclaw skills update --all
 ```
 
@@ -51,10 +51,10 @@ openclaw skills update --all
 
 ```bash
 # Claude Code
-ln -s ~/path/to/awesome-skills/todo-list-pro ~/.claude/skills/todo-list-pro
+ln -s ~/path/to/awesome-skills/todo-list-promax ~/.claude/skills/todo-list-promax
 
 # Codex
-ln -s ~/path/to/awesome-skills/todo-list-pro ~/.codex/skills/todo-list-pro
+ln -s ~/path/to/awesome-skills/todo-list-promax ~/.codex/skills/todo-list-promax
 ```
 
 安装后重启 Agent 即可生效。
@@ -144,7 +144,7 @@ skill-creator-ProMax（生成）
 
 **触发词**：学后端 / 学 Rust / 从零做项目 / 前端学后端 / 教我做项目 / 带我开发
 
-#### ✅ todo-list-pro — 个人待办事项系统
+#### ✅ todo-list-promax — 个人待办事项系统
 
 永久不丢失的待办事项管理。自动从聊天中捕获待办（文字/图片/附件），智能解析时间与优先级，每日晚上 9 点主动推送未完成提醒。支持四级优先级（P0-P3）、多种自然语言触发、完成/删除/修改操作。
 
@@ -214,7 +214,7 @@ openclaw skills install project-onboarding
 openclaw skills install skill-creator-ProMax
 openclaw skills install skill-review-pro
 openclaw skills install dev-mentor
-openclaw skills install todo-list-pro
+openclaw skills install todo-list-promax
 openclaw skills update --all
 ```
 
@@ -222,10 +222,10 @@ openclaw skills update --all
 
 ```bash
 # Claude Code
-ln -s ~/path/to/awesome-skills/todo-list-pro ~/.claude/skills/todo-list-pro
+ln -s ~/path/to/awesome-skills/todo-list-promax ~/.claude/skills/todo-list-promax
 
 # Codex
-ln -s ~/path/to/awesome-skills/todo-list-pro ~/.codex/skills/todo-list-pro
+ln -s ~/path/to/awesome-skills/todo-list-promax ~/.codex/skills/todo-list-promax
 ```
 
 Restart your Agent after installing.
@@ -311,7 +311,7 @@ Helps experienced developers learn unfamiliar domains by building a full project
 
 **Triggers**: learn backend / learn Rust / build project from scratch / teach me to code
 
-#### ✅ todo-list-pro — Personal Todo System
+#### ✅ todo-list-promax — Personal Todo System
 
 Permanent, loss-proof todo management. Auto-captures todos from chat (text/image/attachment), parses time & priority, pushes unfinished reminders daily at 9 PM. Supports 4 priority levels (P0-P3), natural language triggers, and complete/delete/modify operations.
 
