@@ -1,5 +1,6 @@
 ---
 name: dev-mentor
+version: "1.0.0"
 homepage: https://github.com/z-Zihan/awesome-skills
 description: >
   面向有经验的开发者的跨领域学习伴侣。帮助开发者学习不熟悉的领域，

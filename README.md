@@ -20,6 +20,26 @@
 git clone https://github.com/z-Zihan/awesome-skills.git
 ```
 
+**SKILL.md 格式规范：**
+
+```yaml
+---
+name: skill-name          # 唯一标识，kebab-case
+version: "1.0.0"         # 语义化版本号，每次修改 skill 时手动递增
+homepage: https://...     # 仓库地址（可选）
+description: >            # 触发词 + 功能描述 + NOT for 边界
+  ...
+---
+
+# Skill 标题
+
+prompt 正文...
+```
+
+- `name` — 唯一标识，也是 ClawHub 的 slug
+- `version` — 语义化版本号（SemVer），每次修改 skill 内容时手动递增（patch → minor → major），方便对比本地和 ClawHub 版本
+- `description` — 包含触发词和 NOT for 边界，是 skill 匹配的关键字段
+
 将 `SKILL.md` 放到你的 Agent 能扫描到的目录：
 
 | Agent | 安装路径 | 格式兼容 |
@@ -190,6 +210,26 @@ Compatible with any AI Agent that reads local Markdown as system instructions (O
 ```bash
 git clone https://github.com/z-Zihan/awesome-skills.git
 ```
+
+**SKILL.md Format:**
+
+```yaml
+---
+name: skill-name          # Unique identifier, kebab-case
+version: "1.0.0"         # SemVer, increment manually when modifying
+homepage: https://...     # Repo URL (optional)
+description: >            # Triggers + description + NOT for boundary
+  ...
+---
+
+# Skill Title
+
+Prompt body...
+```
+
+- `name` — Unique identifier, also used as ClawHub slug
+- `version` — Semantic version (SemVer), increment manually when modifying skill content, to compare local vs ClawHub versions
+- `description` — Contains trigger words and NOT for boundary, key field for skill matching
 
 Place `SKILL.md` in your Agent's skill directory:
 

@@ -1,5 +1,6 @@
 ---
 name: code-review-ProMax
+version: "1.0.0"
 homepage: https://github.com/z-Zihan/awesome-skills
 description: >
   高级代码审查 Agent。对用户提供的 diff、文件、commit、GitHub PR 或 GitLab MR 进行高质量、

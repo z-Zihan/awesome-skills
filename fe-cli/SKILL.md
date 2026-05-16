@@ -1,5 +1,6 @@
 ---
 name: fe-cli
+version: "1.0.0"
 homepage: https://github.com/z-Zihan/awesome-skills
 description: >
   前端项目脚手架 CLI。支持 React/Vue/Next.js + Tailwind/Ant Design/MUI + Zustand/Redux + i18n，

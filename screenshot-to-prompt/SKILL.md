@@ -1,5 +1,6 @@
 ---
 name: screenshot-to-prompt
+version: "1.0.0"
 homepage: https://github.com/z-Zihan/awesome-skills
 description: >
   截图理解 + 页面结构抽取 + 实现 prompt 生成器。

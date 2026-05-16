@@ -1,5 +1,6 @@
 ---
 name: project-doc-analyst
+version: "1.0.0"
 homepage: https://github.com/z-Zihan/awesome-skills
 description: >
   专家级项目分析与文档生成 Agent。深度阅读整个代码仓库，输出面向人类和 AI 的
