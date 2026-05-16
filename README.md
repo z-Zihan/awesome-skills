@@ -10,7 +10,7 @@
 
 通用 AI Agent 技能库。一个 skill 就是一份 `SKILL.md`，按需加载，开箱即用。
 
-适用于任何支持读取本地 Markdown 作为系统指令的 AI Agent（OpenClaw、Claude Desktop、Cursor、Cline 等）。
+适用于任何支持读取本地 Markdown 作为系统指令的 AI Agent（OpenClaw、Claude Code、Codex、Cursor、Cline 等）。
 
 ### 安装
 
@@ -22,14 +22,17 @@ git clone https://github.com/z-Zihan/awesome-skills.git
 
 将 `SKILL.md` 放到你的 Agent 能扫描到的目录：
 
-| Agent | 配置方式 |
-|---|---|
-| OpenClaw | 软链接到 `~/.openclaw-autoclaw/skills/` |
-| Claude Desktop | 在 `CLAUDE.md` 中引用文件路径 |
-| Cursor | 在 `.cursorrules` 或项目 `.cursor/` 中配置 |
-| Cline | 在 `.clinerules` 中引用 |
+| Agent | 安装路径 | 格式兼容 |
+|---|---|---|
+| OpenClaw | `~/.openclaw-autoclaw/skills/<name>/` | ✅ 原生 |
+| Claude Code | `~/.claude/skills/<name>/` | ✅ 原生 |
+| Codex | `~/.codex/skills/<name>/` | ✅ 原生 |
+| Cursor | `.cursor/rules/<name>.md` | ✅ 原生 |
+| Cline | `.clinerules` | ✅ 原生 |
 
-**ClawHub（OpenClaw 用户）：**
+> 💡 五大平台均使用相同的 SKILL.md 格式（YAML frontmatter + markdown prompt），无需任何转换，直接安装即可。
+
+**一键安装（OpenClaw 用户）：**
 
 ```bash
 openclaw skills install code-review-ProMax
@@ -40,8 +43,21 @@ openclaw skills install project-onboarding
 openclaw skills install skill-creator-ProMax
 openclaw skills install skill-review-pro
 openclaw skills install dev-mentor
+openclaw skills install todo-list
 openclaw skills update --all
 ```
+
+**手动安装（Claude Code / Codex 用户）：**
+
+```bash
+# Claude Code
+ln -s ~/path/to/awesome-skills/todo-list ~/.claude/skills/todo-list
+
+# Codex
+ln -s ~/path/to/awesome-skills/todo-list ~/.codex/skills/todo-list
+```
+
+安装后重启 Agent 即可生效。
 
 ### 体系职责边界 / Skill Pipeline Architecture
 
@@ -128,6 +144,12 @@ skill-creator-ProMax（生成）
 
 **触发词**：学后端 / 学 Rust / 从零做项目 / 前端学后端 / 教我做项目 / 带我开发
 
+#### ✅ todo-list — 个人待办事项系统
+
+永久不丢失的待办事项管理。自动从聊天中捕获待办（文字/图片/附件），智能解析时间与优先级，每日晚上 9 点主动推送未完成提醒。支持四级优先级（P0-P3）、多种自然语言触发、完成/删除/修改操作。
+
+**触发词**：TODO: / 帮我记录一下 / 记一下 / 别忘了 / 提醒我 / TODOLIST / 今天还有哪些 / 还有什么没做 / 待办列表
+
 ### 版本管理
 
 **日常开发（自动发布）：**
@@ -159,7 +181,7 @@ Tag 命名规范：`v<major>.<minor>.<patch>`，例如 `v1.0.0`、`v1.1.0`、`v1
 
 A universal AI Agent skill library. Each skill is a single `SKILL.md` file — load on demand, zero config.
 
-Compatible with any AI Agent that reads local Markdown as system instructions (OpenClaw, Claude Desktop, Cursor, Cline, etc.).
+Compatible with any AI Agent that reads local Markdown as system instructions (OpenClaw, Claude Code, Codex, Cursor, Cline, etc.).
 
 ### Installation
 
@@ -171,12 +193,15 @@ git clone https://github.com/z-Zihan/awesome-skills.git
 
 Place `SKILL.md` in your Agent's skill directory:
 
-| Agent | Setup |
-|---|---|
-| OpenClaw | Symlink to `~/.openclaw-autoclaw/skills/` |
-| Claude Desktop | Reference path in `CLAUDE.md` |
-| Cursor | Add to `.cursorrules` or `.cursor/` |
-| Cline | Reference in `.clinerules` |
+| Agent | Install Path | Format |
+|---|---|---|
+| OpenClaw | `~/.openclaw-autoclaw/skills/<name>/` | ✅ Native |
+| Claude Code | `~/.claude/skills/<name>/` | ✅ Native |
+| Codex | `~/.codex/skills/<name>/` | ✅ Native |
+| Cursor | `.cursor/rules/<name>.md` | ✅ Native |
+| Cline | `.clinerules` | ✅ Native |
+
+> 💡 All five platforms share the same SKILL.md format (YAML frontmatter + markdown prompt) — zero conversion needed.
 
 **ClawHub (OpenClaw users):**
 
@@ -189,8 +214,21 @@ openclaw skills install project-onboarding
 openclaw skills install skill-creator-ProMax
 openclaw skills install skill-review-pro
 openclaw skills install dev-mentor
+openclaw skills install todo-list
 openclaw skills update --all
 ```
+
+**Manual install (Claude Code / Codex):**
+
+```bash
+# Claude Code
+ln -s ~/path/to/awesome-skills/todo-list ~/.claude/skills/todo-list
+
+# Codex
+ln -s ~/path/to/awesome-skills/todo-list ~/.codex/skills/todo-list
+```
+
+Restart your Agent after installing.
 
 ### Architecture
 
@@ -272,6 +310,12 @@ Modular Skill QA system. Evaluates Skills through static analysis + behavioral t
 Helps experienced developers learn unfamiliar domains by building a full project from zero to production via continuous conversation. First batch: backend (TypeScript/Go/Python), databases, server deployment (Docker/Nginx/HTTPS/CI-CD), Rust systems programming. Auto-detects existing skills, uses analogies from known domains, explains technical terms on first use.
 
 **Triggers**: learn backend / learn Rust / build project from scratch / teach me to code
+
+#### ✅ todo-list — Personal Todo System
+
+Permanent, loss-proof todo management. Auto-captures todos from chat (text/image/attachment), parses time & priority, pushes unfinished reminders daily at 9 PM. Supports 4 priority levels (P0-P3), natural language triggers, and complete/delete/modify operations.
+
+**Triggers**: TODO: / 帮我记录一下 / remind me / 别忘了 / TODOLIST / what's left today / anything pending / show todos
 
 ### Versioning
 

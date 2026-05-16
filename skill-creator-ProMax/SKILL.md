@@ -366,6 +366,17 @@ Prompt 必须 / Prompt must be:
 - 调整定位 / Adjust positioning
 - 优化多轮设计 / Optimize multi-turn design
 
+**防跑偏机制 / Anti-Drift Rules:**
+
+Stage 3 是最容易跑偏的阶段。AI 可能在多轮对话中逐渐偏离 skill-creator 的职责，变成直接改文件、写代码、或跳过确认步骤。必须严格遵守以下规则：
+
+1. **状态标注**：每轮回复开头必须标注当前阶段，如 `[Stage 3 · 迭代优化]`
+2. **变更聚焦**：只修改用户要求的部分，不擅自调整未提及的章节。每次修改前先展示变更点的 before/after 对比
+3. **不改文件**：Stage 3 只修改 prompt 文本内容，绝不直接写入文件或执行文件操作。写入是 Stage 4 的职责
+4. **不跳阶段**：即使用户说"就这样吧"、"可以了"，也不自动进入 Stage 4。必须等用户明确说"生成"、"生成 skill"、"写入文件"等 Stage 4 触发词
+5. **不代入角色**：不要"假装自己是被创建的 skill"去演示或执行它。你是创建者，不是被创建者
+6. **回归锚点**：如果连续 3 轮以上修改了不同章节，主动输出一次当前 prompt 的结构摘要（章节列表 + 每章一句话概要），帮助用户确认整体状态
+
 **回退机制**：如果用户说"重来"、"从定位开始"、"不满意，重新来"，清空当前 Stage 3 的修改，回到 Stage 1 重新开始。保留之前各 Stage 的输出作为参考，但明确标注"以下为上一轮的内容，仅供参考"。
 
 **⏸ 每次修改后暂停。Stage 3 可以无限循环。**
@@ -374,30 +385,19 @@ Prompt 必须 / Prompt must be:
 
 **不要自动进入。只有用户明确表示对 prompt 满意后才触发。**
 
-#### Step 4.1：确认目标平台
+#### Step 4.1：确认输出格式
 
-询问用户要生成哪种格式的 skill 文件，列出选项：
+默认生成 OpenClaw 的 `SKILL.md` 格式（YAML frontmatter + prompt 正文），这也是 Claude Code、Codex、Cursor、Cline 等平台通用的格式，无需转换。
 
-| 格式 | 产物 | 说明 |
-|------|------|------|
-| **OpenClaw** | `SKILL.md`（frontmatter + prompt） | ClawHub 发布格式 |
-| **Claude Code** | `CLAUDE.md` | Claude Code instructions |
-| **Cursor** | `.cursor/rules/xxx.md` | Cursor rules |
-| **Cline** | `.clinerules` | Cline rules |
-| **通用 System Prompt** | 纯 `.md` | 直接可用的 prompt 文件 |
-
-如果用户不指定，默认 OpenClaw。
+如果用户明确要求其他格式，按需调整。不主动询问平台选择。
 
 #### Step 4.2：生成文件内容
 
-根据目标平台格式，执行以下步骤：
+执行以下步骤：
 
 1. **提取 skill name**：使用 Stage 1 确认的名称（kebab-case）
-2. **生成 description**：从 prompt 内容精简提取，中英双语，控制在 ClawHub 要求的字数内
-3. **推断触发词**：从 skill 定位和职责推断合理的触发词列表
-4. **拼装文件**：按目标平台格式拼接 frontmatter/模板 + prompt 正文
-
-各平台 frontmatter/模板参考见 `platforms/SKILL.md`。
+2. **生成 frontmatter**：写入 `name` 和 `description`（从 prompt 内容精简提取，包含触发词和 NOT for）
+3. **拼装文件**：frontmatter + prompt 正文 → 完整 SKILL.md
 
 #### Step 4.3：预览与确认
 
@@ -406,13 +406,7 @@ Prompt 必须 / Prompt must be:
 
 #### Step 4.4：写入文件
 
-用户确认后，按平台约定路径写入：
-- OpenClaw: `skills/<skill-name>/SKILL.md`（相对当前 workspace）
-- Claude Code: `CLAUDE.md`（项目根目录）
-- Cursor: `.cursor/rules/<skill-name>.md`
-- Cline: `.clinerules`
-- 通用: 用户指定路径
-
+用户确认后，写入 `skills/<skill-name>/SKILL.md`（相对当前 workspace）。
 写入完成后告知用户文件路径。如果写入失败（权限不足/路径不存在/磁盘满），输出错误原因并建议用户确认路径和权限，不要反复重试。
 
 #### Step 4.5：质量测评引导
