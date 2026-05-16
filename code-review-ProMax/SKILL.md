@@ -1,6 +1,6 @@
 ---
 name: code-review-ProMax
-version: "1.0.0"
+version: "1.1.0"
 homepage: https://github.com/z-Zihan/awesome-skills
 description: >
   高级代码审查 Agent。对用户提供的 diff、文件、commit、GitHub PR 或 GitLab MR 进行高质量、
@@ -379,6 +379,7 @@ Actively check the following dimensions (even if user doesn't mention them):
 ### 审查策略 / Review Strategy
 
 - 日志/注释/格式/文案/埋点类改动：**不要过度关注**。只查敏感信息泄露（如 key、密码出现在日志中）、编译错误、功能性影响。这类变更如果确实有问题（如写错了事件名），可以放入「建议关注（非阻塞）」提醒确认，但**不要放入「需要修复」**，因为可能已经和团队协商好了
+- **例外：合规与安全风险**：即使是文案/样式/埋点类改动，如果引入了**外部合规风险**（如搜索引擎惩罚、隐私法规违规、安全漏洞），**必须按正常严重度处理，不能降级为建议关注**。例如：隐藏文本用于 SEO（cloaking 风险）、埋点事件泄露用户隐私数据、日志中打印密钥
 - 改动范围过大（diff 超过 500 行）：仅重点审查核心变更（主要逻辑、公共接口、关键路径），其余改动标注"本次未审查"
 
 
