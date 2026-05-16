@@ -79,45 +79,18 @@ description: >
 
 #### 变更来源识别
 
-用户可能通过以下方式提供变更内容，按优先级处理：
+按优先级处理：1. 直接 diff/文件内容 → 2. Git commit hash (`git show <hash>`) → 3. GitHub PR (`gh pr diff` 或 API) → 4. GitLab MR (API 或 `git fetch`) → 5. 本地 git (`git diff`/`git diff --staged`)
 
-1. **直接提供 diff/文件内容** → 直接审查
-2. **提供 Git commit hash** → `git show <hash>` 或 `git diff <hash>~1 <hash>` 获取 diff
-3. **提供 GitHub PR 链接**：
-   - 从 URL 提取 owner/repo/pr_number
-   - 使用 `gh pr diff <pr_number> -R <owner>/<repo>` 获取 diff
-   - 如果 `gh` CLI 不可用，使用 GitHub API：`https://api.github.com/repos/{owner}/{repo}/pulls/{number}` 获取 PR 信息和描述，`https://api.github.com/repos/{owner}/{repo}/pulls/{number}/files` 获取变更文件列表
-   - 同时获取 PR title、description 作为审查上下文
-4. **提供 GitLab MR 链接**：
-   - 从 URL 提取 host/group/project/merge_request_number
-   - 使用 GitLab API：`https://{host}/api/v4/projects/{id}/merge_requests/{number}/changes` 获取 diff
-   - 需要先通过 `https://{host}/api/v4/projects?search={project}` 获取 project ID（URL encode project path）
-   - 同时获取 MR title、description 作为审查上下文
-   - 如果是内网 GitLab（如 gitlab.glm.ai），使用 `git` 命令克隆并 diff：`git fetch origin merge-requests/<number>/head:mr-<number> && git diff ...mr-<number>`
-5. **在本地 Git 仓库中**：
-   - `git diff` / `git diff --staged` / `git diff HEAD` 获取工作区/暂存区改动
-   - `git log --oneline -N` 查看最近提交
-   - `git show <hash>` 查看某次提交的详情
-   - 如果 `git diff` 返回空（工作区和暂存区均无改动），告知用户："当前工作区和暂存区均无改动。你是否想审查某个 commit？请提供 commit hash。" 不应输出空报告
+- GitHub PR: 从 URL 提取 owner/repo/number，优先 `gh` CLI，不可用则用 API；认证失败提示设 `GITHUB_TOKEN`
+- GitLab MR: 内网直连无代理，用 API 获取 diff；需先查 project ID
+- `git diff` 返回空时：提示用户可能是工作区无改动，询问是否审查某 commit
+- GitHub 需代理时配置 `https_proxy` 重试
 
-> **GitHub 需要代理时**：如果 API 调用失败（网络超时），尝试配置代理 `https_proxy` 后重试。
-> **GitHub 认证失败时**：如果 API 调用因认证失败（401/403 非 rate limit），明确告知用户："GitHub API 认证失败，请设置 `GITHUB_TOKEN` 环境变量或使用 `gh auth login` 登录。" 不应静默跳过。
-> **GitLab 内网直连**：内网 GitLab（如 gitlab.glm.ai）无需代理，直接访问。
+**多来源并存**：按编号顺序选第一个可用的。**git 不可用**：提示用户粘贴 diff 或提供文件路径。
 
-**多来源并存时**：按上述编号顺序选择第一个可用的输入源（diff > commit hash > GitHub PR > GitLab MR > 本地 git）。如果多种来源同时可用，优先使用 diff 或 commit hash。
-
-**git 不可用时的降级**：如果用户环境中没有安装 git 或当前目录不是 git 仓库：
-1. 告知用户："当前环境无 git 或非 git 仓库，无法自动获取 diff。"
-2. 提供替代方案："请直接粘贴 diff 内容或提供文件路径，我可以直接审查。"
-
-- 在开始审查前，先确认本次变更的背景：需求实现 / Bug 修复 / 重构优化
-- **上下文来源（按优先级）**：
-  1. 用户提供的文档（需求文档、接口文档、设计稿链接等）→ 必须先仔细阅读，再对照代码
-  2. 用户在对话中发的文字描述（需求说明、bug 描述、补充要求等）→ 同等对待，作为审查依据
-  3. PR title、commit message、分支名 → 从中推断变更意图
-  4. 用户转发的群聊消息、飞书文档链接、截图中的文字 → 都是有效的上下文来源
-- 如果以上所有来源都没有提供明确背景，**先基于 diff 推断变更意图**（标注 Low/Medium 置信度），直接开始审查。仅在无法判断合入风险（如改动涉及核心流程但意图完全不明）时才追问用户
-- 获取背景后再开始逐行审查，避免脱离需求盲目 review
+- 开始审查前确认变更背景：需求实现/Bug修复/重构优化
+- **上下文来源**：用户文档 > 对话描述 > PR title/commit msg > 群聊/截图文字
+- 无明确背景时，基于 diff 推断意图（标注置信度），仅核心链路意图不明时追问
 
 #### 变更意图推断
 
