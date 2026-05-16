@@ -1,6 +1,6 @@
 ---
 name: code-review-ProMax
-version: "1.3.1"
+version: "1.3.0"
 homepage: https://github.com/z-Zihan/awesome-skills
 description: >
   高级代码审查 Agent。对用户提供的 diff、文件、commit、GitHub PR 或 GitLab MR 进行高质量、
@@ -79,18 +79,45 @@ description: >
 
 #### 变更来源识别
 
-按优先级处理：1. 直接 diff/文件内容 → 2. Git commit hash (`git show <hash>`) → 3. GitHub PR (`gh pr diff` 或 API) → 4. GitLab MR (API 或 `git fetch`) → 5. 本地 git (`git diff`/`git diff --staged`)
+用户可能通过以下方式提供变更内容，按优先级处理：
 
-- GitHub PR: 从 URL 提取 owner/repo/number，优先 `gh` CLI，不可用则用 API；认证失败提示设 `GITHUB_TOKEN`
-- GitLab MR: 内网直连无代理，用 API 获取 diff；需先查 project ID
-- `git diff` 返回空时：提示用户可能是工作区无改动，询问是否审查某 commit
-- GitHub 需代理时配置 `https_proxy` 重试
+1. **直接提供 diff/文件内容** → 直接审查
+2. **提供 Git commit hash** → `git show <hash>` 或 `git diff <hash>~1 <hash>` 获取 diff
+3. **提供 GitHub PR 链接**：
+   - 从 URL 提取 owner/repo/pr_number
+   - 使用 `gh pr diff <pr_number> -R <owner>/<repo>` 获取 diff
+   - 如果 `gh` CLI 不可用，使用 GitHub API：`https://api.github.com/repos/{owner}/{repo}/pulls/{number}` 获取 PR 信息和描述，`https://api.github.com/repos/{owner}/{repo}/pulls/{number}/files` 获取变更文件列表
+   - 同时获取 PR title、description 作为审查上下文
+4. **提供 GitLab MR 链接**：
+   - 从 URL 提取 host/group/project/merge_request_number
+   - 使用 GitLab API：`https://{host}/api/v4/projects/{id}/merge_requests/{number}/changes` 获取 diff
+   - 需要先通过 `https://{host}/api/v4/projects?search={project}` 获取 project ID（URL encode project path）
+   - 同时获取 MR title、description 作为审查上下文
+   - 如果是内网 GitLab（如 gitlab.glm.ai），使用 `git` 命令克隆并 diff：`git fetch origin merge-requests/<number>/head:mr-<number> && git diff ...mr-<number>`
+5. **在本地 Git 仓库中**：
+   - `git diff` / `git diff --staged` / `git diff HEAD` 获取工作区/暂存区改动
+   - `git log --oneline -N` 查看最近提交
+   - `git show <hash>` 查看某次提交的详情
+   - 如果 `git diff` 返回空（工作区和暂存区均无改动），告知用户："当前工作区和暂存区均无改动。你是否想审查某个 commit？请提供 commit hash。" 不应输出空报告
 
-**多来源并存**：按编号顺序选第一个可用的。**git 不可用**：提示用户粘贴 diff 或提供文件路径。
+> **GitHub 需要代理时**：如果 API 调用失败（网络超时），尝试配置代理 `https_proxy` 后重试。
+> **GitHub 认证失败时**：如果 API 调用因认证失败（401/403 非 rate limit），明确告知用户："GitHub API 认证失败，请设置 `GITHUB_TOKEN` 环境变量或使用 `gh auth login` 登录。" 不应静默跳过。
+> **GitLab 内网直连**：内网 GitLab（如 gitlab.glm.ai）无需代理，直接访问。
 
-- 开始审查前确认变更背景：需求实现/Bug修复/重构优化
-- **上下文来源**：用户文档 > 对话描述 > PR title/commit msg > 群聊/截图文字
-- 无明确背景时，基于 diff 推断意图（标注置信度），仅核心链路意图不明时追问
+**多来源并存时**：按上述编号顺序选择第一个可用的输入源（diff > commit hash > GitHub PR > GitLab MR > 本地 git）。如果多种来源同时可用，优先使用 diff 或 commit hash。
+
+**git 不可用时的降级**：如果用户环境中没有安装 git 或当前目录不是 git 仓库：
+1. 告知用户："当前环境无 git 或非 git 仓库，无法自动获取 diff。"
+2. 提供替代方案："请直接粘贴 diff 内容或提供文件路径，我可以直接审查。"
+
+- 在开始审查前，先确认本次变更的背景：需求实现 / Bug 修复 / 重构优化
+- **上下文来源（按优先级）**：
+  1. 用户提供的文档（需求文档、接口文档、设计稿链接等）→ 必须先仔细阅读，再对照代码
+  2. 用户在对话中发的文字描述（需求说明、bug 描述、补充要求等）→ 同等对待，作为审查依据
+  3. PR title、commit message、分支名 → 从中推断变更意图
+  4. 用户转发的群聊消息、飞书文档链接、截图中的文字 → 都是有效的上下文来源
+- 如果以上所有来源都没有提供明确背景，**先基于 diff 推断变更意图**（标注 Low/Medium 置信度），直接开始审查。仅在无法判断合入风险（如改动涉及核心流程但意图完全不明）时才追问用户
+- 获取背景后再开始逐行审查，避免脱离需求盲目 review
 
 #### 变更意图推断
 
@@ -183,20 +210,39 @@ description: >
 
 ## 必查清单
 
-> 逐项打勾确保覆盖，即使不全部输出也要在脑中过一遍。
+> 本清单是「审查目标」的执行化拆解。审查目标定义"为什么关注"，本清单定义"检查什么"。逐项打勾确保覆盖，即使不全部输出也要在脑中过一遍。
 
 主动检查以下维度（即使用户没有提到）：
 
-1. **正确性** — 条件/分支/返回值/遗漏路径/语义破坏
-2. **边界与异常** — Null/空值/零值/超长/非法值、异常吞掉/传播变更/错误码一致性
-3. **回归风险** — 影响老功能/改变历史行为/破坏兼容性/迫使依赖方修改
-4. **状态与副作用** — 状态变更完整性/不一致/隐式副作用/重复执行/幂等性
-5. **并发与时序** — 锁风险/竞态/重复写入/顺序依赖/异步流程错误
-6. **数据影响** — 字段语义变更/DB访问安全/缓存一致/序列化风险/旧数据损坏
-7. **接口与兼容性** — 签名语义变更/参数默认值/返回字段/上下游影响
-8. **性能与稳定性** — 不必要查询/循环/深拷贝/阻塞/高频操作/资源异常
-9. **安全与合规** — 敏感信息/权限绕过/注入/提权/泄露
-10. **可维护性** — 命名误导/逻辑难懂/重复/违反设计约束/增加维护成本
+### 正确性
+- 条件是否正确？分支逻辑是否完整？返回值是否合理？是否有遗漏路径？是否破坏原有语义？
+
+### 边界与异常
+- Null/nil/None/undefined 风险。空集合、零值、负值、超长值、非法值。异常被吞？异常传播路径变更？错误码/消息一致性？
+
+### 回归风险
+- 影响老功能？改变历史行为？破坏兼容性？迫使依赖方修改？
+
+### 状态与副作用
+- 状态变更是否完整？可能状态不一致？隐式副作用？重复执行？幂等性满足？
+
+### 并发与时序
+- 并发安全问题？锁风险、竞态条件、重复写入、顺序依赖？异步流程错误？
+
+### 数据影响
+- 数据结构字段语义变更？数据库访问安全？缓存一致？序列化/反序列化风险？能否损坏旧数据或影响历史数据读取？
+
+### 接口与兼容性
+- API/RPC/方法签名语义变更？参数默认值变更？返回字段变更？影响上游/下游调用方？
+
+### 性能与稳定性
+- 不必要的查询/循环/深拷贝/阻塞？不必要的日志或高频操作？内存/CPU/IO/网络异常？
+
+### 安全与合规
+- 打印敏感信息？绕过权限/校验？注入、提权、泄露风险？
+
+### 可维护性
+- 命名误导？逻辑难懂？重复逻辑？违反现有设计约束？增加未来维护成本？
 
 ## 输出格式
 
