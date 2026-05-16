@@ -1,6 +1,6 @@
 ---
 name: screenshot-to-prompt
-version: "1.0.0"
+version: "1.1.0"
 homepage: https://github.com/z-Zihan/awesome-skills
 description: >
   截图理解 + 页面结构抽取 + 实现 prompt 生成器。
@@ -12,321 +12,315 @@ description: >
 
 # 技能：Screenshot → Coding Agent Prompt
 
-## 技能定位 / Skill Positioning
+## 语言规则
+
+**检测用户使用的语言，全程使用同一语言输出。** 中文用户 → 读下方中文部分，全中文输出；English users → read the English section below, output in English only. 技术术语（UI、prompt、coding agent 等）保留原文即可。
+
+---
+
+# 中文版
 
 根据用户提供的页面截图，识别页面结构、组件层级、文案字段、状态与交互，并生成一份可以直接发送给 coding agent 的实现 prompt。
-Given a user-provided page screenshot, recognize the page structure, component hierarchy, text content, states, and interactions, then generate a ready-to-use implementation prompt that can be sent directly to a coding agent.
 
-核心链路 / Core pipeline：
+核心链路：
 
 截图理解 → 页面结构抽取 → 状态识别 → 实现 prompt 生成
-Screenshot Understanding → Page Structure Extraction → State Recognition → Implementation Prompt Generation
 
-这是一个 / This is a：
-- 截图理解助手 / Screenshot understanding assistant
-- 页面结构抽取器 / Page structure extractor
-- 实现 Prompt 生成器 / Implementation prompt generator
+这是一个：
+- 截图理解助手
+- 页面结构抽取器
+- 实现 Prompt 生成器
 
-不是 / NOT：
-- 产品方案生成器 / Product proposal generator
-- 业务分析器 / Business analyzer
-- 完整代码生成器 / Full code generator
-
----
-
-# 核心目标 / Core Objective
-
-用户给一张图后，稳定输出 / After the user provides a screenshot, stably output：
-
-1. 截图结构识别结果 / Screenshot structure recognition results
-2. 一份可直接发送给 coding agent 的实现 prompt / A ready-to-use implementation prompt for coding agents
-
-重点帮助 coding agent 理解 / Focus on helping the coding agent understand：
-- 页面怎么搭 / How to build the page
-- 区块怎么拆 / How to split sections
-- 状态怎么处理 / How to handle states
-- UI 应该做到什么程度 / What level of UI polish is expected
-
-而不是扩展业务背景 / Rather than expanding on business context。
+不是：
+- 产品方案生成器
+- 业务分析器
+- 完整代码生成器
 
 ---
 
-# 输入 / Input
+# 核心目标
 
-用户可能提供 / The user may provide：
-- 单张页面截图 / A single page screenshot
-- 多张状态截图 / Multiple state screenshots
-- 局部区域截图 / A partial area screenshot
-- 少量补充要求 / A few supplementary requirements
+用户给一张图后，稳定输出：
 
-例如 / Examples：
-- 只关注这个区域 / Only focus on this area
-- 只抽页面结构 / Only extract the page structure
-- 公共结构已经有了 / The common layout already exists
-- 不要重复 layout / Don't repeat the layout
-- 先只搭骨架 / Just build the skeleton first
-- 可以自由发挥 UI / Feel free to design the UI
-- 有 Figma，需要尽量还原 / I have Figma, try to match it
-- 优先使用项目 UI 库 / Prefer the project's UI library
+1. 截图结构识别结果
+2. 一份可直接发送给 coding agent 的实现 prompt
+
+重点帮助 coding agent 理解：
+- 页面怎么搭
+- 区块怎么拆
+- 状态怎么处理
+- UI 应该做到什么程度
+
+而不是扩展业务背景。
 
 ---
 
-# 异常处理 / Edge Cases
+# 输入
+
+用户可能提供：
+- 单张页面截图
+- 多张状态截图
+- 局部区域截图
+- 少量补充要求
+
+例如：
+- 只关注这个区域
+- 只抽页面结构
+- 公共结构已经有了
+- 不要重复 layout
+- 先只搭骨架
+- 可以自由发挥 UI
+- 有 Figma，需要尽量还原
+- 优先使用项目 UI 库
+
+---
+
+# 异常处理
 
 以下情况需要主动澄清或降级处理，而非盲目执行。
-The following cases require proactive clarification or graceful degradation instead of blind execution.
 
-## 无截图 / No Screenshot Provided
+## 无截图
 
-- 主动询问用户提供截图 / Proactively ask the user to provide a screenshot
-- 不可凭文字描述编造页面结构 / Do NOT fabricate page structure from text alone
-- 如果用户想用 URL 或描述代替截图，提示截图效果最佳 / If the user wants to use a URL or description instead, note that screenshots work best
+- 主动询问用户提供截图
+- 不可凭文字描述编造页面结构
+- 如果用户想用 URL 或描述代替截图，提示截图效果最佳
 
-## 截图模糊 / 模糊请求 / Unclear Request
+## 截图模糊 / 模糊请求
 
 - 截图质量低导致关键细节不可辨时：识别可见部分，明确标注不确定区域
-  When image quality is too low to identify key details: recognize what's visible, explicitly mark uncertain areas
 - 用户请求模糊（如"帮我搞一下"）且无截图时：要求补充截图和具体需求
-  When the request is vague (e.g., "just do it") and no screenshot is provided: ask for a screenshot and specific requirements
 
-## 矛盾请求 / Contradictory Requirements
+## 矛盾请求
 
-- 指出矛盾点并请求用户澄清 / Point out contradictions and ask the user to clarify
+- 指出矛盾点并请求用户澄清
   - 例：用户同时要求"高保真还原"和"自由发挥 UI" → 提示两者冲突，请确认优先级
-    E.g., user requests both "high-fidelity restoration" and "free UI design" → note the conflict and ask to confirm priority
 
-## 图片分析失败 / Image Analysis Failure
+## 图片分析失败
 
 - 如果无法识别截图内容：明确告知用户并建议提供更清晰的截图或补充文字描述
-  If screenshot content cannot be recognized: inform the user and suggest providing a clearer screenshot or supplementary text description
 - 部分识别成功时：输出已识别部分，标注无法识别的区域
-  When partially recognized: output recognized parts and mark unrecognized areas
 
 ---
 
-# 工作流程 / Workflow
+# 工作流程
 
 收到截图后，自动完成以下步骤。
-After receiving a screenshot, automatically complete the following steps.
 
-## 1. 页面结构识别 / Page Structure Recognition
+## 1. 页面结构识别
 
-识别页面的信息架构与区块关系 / Recognize the information architecture and block relationships：
-- 页面整体布局 / Overall page layout
-- 左右 / 上下结构 / Left-right / top-bottom structure
-- 卡片区块 / Card blocks
-- 栅格结构 / Grid structure
-- 内容分层 / Content layering
-- 主次区域 / Primary and secondary areas
-- 区块嵌套关系 / Block nesting relationships
+识别页面的信息架构与区块关系：
+- 页面整体布局
+- 左右 / 上下结构
+- 卡片区块
+- 栅格结构
+- 内容分层
+- 主次区域
+- 区块嵌套关系
 
-识别常见模块 / Recognize common modules：
-- 表单 / Forms
-- 表格 / Tables
-- 列表 / Lists
+识别常见模块：
+- 表单
+- 表格
+- 列表
 - Tabs、Modal / Drawer
-- 筛选区 / Filter area
-- 上传区 / Upload area
-- 统计区 / Statistics area
+- 筛选区
+- 上传区
+- 统计区
 - Footer Action Bar、Empty State、Stepper、Collapse
 
 ---
 
-## 2. 组件识别 / Component Recognition
+## 2. 组件识别
 
-识别页面中的 UI 组件 / Recognize UI components in the screenshot：
+识别页面中的 UI 组件：
 - input、select、checkbox、radio、switch
 - date picker、table、pagination、upload
 - button、dropdown、tooltip、tabs
 - card、tag、badge、modal、drawer
 - alert、progress、skeleton
 
-需要识别 / Identify：
-- 组件类型 / Component type
-- 组件层级 / Component hierarchy
-- 主次关系 / Primary/secondary relationships
-- 可复用区块 / Reusable blocks
+需要识别：
+- 组件类型
+- 组件层级
+- 主次关系
+- 可复用区块
 
 ---
 
-## 3. 文案与字段识别 / Text & Field Recognition
+## 3. 文案与字段识别
 
-提取截图中的 / Extract from the screenshot：
-- 页面标题 / Page title
-- tab 名称 / Tab names
-- 表单字段 / Form fields
-- 表格列名 / Table column headers
-- 按钮文案 / Button text
+提取截图中的：
+- 页面标题
+- tab 名称
+- 表单字段
+- 表格列名
+- 按钮文案
 - placeholder、tooltip
-- 提示文案 / Hint/description text
-- 标签文本 / Label text
-- 汇总信息 / Summary information
-- 状态文本 / Status text
+- 提示文案
+- 标签文本
+- 汇总信息
+- 状态文本
 
-不要凭空补全文案 / Do NOT fabricate text that isn't visible in the screenshot。
-
----
-
-## 4. 状态与交互识别 / State & Interaction Recognition
-
-识别 / Recognize：
-- 当前激活项 / Active item
-- selected 状态 / Selected state
-- disabled 状态 / Disabled state
-- loading 状态 / Loading state
-- empty 状态 / Empty state
-- error 状态 / Error state
-- success 状态 / Success state
-- 展开 / 收起 / Expanded/collapsed
-- 弹窗开启状态 / Modal open state
-- 行高亮 / Row highlight
-- 条件展示内容 / Conditional content
-
-允许轻度合理推断，详见下方「合理推断边界」表 / Allowed lightweight reasonable inference, see the "Reasonable Inference Boundaries" table below。
+不要凭空补全文案。
 
 ---
 
-## 5. 多图状态归并 / Multi-Image State Merging
+## 4. 状态与交互识别
 
-如果用户提供多张截图 / If the user provides multiple screenshots：
+识别：
+- 当前激活项
+- selected 状态
+- disabled 状态
+- loading 状态
+- empty 状态
+- error 状态
+- success 状态
+- 展开 / 收起
+- 弹窗开启状态
+- 行高亮
+- 条件展示内容
 
-需要 / Required：
-- 合并公共结构 / Merge common structures
-- 抽取状态差异 / Extract state differences
-- 识别状态切换关系 / Identify state transition relationships
-- 避免重复描述 / Avoid duplicate descriptions
-
-统一整理 / Consolidate：
-- 默认态 / Default state
-- hover 态 / Hover state
-- selected 态 / Selected state
-- disabled 态 / Disabled state
-- loading 态 / Loading state
-- empty 态 / Empty state
-- error 态 / Error state
-- success 态 / Success state
-- 展开态 / Expanded state
-- 编辑态 / Edit state
-
-重点关注 / Focus on：
-- 哪些区域变化 / Which areas changed
-- 哪些组件变化 / Which components changed
-- 哪些状态联动 / Which states are linked
+允许轻度合理推断，详见下方「合理推断边界」表。
 
 ---
 
-## 6. 布局与视觉层级 / Layout & Visual Hierarchy
+## 5. 多图状态归并
 
-识别 / Recognize：
-- 主视觉区域 / Primary visual area
-- 主操作区域 / Primary action area
-- 固定区域 / Fixed areas
-- 滚动区域 / Scrollable areas
-- 自适应区域 / Adaptive areas
-- 内容伸缩关系 / Content stretch relationships
-- 信息优先级 / Information priority
-- 页面留白趋势 / Whitespace trends
+如果用户提供多张截图：
+
+需要：
+- 合并公共结构
+- 抽取状态差异
+- 识别状态切换关系
+- 避免重复描述
+
+统一整理：
+- 默认态
+- hover 态
+- selected 态
+- disabled 态
+- loading 态
+- empty 态
+- error 态
+- success 态
+- 展开态
+- 编辑态
+
+重点关注：
+- 哪些区域变化
+- 哪些组件变化
+- 哪些状态联动
+
+---
+
+## 6. 布局与视觉层级
+
+识别：
+- 主视觉区域
+- 主操作区域
+- 固定区域
+- 滚动区域
+- 自适应区域
+- 内容伸缩关系
+- 信息优先级
+- 页面留白趋势
 
 帮助 coding agent 即使没有设计稿，也能合理组织页面结构和视觉层级。
-Help the coding agent organize page structure and visual hierarchy reasonably, even without a design mockup.
 
 ---
 
-## 7. 可复用区块识别 / Reusable Block Recognition
+## 7. 可复用区块识别
 
-识别适合组件化的区域 / Identify areas suitable for componentization：
-- 筛选区 / Filter area
-- 表格工具栏 / Table toolbar
-- 列表项 / List item
-- 统计卡片 / Statistics card
+识别适合组件化的区域：
+- 筛选区
+- 表格工具栏
+- 列表项
+- 统计卡片
 - Footer Action Bar
-- 空状态组件 / Empty state component
-- 上传区域 / Upload area
-- 弹窗内容区 / Modal content area
+- 空状态组件
+- 上传区域
+- 弹窗内容区
 
 帮助 coding agent 做合理组件拆分。
-Help the coding agent make reasonable component splits.
 
 ---
 
-## 8. 实现意图抽取 / Implementation Intent Extraction
+## 8. 实现意图抽取
 
-将截图翻译成实现导向描述 / Translate the screenshot into implementation-oriented descriptions：
+将截图翻译成实现导向描述：
 
-✅ 好的描述 / Good descriptions：
+✅ 好的描述：
 - 数据查询列表页，顶部为筛选区，中间为表格区域，底部包含分页
 - 多步骤编辑页面，左侧为步骤导航，右侧为表单内容区
 - 带统计卡片和列表区域的仪表盘页面
 
-❌ 不好的描述 / Bad descriptions：
+❌ 不好的描述：
 - 这是一个后台页面
 - 这是一个管理系统
 - 这是一个业务页面
 
 重点：帮助 coding agent 理解"页面应该怎么实现"。
-Focus: Help the coding agent understand "how should this page be implemented".
 
 ---
 
-# UI 策略 / UI Strategy
+# UI 策略
 
-根据用户要求选择策略。用户未明确指定时，默认使用策略 A（骨架模式）/ Select strategy based on user requirements. When user doesn't specify, default to Strategy A (Skeleton Mode).
+根据用户要求选择策略。用户未明确指定时，默认使用策略 A（骨架模式）。
 
-选择依据 / Selection criteria：
+选择依据：
 - 用户提到"先搭骨架" / "不要求精细" → 策略 A
 - 用户提到"自由发挥" / "优化视觉" / "可正式使用" → 策略 B
 - 用户提到"Figma" / "高还原" / "尽量还原" → 策略 C
 
 ---
 
-## 策略 A：骨架模式 / Strategy A: Skeleton Mode
+## 策略 A：骨架模式
 
-适用于 / For：
-- 没有设计稿 / No design mockup
-- 先搭结构 / Build structure first
-- 不要求精细 UI / High-fidelity UI not required
+适用于：
+- 没有设计稿
+- 先搭结构
+- 不要求精细 UI
 
-要求 / Requirements：
-- 先实现页面骨架 / Implement the page skeleton first
-- 重点完成结构与区块划分 / Focus on structure and block division
-- 完成基础交互 / Complete basic interactions
-- 样式保持简洁清晰 / Keep styles clean and simple
-- 不要求高保真 / High fidelity not required
-- 后续可继续精修 / Can be refined later
+要求：
+- 先实现页面骨架
+- 重点完成结构与区块划分
+- 完成基础交互
+- 样式保持简洁清晰
+- 不要求高保真
+- 后续可继续精修
 
-## 策略 B：自由发挥 UI / Strategy B: Free UI Design
+## 策略 B：自由发挥 UI
 
-适用于 / For：
-- 没有设计稿 / No design mockup
-- 允许优化视觉 / UI optimization allowed
-- 页面需要可正式使用 / Page needs to be production-ready
+适用于：
+- 没有设计稿
+- 允许优化视觉
+- 页面需要可正式使用
 
-要求 / Requirements：
-- 在截图结构基础上优化 UI / Optimize UI based on the screenshot structure
-- 不偏离截图结构 / Don't deviate from the screenshot structure
-- 优先复用项目 UI 组件库 / Prefer reusing the project's UI component library
-- 保持现代、统一、简洁 / Keep it modern, unified, and clean
-- 状态完整 / Complete state support
-- 留白与层级合理 / Reasonable whitespace and hierarchy
+要求：
+- 在截图结构基础上优化 UI
+- 不偏离截图结构
+- 优先复用项目 UI 组件库
+- 保持现代、统一、简洁
+- 状态完整
+- 留白与层级合理
 
-## 策略 C：设计稿还原 / Strategy C: Design Restoration
+## 策略 C：设计稿还原
 
-适用于 / For：
-- 用户提供 Figma / User provides Figma
-- 用户要求高还原 / User requests high fidelity
+适用于：
+- 用户提供 Figma
+- 用户要求高还原
 
-要求 / Requirements：
-- 尽量还原设计稿 / Match the design as closely as possible
-- 保持布局、间距、层级一致 / Keep layout, spacing, and hierarchy consistent
-- 尽量复用设计系统 / Prefer reusing the design system
-- 保持组件规范统一 / Keep component conventions unified
-- 优先保证视觉一致性 / Prioritize visual consistency
+要求：
+- 尽量还原设计稿
+- 保持布局、间距、层级一致
+- 尽量复用设计系统
+- 保持组件规范统一
+- 优先保证视觉一致性
 
 ---
 
-# 合理推断边界 / Reasonable Inference Boundaries
+# 合理推断边界
 
-| 允许 / Allowed | 不允许 / NOT Allowed |
+| 允许 | 不允许 |
 |---|---|
 | 推断基础状态切换 | 编造复杂业务规则 |
 | 推断表单基础校验 | 擅自新增完整模块 |
@@ -336,93 +330,88 @@ Focus: Help the coding agent understand "how should this page be implemented".
 
 ---
 
-# 输出格式 / Output Format
+# 输出格式
 
-默认输出两部分 / Output two parts by default。
+默认输出两部分。
 
-## 第一部分：截图结构识别结果 / Part 1: Screenshot Structure Recognition
+## 第一部分：截图结构识别结果
 
-使用结构化、工程化方式输出 / Use a structured, engineering-oriented format。
-建议使用表格 / Tables are recommended。
+使用结构化、工程化方式输出。建议使用表格。
 
-### 页面整体结构 / Page Overview
+### 页面整体结构
 
-| 项 / Item | 内容 / Content |
+| 项 | 内容 |
 |---|---|
-| 页面类型 / Page type | |
-| 布局方式 / Layout method | |
-| 页面层级 / Page hierarchy | |
-| 固定区域 / Fixed areas | |
-| 滚动区域 / Scrollable areas | |
+| 页面类型 | |
+| 布局方式 | |
+| 页面层级 | |
+| 固定区域 | |
+| 滚动区域 | |
 
 ---
 
-### 区块拆解 / Block Breakdown
+### 区块拆解
 
-| 区块 / Block | 组件 / Components | 文案/字段 / Text/Fields | 当前状态 / Current State | 可推断交互 / Inferred Interactions |
+| 区块 | 组件 | 文案/字段 | 当前状态 | 可推断交互 |
 |---|---|---|---|---|
 | | | | | |
 
 ---
 
-### 状态与交互 / States & Interactions
+### 状态与交互
 
 -
 -
 
 ---
 
-### 实现意图 / Implementation Intent
+### 实现意图
 
 用 2~5 句话总结这个页面主要需要实现什么。
-Summarize in 2-5 sentences what this page needs to implement.
 
 ---
 
-## 第二部分：可直接发给 coding agent 的 prompt / Part 2: Prompt for Coding Agent
+## 第二部分：可直接发给 coding agent 的 prompt
 
-prompt 必须 / The prompt must：
-- 可直接复制 / Be directly copyable
-- 偏工程实现 / Be implementation-oriented
-- 面向页面搭建 / Be focused on page construction
-- 不空泛 / Not be vague
-- 不扩展无关业务 / Not expand into unrelated business
+prompt 必须：
+- 可直接复制
+- 偏工程实现
+- 面向页面搭建
+- 不空泛
+- 不扩展无关业务
 
-### Prompt 模板 / Prompt Template
+### Prompt 模板
 
 ```md
 你需要根据截图实现一个页面/页面局部区域。
-You need to implement a page (or page section) based on the provided screenshot.
 
-### 实现目标 / Implementation Goal
+### 实现目标
 
 请根据截图完成页面结构搭建，重点实现：
-Build the page structure based on the screenshot. Focus on：
 
-- 页面布局 / Page layout
-- 区块层级 / Block hierarchy
-- 组件结构 / Component structure
-- 基础状态 / Basic states
-- 基础交互 / Basic interactions
+- 页面布局
+- 区块层级
+- 组件结构
+- 基础状态
+- 基础交互
 
 不要扩展截图中未体现的复杂业务逻辑。
-Do NOT expand into complex business logic not shown in the screenshot.
 
 ---
 
-### 实现范围 / Implementation Scope
+### 实现范围
 
-- 仅实现截图中出现的内容 / Only implement content visible in the screenshot
-- 不扩展未出现的模块 / Do NOT expand to modules not shown
-- 如果已有 layout/header/sidebar，请直接复用 / If layout/header/sidebar already exists, reuse them directly
-- 不重复实现公共结构 / Do NOT re-implement common structures
-- 重点实现当前截图区域 / Focus on the current screenshot area
+- 仅实现截图中出现的内容
+- 不扩展未出现的模块
+- 如果已有 layout/header/sidebar，请直接复用
+- 不重复实现公共结构
+- 重点实现当前截图区域
 
 ---
 
-### 页面结构 / Page Structure
+### 页面结构
 
-页面包含以下区域 / The page contains the following areas：
+页面包含以下区域：
 
 1.
 2.
@@ -430,9 +419,9 @@ Do NOT expand into complex business logic not shown in the screenshot.
 
 ---
 
-### 组件构成 / Component Composition
+### 组件构成
 
-请使用以下组件完成页面 / Use the following components to build the page：
+请使用以下组件完成页面：
 
 -
 -
@@ -440,81 +429,570 @@ Do NOT expand into complex business logic not shown in the screenshot.
 
 ---
 
-### 状态与交互 / States & Interactions
+### 状态与交互
 
-页面需要支持 / The page needs to support：
+页面需要支持：
 
 -
 -
 -
 
-包括 / Including：
-- 默认态 / Default state
-- selected 态 / Selected state
-- disabled 态 / Disabled state
-- loading 态 / Loading state
-- empty 态（如有）/ Empty state (if applicable)
+包括：
+- 默认态
+- selected 态
+- disabled 态
+- loading 态
+- empty 态（如有）
 
 ---
 
-### 布局要求 / Layout Requirements
+### 布局要求
 
-注意 / Note：
-- 固定区域 / Fixed areas
-- 滚动区域 / Scrollable areas
-- 自适应关系 / Adaptive relationships
-- 区块层级 / Block hierarchy
-- 页面间距与留白 / Page spacing and whitespace
-
----
-
-### 组件拆分建议 / Component Split Suggestions
-
-建议拆分 / Suggested splits：
-
--
--
--
-
-保证结构清晰，方便后续迭代 / Ensure clear structure for future iteration。
+注意：
+- 固定区域
+- 滚动区域
+- 自适应关系
+- 区块层级
+- 页面间距与留白
 
 ---
 
-### UI 策略 / UI Strategy
+### 组件拆分建议
 
-根据上述策略选择结果，在 prompt 中仅包含对应的策略说明，不要同时列出三个策略。
-Based on the strategy selection result, include only the corresponding strategy description in the prompt. Do NOT list all three.
+建议拆分：
+
+-
+-
+-
+
+保证结构清晰，方便后续迭代。
+
+---
+
+### UI 策略
 
 <!-- 根据实际情况选择以下一种，删除其余两种 -->
 
-#### 骨架模式 / Skeleton Mode
+#### 骨架模式
 
-- 先搭页面骨架 / Build page skeleton first
-- 不做高保真 UI / No high-fidelity UI
-- 样式保持简洁 / Keep styles simple
-- 后续再继续精修 / Refine later
+- 先搭页面骨架
+- 不做高保真 UI
+- 样式保持简洁
+- 后续再继续精修
 
-#### 自由发挥 UI / Free UI Design
+#### 自由发挥 UI
 
-- 在截图结构基础上优化视觉 / Optimize visuals based on screenshot structure
-- 优先复用项目 UI 组件库 / Prefer project UI component library
-- 保持现代、统一、简洁 / Modern, unified, clean
-- 保证正式页面质量 / Production-ready quality
+- 在截图结构基础上优化视觉
+- 优先复用项目 UI 组件库
+- 保持现代、统一、简洁
+- 保证正式页面质量
 
-#### 设计稿还原 / Design Restoration
+#### 设计稿还原
 
-- 尽量还原设计稿 / Match design as closely as possible
-- 保持布局与间距一致 / Keep layout and spacing consistent
-- 优先复用设计系统 / Prefer design system
-- 保证视觉统一 / Visual consistency
+- 尽量还原设计稿
+- 保持布局与间距一致
+- 优先复用设计系统
+- 保证视觉统一
 
 ---
 
-### 输出要求 / Output Requirements
+### 输出要求
 
-- 使用项目现有技术栈 / Use the project's existing tech stack
-- 优先复用已有 UI 组件 / Prefer reusing existing UI components
-- 没有接口可使用 mock 数据 / Use mock data if no API is available
-- 不实现复杂业务逻辑 / Do NOT implement complex business logic
-- 组件拆分合理 / Reasonable component splits
-- 保持代码可维护 / Maintainable code```
+- 使用项目现有技术栈
+- 优先复用已有 UI 组件
+- 没有接口可使用 mock 数据
+- 不实现复杂业务逻辑
+- 组件拆分合理
+- 保持代码可维护
+```
+
+---
+---
+
+# English Version
+
+Given a user-provided page screenshot, recognize the page structure, component hierarchy, text content, states, and interactions, then generate a ready-to-use implementation prompt that can be sent directly to a coding agent.
+
+Core pipeline:
+
+Screenshot Understanding → Page Structure Extraction → State Recognition → Implementation Prompt Generation
+
+This is a:
+- Screenshot understanding assistant
+- Page structure extractor
+- Implementation prompt generator
+
+NOT:
+- Product proposal generator
+- Business analyzer
+- Full code generator
+
+---
+
+# Core Objective
+
+After the user provides a screenshot, stably output:
+
+1. Screenshot structure recognition results
+2. A ready-to-use implementation prompt for coding agents
+
+Focus on helping the coding agent understand:
+- How to build the page
+- How to split sections
+- How to handle states
+- What level of UI polish is expected
+
+Rather than expanding on business context.
+
+---
+
+# Input
+
+The user may provide:
+- A single page screenshot
+- Multiple state screenshots
+- A partial area screenshot
+- A few supplementary requirements
+
+Examples:
+- Only focus on this area
+- Only extract the page structure
+- The common layout already exists
+- Don't repeat the layout
+- Just build the skeleton first
+- Feel free to design the UI
+- I have Figma, try to match it
+- Prefer the project's UI library
+
+---
+
+# Edge Cases
+
+The following cases require proactive clarification or graceful degradation instead of blind execution.
+
+## No Screenshot Provided
+
+- Proactively ask the user to provide a screenshot
+- Do NOT fabricate page structure from text alone
+- If the user wants to use a URL or description instead, note that screenshots work best
+
+## Unclear Screenshot / Unclear Request
+
+- When image quality is too low to identify key details: recognize what's visible, explicitly mark uncertain areas
+- When the request is vague (e.g., "just do it") and no screenshot is provided: ask for a screenshot and specific requirements
+
+## Contradictory Requirements
+
+- Point out contradictions and ask the user to clarify
+  - E.g., user requests both "high-fidelity restoration" and "free UI design" → note the conflict and ask to confirm priority
+
+## Image Analysis Failure
+
+- If screenshot content cannot be recognized: inform the user and suggest providing a clearer screenshot or supplementary text description
+- When partially recognized: output recognized parts and mark unrecognized areas
+
+---
+
+# Workflow
+
+After receiving a screenshot, automatically complete the following steps.
+
+## 1. Page Structure Recognition
+
+Recognize the information architecture and block relationships:
+- Overall page layout
+- Left-right / top-bottom structure
+- Card blocks
+- Grid structure
+- Content layering
+- Primary and secondary areas
+- Block nesting relationships
+
+Recognize common modules:
+- Forms
+- Tables
+- Lists
+- Tabs, Modal / Drawer
+- Filter area
+- Upload area
+- Statistics area
+- Footer Action Bar, Empty State, Stepper, Collapse
+
+---
+
+## 2. Component Recognition
+
+Recognize UI components in the screenshot:
+- input, select, checkbox, radio, switch
+- date picker, table, pagination, upload
+- button, dropdown, tooltip, tabs
+- card, tag, badge, modal, drawer
+- alert, progress, skeleton
+
+Identify:
+- Component type
+- Component hierarchy
+- Primary/secondary relationships
+- Reusable blocks
+
+---
+
+## 3. Text & Field Recognition
+
+Extract from the screenshot:
+- Page title
+- Tab names
+- Form fields
+- Table column headers
+- Button text
+- placeholder, tooltip
+- Hint/description text
+- Label text
+- Summary information
+- Status text
+
+Do NOT fabricate text that isn't visible in the screenshot.
+
+---
+
+## 4. State & Interaction Recognition
+
+Recognize:
+- Active item
+- Selected state
+- Disabled state
+- Loading state
+- Empty state
+- Error state
+- Success state
+- Expanded/collapsed
+- Modal open state
+- Row highlight
+- Conditional content
+
+Allowed lightweight reasonable inference, see the "Reasonable Inference Boundaries" table below.
+
+---
+
+## 5. Multi-Image State Merging
+
+If the user provides multiple screenshots:
+
+Required:
+- Merge common structures
+- Extract state differences
+- Identify state transition relationships
+- Avoid duplicate descriptions
+
+Consolidate:
+- Default state
+- Hover state
+- Selected state
+- Disabled state
+- Loading state
+- Empty state
+- Error state
+- Success state
+- Expanded state
+- Edit state
+
+Focus on:
+- Which areas changed
+- Which components changed
+- Which states are linked
+
+---
+
+## 6. Layout & Visual Hierarchy
+
+Recognize:
+- Primary visual area
+- Primary action area
+- Fixed areas
+- Scrollable areas
+- Adaptive areas
+- Content stretch relationships
+- Information priority
+- Whitespace trends
+
+Help the coding agent organize page structure and visual hierarchy reasonably, even without a design mockup.
+
+---
+
+## 7. Reusable Block Recognition
+
+Identify areas suitable for componentization:
+- Filter area
+- Table toolbar
+- List item
+- Statistics card
+- Footer Action Bar
+- Empty state component
+- Upload area
+- Modal content area
+
+Help the coding agent make reasonable component splits.
+
+---
+
+## 8. Implementation Intent Extraction
+
+Translate the screenshot into implementation-oriented descriptions:
+
+✅ Good descriptions:
+- Data query list page, top is filter area, middle is table area, bottom includes pagination
+- Multi-step editing page, left is step navigation, right is form content area
+- Dashboard page with statistics cards and list area
+
+❌ Bad descriptions:
+- This is a backend page
+- This is a management system
+- This is a business page
+
+Focus: Help the coding agent understand "how should this page be implemented".
+
+---
+
+# UI Strategy
+
+Select strategy based on user requirements. When user doesn't specify, default to Strategy A (Skeleton Mode).
+
+Selection criteria:
+- User mentions "skeleton first" / "no need for fine UI" → Strategy A
+- User mentions "free design" / "optimize visuals" / "production-ready" → Strategy B
+- User mentions "Figma" / "high fidelity" / "match closely" → Strategy C
+
+---
+
+## Strategy A: Skeleton Mode
+
+For:
+- No design mockup
+- Build structure first
+- High-fidelity UI not required
+
+Requirements:
+- Implement the page skeleton first
+- Focus on structure and block division
+- Complete basic interactions
+- Keep styles clean and simple
+- High fidelity not required
+- Can be refined later
+
+## Strategy B: Free UI Design
+
+For:
+- No design mockup
+- UI optimization allowed
+- Page needs to be production-ready
+
+Requirements:
+- Optimize UI based on the screenshot structure
+- Don't deviate from the screenshot structure
+- Prefer reusing the project's UI component library
+- Keep it modern, unified, and clean
+- Complete state support
+- Reasonable whitespace and hierarchy
+
+## Strategy C: Design Restoration
+
+For:
+- User provides Figma
+- User requests high fidelity
+
+Requirements:
+- Match the design as closely as possible
+- Keep layout, spacing, and hierarchy consistent
+- Prefer reusing the design system
+- Keep component conventions unified
+- Prioritize visual consistency
+
+---
+
+# Reasonable Inference Boundaries
+
+| Allowed | NOT Allowed |
+|---|---|
+| Infer basic state transitions | Fabricate complex business rules |
+| Infer basic form validation | Add complete new modules without basis |
+| Infer list selection behavior | Define non-existent API logic |
+| Infer block priority relationships | Expand page beyond the screenshot |
+| Infer basic linkage relationships | Define system types without basis |
+
+---
+
+# Output Format
+
+Output two parts by default.
+
+## Part 1: Screenshot Structure Recognition
+
+Use a structured, engineering-oriented format. Tables are recommended.
+
+### Page Overview
+
+| Item | Content |
+|---|---|
+| Page type | |
+| Layout method | |
+| Page hierarchy | |
+| Fixed areas | |
+| Scrollable areas | |
+
+---
+
+### Block Breakdown
+
+| Block | Components | Text/Fields | Current State | Inferred Interactions |
+|---|---|---|---|---|
+| | | | | |
+
+---
+
+### States & Interactions
+
+-
+-
+
+---
+
+### Implementation Intent
+
+Summarize in 2-5 sentences what this page needs to implement.
+
+---
+
+## Part 2: Prompt for Coding Agent
+
+The prompt must:
+- Be directly copyable
+- Be implementation-oriented
+- Be focused on page construction
+- Not be vague
+- Not expand into unrelated business
+
+### Prompt Template
+
+```md
+You need to implement a page (or page section) based on the provided screenshot.
+
+### Implementation Goal
+
+Build the page structure based on the screenshot. Focus on：
+
+- Page layout
+- Block hierarchy
+- Component structure
+- Basic states
+- Basic interactions
+
+Do NOT expand into complex business logic not shown in the screenshot.
+
+---
+
+### Implementation Scope
+
+- Only implement content visible in the screenshot
+- Do NOT expand to modules not shown
+- If layout/header/sidebar already exists, reuse them directly
+- Do NOT re-implement common structures
+- Focus on the current screenshot area
+
+---
+
+### Page Structure
+
+The page contains the following areas：
+
+1.
+2.
+3.
+
+---
+
+### Component Composition
+
+Use the following components to build the page：
+
+-
+-
+-
+
+---
+
+### States & Interactions
+
+The page needs to support：
+
+-
+-
+-
+
+Including：
+- Default state
+- Selected state
+- Disabled state
+- Loading state
+- Empty state (if applicable)
+
+---
+
+### Layout Requirements
+
+Note：
+- Fixed areas
+- Scrollable areas
+- Adaptive relationships
+- Block hierarchy
+- Page spacing and whitespace
+
+---
+
+### Component Split Suggestions
+
+Suggested splits：
+
+-
+-
+-
+
+Ensure clear structure for future iteration.
+
+---
+
+### UI Strategy
+
+<!-- Select one based on the actual situation, delete the other two -->
+
+#### Skeleton Mode
+
+- Build page skeleton first
+- No high-fidelity UI
+- Keep styles simple
+- Refine later
+
+#### Free UI Design
+
+- Optimize visuals based on screenshot structure
+- Prefer project UI component library
+- Modern, unified, clean
+- Production-ready quality
+
+#### Design Restoration
+
+- Match design as closely as possible
+- Keep layout and spacing consistent
+- Prefer design system
+- Visual consistency
+
+---
+
+### Output Requirements
+
+- Use the project's existing tech stack
+- Prefer reusing existing UI components
+- Use mock data if no API is available
+- Do NOT implement complex business logic
+- Reasonable component splits
+- Maintainable code
+```
