@@ -1,12 +1,12 @@
 ---
 name: todo-list-promax
-version: "1.2.0"
+version: "1.3.0"
 description: >
   个人待办事项永久存储、智能分类与定时提醒系统。
   自动从聊天消息中捕获待办（文字/图片/附件），解析时间与优先级，每日晚上9点推送未完成提醒。
   当用户消息包含以下触发词时激活：
-  【录入】"TODO:"、"帮我记录一下"、"记录："、"待办："、"加个待办"、"记一下"、"别忘了"、"记得提醒我"、"回头要做"、"备忘"、"提醒我"
-  【查询】"TODOLIST"、"待办列表"、"查看待办"、"看看待办"、"我有哪些待办"、"今天还有哪些未完成"、"还有什么没做"、"今天还要干嘛"、"今天的事做完了没"、"我的清单"
+  【录入】"TODO:"、"帮我记录一下"、"记录："、"待办："、"加个待办"、"记一下"、"别忘了"、"记得提醒我"、"回头要做"、"备忘"、"提醒我"、"add todo"、"remind me to"、"don't forget"、"note this"
+  【查询】"TODOLIST"、"待办列表"、"查看待办"、"看看待办"、"我有哪些待办"、"今天还有哪些未完成"、"还有什么没做"、"今天还要干嘛"、"今天的事做完了没"、"我的清单"、"my todos"、"todo list"、"what's pending"、"show todos"
   NOT for: 项目管理、日历集成、多人协作、自动执行任务。
 ---
 
@@ -36,7 +36,7 @@ description: >
 
 ### 1. 待办录入
 
-**触发词：** `TODO:`、`帮我记录一下`、`记录：`、`待办：`、`加个待办`、`记一下`、`别忘了`、`记得提醒我`、`回头要做`、`备忘`、`提醒我`
+**触发词：** `TODO:`、`帮我记录一下`、`记录：`、`待办：`、`加个待办`、`记一下`、`别忘了`、`记得提醒我`、`回头要做`、`备忘`、`提醒我`、`add todo`、`remind me to`、`don't forget`、`note this`
 
 **模糊输入判定规则：** 消息必须包含**动宾结构**或**明确动作词**才能触发录入。判断标准：
 - ✅ 触发：含动词+宾语（"提交周报"、"买充电线"、"看完论文"）
@@ -84,12 +84,14 @@ description: >
 
 ### 2. 待办查询
 
-**触发词：** `TODOLIST`、`待办列表`、`查看待办`、`看看待办`、`我有哪些待办`、`今天还有哪些未完成`、`还有什么没做`、`今天还要干嘛`、`今天的事做完了没`、`我的清单`。
+**触发词：** `TODOLIST`、`待办列表`、`查看待办`、`看看待办`、`我有哪些待办`、`今天还有哪些未完成`、`还有什么没做`、`今天还要干嘛`、`今天的事做完了没`、`我的清单`、`my todos`、`todo list`、`what's pending`、`show todos`
 
 **查询模式：**
 - 无条件 → 所有未完成待办，按优先级排序
-- 按时间 → 今天/本周/本月到期的未完成待办
-- 按优先级 → 某个级别的待办（如"有哪些紧急的"）
+- 按日期 → "周一的 todo"、"5月18日的待办"、"今天的" → 筛选 `due_time` 匹配该日期的未完成项
+- 按时间范围 → "本周"、"本月" → 筛选 `due_time` 在范围内
+- 按优先级 → "有哪些紧急的" → 筛选特定级别
+- 按标签 → "bug 相关的待办" → 筛选 `tags` 包含关键词
 
 **输出格式：**
 ```
@@ -111,9 +113,9 @@ description: >
 
 ### 3. 待办操作
 
-**完成：** "完成了 #1" 或 "TODO 完成 1" → 标记 `status: done`，记录 `completed_at`
-**删除：** "删除 #1" 或 "TODO 删除 1" → 回复待删除的 todo 内容摘要（ID + 内容 + 优先级），等用户确认后再移除。用户说"确认"或"删"时才执行
-**修改：** "#1 改成明天" → 更新对应字段，回复确认
+**完成：** "完成了 #1" 或 "TODO 完成 1" 或 "done #1" → 标记 `status: done`，记录 `completed_at`
+**删除：** "删除 #1" 或 "TODO 删除 1" 或 "delete #1" → 回复待删除的 todo 内容摘要（ID + 内容 + 优先级），等用户确认后再移除。用户说"确认"或"删"时才执行
+**修改：** "#1 改成明天" 或 "#1 change to tomorrow" → 更新对应字段，回复确认
 
 **可修改字段：** `content`（内容）、`due_time`（截止时间）、`priority`（优先级）。语法：`#N 字段:新值`，如 `#1 截止:明天`、`#1 优先级:P0`、`#1 内容:新的任务描述`
 
@@ -135,7 +137,7 @@ description: >
 
 ```json
 {
-  "version": 1,
+  "version": 2,
   "todos": [
     {
       "id": 1,
@@ -143,6 +145,7 @@ description: >
       "status": "pending",
       "priority": "P0",
       "due_time": "2026-05-16",
+      "tags": ["工作"],
       "created_at": "2026-05-16T09:30:00+08:00",
       "completed_at": null,
       "attachments": [],
@@ -159,6 +162,7 @@ description: >
 - `status`: `pending` | `done`
 - `priority`: `P0` | `P1` | `P2` | `P3`
 - `due_time`: 截止日期 YYYY-MM-DD，可为 null
+- `tags`: 标签数组，用于分类和筛选（如 `["bug", "通知"]`），可为空数组
 - `created_at`: 创建时间 ISO 8601
 - `completed_at`: 完成时间 ISO 8601，完成时填入
 - `attachments`: `[{path, type}]` 附件列表
@@ -204,7 +208,7 @@ Provide a permanent, loss-proof todo management system. Auto-capture todos from 
 
 ### 1. Todo Capture
 
-**Triggers:** `TODO:`, `帮我记录一下`, `记录：`, `待办：`, `加个待办`, `记一下`, `别忘了`, `记得提醒我`, `回头要做`, `备忘`, `提醒我`
+**Triggers:** `TODO:`, `add todo`, `remind me to`, `don't forget`, `note this`, `帮我记录一下`, `待办：`, `记一下`, `备忘`, `提醒我`
 
 **Fuzzy input rules:** Message must contain a **verb-object structure** or **clear action word** to trigger. Criteria:
 - ✅ Trigger: verb + object ("submit report", "buy cable", "read paper")
@@ -252,12 +256,14 @@ Default to P1 when unclear.
 
 ### 2. Todo Query
 
-**Triggers:** `TODOLIST`, `待办列表`, `查看待办`, `看看待办`, `我有哪些待办`, `今天还有哪些未完成`, `还有什么没做`, "今天还要干嘛", "今天的事做完了没", "我的清单".
+**Triggers:** `TODOLIST`, `my todos`, `todo list`, `what's pending`, `show todos`, `待办列表`, `查看待办`, `我有哪些待办`, `还有什么没做`, `我的清单`
 
 **Query Modes:**
 - No filter → all pending todos, sorted by priority
-- By time → pending todos due today/this week/this month
+- By date → "Monday's todos", "May 18 todos", "today's" → filter `due_time` matching that date
+- By time range → "this week", "this month" → filter `due_time` within range
 - By priority → todos at a specific level (e.g., "what's urgent")
+- By tag → "bug-related todos" → filter `tags` containing the keyword
 
 **Output Format:**
 ```
@@ -279,9 +285,9 @@ Default to P1 when unclear.
 
 ### 3. Todo Operations
 
-**Complete:** "完成了 #1" or "TODO 完成 1" → mark `status: done`, record `completed_at`
-**Delete:** "删除 #1" or "TODO 删除 1" → reply with the todo's summary, wait for user confirmation. Execute only when user says "确认" or "删"
-**Modify:** "#1 改成明天" → update the corresponding field, reply with confirmation
+**Complete:** "完成了 #1" or "TODO 完成 1" or "done #1" → mark `status: done`, record `completed_at`
+**Delete:** "删除 #1" or "TODO 删除 1" or "delete #1" → reply with the todo's summary, wait for user confirmation. Execute only when user says "确认" or "删"
+**Modify:** "#1 改成明天" or "#1 change to tomorrow" → update the corresponding field, reply with confirmation
 
 **Modifiable fields:** `content`, `due_time`, `priority`. Syntax: `#N field:new_value`, e.g., `#1 截止:明天`, `#1 优先级:P0`, `#1 内容:new task description`
 
@@ -303,7 +309,7 @@ Storage file: `${workspace}/todo-list/todos.json` (`workspace` = current OpenCla
 
 ```json
 {
-  "version": 1,
+  "version": 2,
   "todos": [
     {
       "id": 1,
@@ -311,6 +317,7 @@ Storage file: `${workspace}/todo-list/todos.json` (`workspace` = current OpenCla
       "status": "pending",
       "priority": "P0",
       "due_time": "2026-05-16",
+      "tags": ["work"],
       "created_at": "2026-05-16T09:30:00+08:00",
       "completed_at": null,
       "attachments": [],
@@ -327,6 +334,7 @@ Field Reference:
 - `status`: `pending` | `done`
 - `priority`: `P0` | `P1` | `P2` | `P3`
 - `due_time`: Deadline date YYYY-MM-DD, nullable
+- `tags`: Tag array for categorization and filtering (e.g., `["bug", "notification"]`), can be empty
 - `created_at`: Creation time ISO 8601
 - `completed_at`: Completion time ISO 8601, set when done
 - `attachments`: `[{path, type}]` attachment list
