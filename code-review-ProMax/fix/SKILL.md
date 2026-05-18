@@ -1,14 +1,3 @@
----
-name: code-review-fix
-version: "1.0.0"
-homepage: https://github.com/z-Zihan/awesome-skills
-description: >
-  代码审查修复执行器。接收 code-review-ProMax 输出的修复指令，逐条在代码中应用修复。
-  自动解析审查报告中的「Code Review 修复任务」，定位问题代码，生成修复，逐条确认后应用。
-  触发词：直接修复, 修复, fix, apply fix, 修一下, 帮我修, 修复这些问题, fix these issues。
-  NOT for: 代码审查（用 code-review-ProMax）、重构优化、需求开发。
----
-
 # code-review-fix — 代码审查修复执行器 / Code Review Fix Executor
 
 ## 语言规则 / Language
@@ -37,7 +26,7 @@ description: >
 2. 用户粘贴了 `## Code Review 修复任务` 格式的修复指令
 3. 用户明确要求对某个审查报告的修复指令执行修复
 
-**不触发**：纯代码审查请求（→ code-review-ProMax）、重构需求、新功能开发。
+**不触发**：纯代码审查请求（→ 主 SKILL.md 审查流程）、重构需求、新功能开发。
 
 ## 执行流程
 
@@ -169,7 +158,7 @@ Activate when any of the following is true:
 2. User pastes fix instructions in `## Code Review 修复任务` format
 3. User explicitly requests executing fix instructions from a review report
 
-**Do NOT trigger for**: Pure code review requests (→ code-review-ProMax), refactoring, new feature development.
+**Do NOT trigger for**: Pure code review requests (→ main SKILL.md review flow), refactoring, new feature development.
 
 ## Workflow
 

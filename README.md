@@ -56,7 +56,6 @@ prompt 正文...
 
 ```bash
 openclaw skills install code-review-ProMax
-openclaw skills install code-review-fix
 openclaw skills install fe-cli
 openclaw skills install screenshot-to-prompt
 openclaw skills install project-doc-analyst
@@ -98,8 +97,7 @@ skill-creator-ProMax（生成）
 |-------|------|---------|
 | **skill-creator-ProMax** | 结构设计 + 多平台文件生成 + 测评引导 | 测试 / 评分 / 修复 |
 | **skill-review-pro** | 静态审查 + 行为测试（对抗/边界/歧义）+ 评分 + 修复 | 生成 / 设计 |
-| **code-review-ProMax** | 代码变更风险审查（不是 Skill 评审） | Skill 质量评审 |
-| **code-review-fix** | 解析审查修复指令并逐条应用修复 | 重构 / 新功能开发 |
+| **code-review-ProMax** | 代码变更风险审查 + 直接修复模式 | Skill 质量评审 |
 
 **架构原则**：
 - **各 Skill 不越界** — creator 不内置测试，reviewer 不生成 prompt
@@ -109,17 +107,11 @@ skill-creator-ProMax（生成）
 
 ### Skill 一览
 
-#### 🤖 code-review-ProMax — 高级代码审查
+#### 🤖 code-review-ProMax — 高级代码审查 + 直接修复
 
-多维度代码审查：需求完成度、回归风险、边界情况、上下游影响。输出结构化结论，含可发给 AI agent 的修复指令。支持变更意图识别、风险推导链、审查置信度（HIGH/MEDIUM/LOW）、迭代审查和专项审查。
+多维度代码审查：需求完成度、回归风险、边界情况、上下游影响。输出结构化结论，含修复指令。支持变更意图识别、风险推导链、审查置信度。用户说"直接修复"时自动切换到修复模式（`fix/` 子 skill），逐条 apply 修复。
 
-**触发词**：review 代码 / 帮我看看改动 / 代码有没有问题 / 改动有没有风险
-
-#### 🔧 code-review-fix — 代码审查修复执行器
-
-code-review-ProMax 的配套修复 skill。解析审查报告中的修复指令，逐条定位问题代码 → 生成修复 → 展示 diff 预览 → 用户确认后应用。最小改动，不趁便优化。
-
-**触发词**：直接修复 / 修复 / fix / 帮我修
+**触发词**：review 代码 / 帮我看看改动 / 代码有没有问题 / 直接修复 / fix
 
 #### 🏗️ fe-cli — 前端项目脚手架
 
@@ -255,7 +247,6 @@ Place `SKILL.md` in your Agent's skill directory:
 
 ```bash
 openclaw skills install code-review-ProMax
-openclaw skills install code-review-fix
 openclaw skills install fe-cli
 openclaw skills install screenshot-to-prompt
 openclaw skills install project-doc-analyst
@@ -297,24 +288,17 @@ skill-creator-ProMax (generate)
 |-------|---------------|---------|
 | **skill-creator-ProMax** | Architecture design + multi-platform file generation + review guidance | Testing / Scoring / Fixing |
 | **skill-review-pro** | Static review + behavioral testing (adversarial/boundary/ambiguity) + scoring + fixing | Generation / Design |
-| **code-review-ProMax** | Code change risk review (not Skill review) | Skill quality evaluation |
-| **code-review-fix** | Parse review fix instructions and apply fixes one by one | Refactoring / Feature development |
+| **code-review-ProMax** | Code change risk review + direct fix mode | Skill quality evaluation |
 
 **Principles**: No boundary crossing between Skills. Modular on-demand loading. Stage-driven workflow with explicit pause/rollback. Fix loop with regression verification.
 
 ### Skills
 
-#### 🤖 code-review-ProMax — Advanced Code Review
+#### 🤖 code-review-ProMax — Advanced Code Review + Direct Fix
 
-Multi-dimensional code review: requirement completion, regression risk, edge cases, upstream/downstream impact. Outputs structured report with AI-agent-ready fix instructions. Supports change intent inference, risk derivation chains, review confidence levels (HIGH/MEDIUM/LOW), iterative review, and focused review.
+Multi-dimensional code review: requirement completion, regression risk, edge cases, upstream/downstream impact. Outputs structured report with fix instructions. When user says "直接修复"/"fix", auto-switches to fix mode (`fix/` sub-skill) to apply fixes one by one.
 
-**Triggers**: review this code / check my changes / any issues / is this safe to merge
-
-#### 🔧 code-review-fix — Code Review Fix Executor
-
-Companion fix skill for code-review-ProMax. Parses fix instructions from review reports, locates problem code one by one → generates fix → shows diff preview → applies after user confirmation. Minimal changes only, no opportunistic optimization.
-
-**Triggers**: 直接修复 / fix / apply fix / fix these issues
+**Triggers**: review this code / check my changes / any issues / 直接修复 / fix
 
 #### 🏗️ fe-cli — Frontend Scaffolding
 

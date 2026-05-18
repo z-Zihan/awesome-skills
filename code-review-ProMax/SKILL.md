@@ -198,6 +198,10 @@ description: >
 - 修复后确认不影响已有功能
 ```
 
+### 直接修复模式
+
+用户说"直接修复"/"fix"/"修复"时，切换到修复模式：读取 `fix/SKILL.md` 子 skill，按其流程逐条应用修复。用户也可选择「复制修复指令」手动交给其他 agent。
+
 ### 审查策略补充
 
 - 日志/注释/格式/文案/埋点类改动：**不要过度关注**。只查敏感信息泄露（如密钥出现在日志中）、编译错误、功能性影响。这类变更如有问题放入「建议关注」，**不放「需要修复」**
@@ -222,6 +226,10 @@ Correctness · Boundary & exceptions · Regression risk · State & side effects 
 
 ### Output Structure
 1. 无影响变更 (No-impact) → 2. 建议关注 (Advisory) → 3. 需要修复 (Must-fix, with 改动→影响→级联 impact chain for Critical/High) → 4. 完成度分析 → 5. 影响分析+验证 → 6. 修复指令 (Fix instructions, title must be `## Code Review 修复任务`)
+
+### Direct Fix Mode
+
+When user says "直接修复"/"fix"/"修复", switch to fix mode: read `fix/SKILL.md` sub-skill, follow its workflow to apply fixes one by one. User can also choose to「复制修复指令」and manually hand off to another agent.
 
 ### Key Rules
 - Log/comment/format/i18n changes: Low-risk, no over-review (may already be team-agreed)
