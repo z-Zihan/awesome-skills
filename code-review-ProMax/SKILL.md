@@ -1,6 +1,6 @@
 ---
 name: code-review-ProMax
-version: "1.3.0"
+version: "1.4.0"
 homepage: https://github.com/z-Zihan/awesome-skills
 description: >
   高级代码审查 Agent。对用户提供的 diff、文件、commit、GitHub PR 或 GitLab MR 进行高质量、
@@ -334,6 +334,26 @@ description: >
 
 - 日志/注释/格式/文案/埋点类改动：**不要过度关注**。只查敏感信息泄露（如 key、密码出现在日志中）、编译错误、功能性影响。这类变更如果确实有问题（如写错了事件名），可以放入「建议关注（非阻塞）」提醒确认，但**不要放入「需要修复」**，因为可能已经和团队协商好了
 - **例外：合规与安全风险**：即使是文案/样式/埋点类改动，如果引入了**外部合规风险**（如搜索引擎惩罚、隐私法规违规、安全漏洞），**必须按正常严重度处理，不能降级为建议关注**。例如：隐藏文本用于 SEO（cloaking 风险）、埋点事件泄露用户隐私数据、日志中打印密钥
+
+### SEO 专项审查清单
+
+当变更涉及 SEO 相关代码（meta 标签、结构化数据、sitemap、robots.txt、隐藏文本、关键词、canonical 等）时，**必须逐条检查以下反模式**。命中任何一条都应作为 Medium 及以上问题提出，不能降级。
+
+| # | 反模式 | 检查内容 | 典型严重度 |
+|---|--------|---------|-----------|
+| 1 | **隐藏文本 (Cloaking)** | CSS 使文本视觉不可见（`position:absolute; width:1px; height:1px; clip:rect(0,0,0,0); overflow:hidden; text-indent:-9999px; font-size:0; opacity:0; visibility:hidden` 等手法），但内容仍被搜索引擎抓取。Google 和百度均将其视为违反 Webmaster Guidelines，可能导致降权或从索引移除 | Critical |
+| 2 | **JS 注入的 SEO 内容** | 通过 `document.createElement` / `innerHTML` 等 JS 动态注入品牌段落、FAQ、关键词等 SEO 内容。百度爬虫对 JS 渲染支持极弱，这些内容很可能不会被索引，SEO 目标无法达成 | High |
+| 3 | **关键词堆砌 (Keyword Stuffing)** | FAQ/描述中反复重复相同品牌词、URL、长尾词。每个回答都包含相同的品牌全称+官方 URL 是典型堆砌模式，会被搜索引擎降权 | Medium |
+| 4 | **meta keywords 无效词** | `meta_keywords` 中放入 URL（如 `autoclaw.zhipuai.cn`）而非关键词，无 SEO 价值。同时注意 meta keywords 标签本身已被 Google 完全忽略、百度也基本不参考 | Low |
+| 5 | **硬编码 URL 分散** | 官方域名/URL 在多个文件中硬编码重复出现（结构化数据、FAQ、meta 标签等），域名变更时需多处修改。应提取为常量或环境变量 | Low |
+| 6 | **废弃 CSS 属性** | 使用 `clip: rect(0,0,0,0)` 等已废弃属性，应改用 `clip-path: inset(50%)` 并保留 `clip` 作为 fallback | Low |
+| 7 | **结构与语义问题** | SEO 相关函数放在语义不匹配的函数中（如国内 SEO 逻辑放在 `applyOverseaLocale()` 中），命名误导增加维护成本 | Low |
+
+**判断逻辑**：
+- 如果变更包含 `visibility:hidden` / `opacity:0` / `position:absolute` + `width:1px` / `text-indent:-9999px` + 大量文本内容 → **命中 #1，Critical**
+- 如果变更通过 JS 动态创建 DOM 节点注入 SEO 文本，且目标搜索引擎包括百度 → **命中 #2，High**
+- 如果 FAQ/描述中同一品牌词+URL 出现 ≥3 次 → **命中 #3，Medium**
+- 以上命中时，**必须给出替代方案**（如：隐藏文本改为折叠/手风琴 UI 让用户可见；JS 注入改为静态 HTML/SSR；关键词堆砌改为自然语言表述）
 - 改动范围过大（diff 超过 500 行）：仅重点审查核心变更（主要逻辑、公共接口、关键路径），其余改动标注"本次未审查"
 - **小 diff 审查克制**：当 diff 总行数 < 50 行时，不要过度审查。小改动容易产生"审查过度"（把合理实现当成问题），遵循以下原则：
   - 优先确认改动意图是否正确达成，而非寻找潜在风险
@@ -373,6 +393,7 @@ Correctness · Boundary & exceptions · Regression risk · State & side effects 
 - Diff > 500 lines: Focus on core paths, skip peripheral changes
 - Internal tools: Downgrade security/network severity by 1 level ONLY when code comments/README explicitly marks as internal tool. Uncertain → ask user
 - Compliance/safety risks: Never downgrade regardless of change type
+- **SEO-specific review checklist**: When changes involve SEO code (meta tags, structured data, hidden text, keywords, canonical, etc.), must check 7 anti-patterns: (1) Hidden text / cloaking → Critical, (2) JS-injected SEO content (Baidu can't crawl) → High, (3) Keyword stuffing in FAQ/descriptions → Medium, (4) URLs in meta keywords → Low, (5) Hardcoded URLs scattered across files → Low, (6) Deprecated CSS clip property → Low, (7) SEO logic in semantically wrong function → Low. Must provide alternatives when patterns are hit.
 
 ### Verdict Decision Tree (priority order, match and stop)
 1. ≥High severity + ≤Possible confidence → **建议进一步验证**
