@@ -1,6 +1,6 @@
 ---
 name: project-onboarding
-version: "1.2.0"
+version: "2.0.0"
 homepage: https://github.com/z-Zihan/awesome-skills
 description: >
   帮助有经验的开发者快速接手陌生项目，支持前端 Web、后端服务、

@@ -172,21 +172,24 @@ skill-creator-ProMax（生成）
 
 ### 版本管理
 
-**日常开发（自动发布）：**
+**版本号来源**：SKILL.md frontmatter 的 `version` 字段是唯一版本来源，CI 不生成版本号。
 
-push 到 `main` 分支，GitHub Actions 自动检测 `SKILL.md` 变更并发布到 ClawHub，版本号自动递增，无需手动管理。
+**更新流程**：
+1. 修改 SKILL.md 内容
+2. 手动 bump `version` 字段
+3. push main → CI 自动校验版本号（必须大于 ClawHub 最新版）→ 发布
 
-**正式发版（手动）：**
+**版本号规则**：
 
-```bash
-# 1. 更新 CHANGELOG.md（记录本次变更）
-# 2. 打 tag 并推送
-git tag v1.0.0
-git push origin v1.0.0
-# 3. GitHub Actions 自动用 tag 作为版本号发布到 ClawHub
-```
+| 改动类型 | 版本变化 | 示例 |
+|---------|---------|------|
+| 小修（修 bug、补细节） | patch +1 | 2.0.0 → 2.0.1 |
+| 加功能、改流程 | minor +1 | 2.0.1 → 2.1.0 |
+| 大重构、不兼容变更 | major +1 | 2.1.0 → 3.0.0 |
 
-Tag 命名规范：`v<major>.<minor>.<patch>`，例如 `v1.0.0`、`v1.1.0`、`v1.1.1`
+**忘了 bump 怎么办？** CI 会拦截并报错，提示版本号未增长，补上再推即可。
+
+**全量发布**（所有 skill 重发一遍）：推 tag 触发，如 `git tag v2.0.0 && git push origin v2.0.0`
 
 ### 贡献
 
@@ -359,21 +362,24 @@ Permanent, loss-proof todo management. Auto-captures todos from chat (text/image
 
 ### Versioning
 
-**Daily development (auto-publish):**
+**版本号来源**：SKILL.md frontmatter 的 `version` 字段是唯一版本来源，CI 不生成版本号。
 
-Push to `main` — GitHub Actions detects `SKILL.md` changes and auto-publishes to ClawHub with an auto-incrementing version. No manual version management needed.
+**更新流程**：
+1. 修改 SKILL.md 内容
+2. 手动 bump `version` 字段
+3. push main → CI 自动校验版本号（必须大于 ClawHub 最新版）→ 发布
 
-**Official release (manual):**
+**版本号规则**：
 
-```bash
-# 1. Update CHANGELOG.md
-# 2. Tag and push
-git tag v1.0.0
-git push origin v1.0.0
-# 3. GitHub Actions uses the tag as the version for ClawHub
-```
+| 改动类型 | 版本变化 | 示例 |
+|---------|---------|------|
+| 小修（修 bug、补细节） | patch +1 | 2.0.0 → 2.0.1 |
+| 加功能、改流程 | minor +1 | 2.0.1 → 2.1.0 |
+| 大重构、不兼容变更 | major +1 | 2.1.0 → 3.0.0 |
 
-Tag format: `v<major>.<minor>.<patch>` (e.g. `v1.0.0`)
+**忘了 bump 怎么办？** CI 会拦截并报错，提示版本号未增长，补上再推即可。
+
+**全量发布**（所有 skill 重发一遍）：推 tag 触发，如 `git tag v2.0.0 && git push origin v2.0.0`
 
 ### Contributing
 

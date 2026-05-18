@@ -1,6 +1,6 @@
 ---
 name: skill-review-pro
-version: "1.2.0"
+version: "2.0.0"
 homepage: https://github.com/z-Zihan/awesome-skills
 description: >
   AI Skill 质量评审系统。通过静态审查对 Skill 进行评分（100分制），
