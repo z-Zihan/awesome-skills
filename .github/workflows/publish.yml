@@ -69,34 +69,57 @@ jobs:
           echo "skills=${CHANGED_SKILLS}" >> $GITHUB_OUTPUT
           echo "Changed skills:${CHANGED_SKILLS}"
 
+      - name: Debug skill file sizes
+        if: steps.changed.outputs.skills != ''
+        run: |
+          for slug in ${{ steps.changed.outputs.skills }}; do
+            echo "Checking ${slug}..."
+            echo "Files:"
+            find "./${slug}" -type f -maxdepth 3 -print0 | xargs -0 wc -c | sort -nr
+            echo ""
+            echo "SKILL.md stats:"
+            wc -c "./${slug}/SKILL.md" || true
+            wc -w "./${slug}/SKILL.md" || true
+            echo "---"
+          done
+
+      - name: Check SKILL token size
+        if: steps.changed.outputs.skills != ''
+        run: |
+          npm i gpt-tokenizer
+          for slug in ${{ steps.changed.outputs.skills }}; do
+            SLUG="$slug" node - <<'NODE'
+            const fs = require('fs');
+            const { encode } = require('gpt-tokenizer');
+
+            const slug = process.env.SLUG;
+            const file = `./${slug}/SKILL.md`;
+
+            if (!fs.existsSync(file)) {
+              console.error(`Missing ${file}`);
+              process.exit(1);
+            }
+
+            const text = fs.readFileSync(file, 'utf8');
+            const tokens = encode(text).length;
+
+            console.log(`${file}: ${tokens} tokens`);
+
+            if (tokens > 7500) {
+              console.error(`ERROR: ${file} is too large. Current: ${tokens}, recommended: < 7500`);
+              process.exit(1);
+            }
+NODE
+          done
+
       - name: Publish skills
         if: steps.changed.outputs.skills != ''
         run: |
           for slug in ${{ steps.changed.outputs.skills }}; do
             echo "Publishing ${slug}..."
-
-            # Temporarily move sub-directories out to avoid embedding token limit
-            MOVED_DIR="/tmp/skill-backup-${slug}"
-            if ls "./${slug}"/*/SKILL.md 1>/dev/null 2>&1; then
-              echo "  Temporarily moving sub-skill dirs to avoid embedding limit..."
-              mkdir -p "$MOVED_DIR"
-              for subdir in "./${slug}"/*/; do
-                [ -d "$subdir" ] && mv "$subdir" "$MOVED_DIR/"
-                echo "  Moved: $(basename $subdir)"
-              done
-            fi
-
             clawhub skill publish "./${slug}" \
               --slug "${slug}" \
               --version "${{ steps.version.outputs.version }}" \
               --changelog "Auto-publish from commit ${{ github.sha }}"
-
-            # Restore sub-directories
-            if [ -d "$MOVED_DIR" ] && ls "$MOVED_DIR"/*/SKILL.md 1>/dev/null 2>&1; then
-              echo "  Restoring sub-skill dirs..."
-              mv "$MOVED_DIR"/* "./${slug}/" 2>/dev/null || true
-              rm -rf "$MOVED_DIR"
-            fi
-
             echo "---"
           done
