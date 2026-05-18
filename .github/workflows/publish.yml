@@ -88,28 +88,28 @@ jobs:
         run: |
           npm i gpt-tokenizer
           for slug in ${{ steps.changed.outputs.skills }}; do
-            SLUG="$slug" node - <<'NODE'
+            SLUG="$slug" node -e "
             const fs = require('fs');
             const { encode } = require('gpt-tokenizer');
 
             const slug = process.env.SLUG;
-            const file = `./${slug}/SKILL.md`;
+            const file = './' + slug + '/SKILL.md';
 
             if (!fs.existsSync(file)) {
-              console.error(`Missing ${file}`);
+              console.error('Missing ' + file);
               process.exit(1);
             }
 
             const text = fs.readFileSync(file, 'utf8');
             const tokens = encode(text).length;
 
-            console.log(`${file}: ${tokens} tokens`);
+            console.log(file + ': ' + tokens + ' tokens');
 
             if (tokens > 7500) {
-              console.error(`ERROR: ${file} is too large. Current: ${tokens}, recommended: < 7500`);
+              console.error('ERROR: ' + file + ' is too large. Current: ' + tokens + ', recommended: < 7500');
               process.exit(1);
             }
-NODE
+            "
           done
 
       - name: Publish skills
