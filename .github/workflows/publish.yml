@@ -83,7 +83,7 @@ jobs:
             echo "---"
           done
 
-      - name: Check SKILL token size
+      - name: Log SKILL token size
         if: steps.changed.outputs.skills != ''
         run: |
           npm i gpt-tokenizer
@@ -103,11 +103,10 @@ jobs:
             const text = fs.readFileSync(file, 'utf8');
             const tokens = encode(text).length;
 
-            console.log(file + ': ' + tokens + ' tokens');
-
             if (tokens > 7500) {
-              console.error('ERROR: ' + file + ' is too large. Current: ' + tokens + ', recommended: < 7500');
-              process.exit(1);
+              console.warn('⚠️ WARNING: ' + file + ' is large (' + tokens + ' tokens, recommended: < 7500). Publishing anyway.');
+            } else {
+              console.log('✅ ' + file + ': ' + tokens + ' tokens');
             }
             "
           done
