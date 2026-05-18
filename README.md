@@ -196,6 +196,14 @@ skill-creator-ProMax（生成）
 1. 创建文件夹 + `SKILL.md`，包含 YAML frontmatter
 2. Push 到 `main`，自动发布
 
+**SKILL.md 编写规范**：
+
+- **必须中英双语**：所有内容同时包含中文和英文
+- **Frontmatter description**：纯中文（ClawHub 卡片展示优先中文）
+- **标题**：中文在前，英文在后，用 `/` 分隔，如 `## 标题 / English Title`
+- **正文**：中文在先，英文跟在后面
+- **每次修改后自查**：所有标题和段落都有双语、新增章节补了英文、description 保持纯中文
+
 ---
 
 <a id="english"></a>
@@ -385,3 +393,11 @@ Permanent, loss-proof todo management. Auto-captures todos from chat (text/image
 
 1. Create a folder + `SKILL.md` with YAML frontmatter
 2. Push to `main` — auto-published via GitHub Actions
+
+**SKILL.md Writing Standards**：
+
+- **Bilingual required**: All content must include both Chinese and English
+- **Frontmatter description**: Chinese only (ClawHub card displays Chinese first)
+- **Headings**: Chinese first, English after, separated by `/`, e.g. `## 标题 / English Title`
+- **Body content**: Chinese first, English follows
+- **Self-check after edits**: All headings and paragraphs are bilingual, new sections have English translations, description remains Chinese only
