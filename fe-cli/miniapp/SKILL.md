@@ -50,6 +50,7 @@ pnpm create uni-app <project-name> --template vue3-ts
 | Pinia (uni-app) | Pinia comes with uni-app template |
 | Taro i18n | `@tarojs/plugin-i18n` |
 | Tailwind | `weapp-tailwindcss` (Taro plugin) |
+| Icons | `@taroify/icons` (icon components for Taro) |
 
 ### Step 4: Project Structure (Taro)
 

@@ -202,6 +202,14 @@ description: >
 
 用户说"直接修复"/"fix"/"修复"时，切换到修复模式：读取 `fix/SKILL.md` 子 skill，按其流程逐条应用修复。用户也可选择「复制修复指令」手动交给其他 agent。
 
+### 深度审查模式
+
+用户说"深度审查"/"专项审查"/"focused review"时，切换到深度审查模式：读取 `focused/SKILL.md` 子 skill，按其流程对特定关注点进行深度逐条审查。
+
+### 多轮迭代模式
+
+用户说"继续审查"/"多轮"/"iterative"时，切换到迭代模式：读取 `iterative/SKILL.md` 子 skill，按其流程进行多轮迭代审查，检测 suppress 和遗漏。
+
 ### 审查策略补充
 
 - 日志/注释/格式/文案/埋点类改动：**不要过度关注**。只查敏感信息泄露（如密钥出现在日志中）、编译错误、功能性影响。这类变更如有问题放入「建议关注」，**不放「需要修复」**
@@ -230,6 +238,12 @@ Correctness · Boundary & exceptions · Regression risk · State & side effects 
 ### Direct Fix Mode
 
 When user says "直接修复"/"fix"/"修复", switch to fix mode: read `fix/SKILL.md` sub-skill, follow its workflow to apply fixes one by one. User can also choose to「复制修复指令」and manually hand off to another agent.
+
+### Focused Review Mode
+When user says "深度审查"/"专项审查"/"focused review", switch to focused mode: read `focused/SKILL.md` sub-skill for deep review on specific areas.
+
+### Iterative Review Mode
+When user says "继续审查"/"多轮"/"iterative", switch to iterative mode: read `iterative/SKILL.md` sub-skill for multi-round review with suppress detection.
 
 ### Key Rules
 - Log/comment/format/i18n changes: Low-risk, no over-review (may already be team-agreed)

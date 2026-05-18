@@ -124,6 +124,34 @@ For Vue projects, change `"jsx": "react-jsx"` to `"jsx": "preserve"`.
 
 ---
 
+## tsconfig.electron.json (Electron projects only)
+
+Used for compiling Electron main process (`electron/main.ts`) and preload script (`electron/preload.ts`) that run in Node.js environment, separate from the Vite-rendered frontend.
+
+```json
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "module": "CommonJS",
+    "lib": ["ES2020"],
+    "outDir": "./dist-electron",
+    "rootDir": "./electron",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true
+  },
+  "include": ["electron/**/*.ts"],
+  "exclude": ["node_modules"]
+}
+```
+
+---
+
 ## .eslintrc.cjs (React)
 
 ```javascript

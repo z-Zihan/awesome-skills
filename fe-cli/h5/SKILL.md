@@ -113,6 +113,7 @@ src/
 ```
 
 **`components/SafeArea.tsx`:**
+> **Note:** Inline styles below are for quick scaffolding. **Production environments should replace them with SCSS modules**.
 ```tsx
 // Safe area padding for iPhone notch / Android punch-hole
 export default function SafeArea({ children }: { children: React.ReactNode }) {
@@ -128,6 +129,7 @@ export default function SafeArea({ children }: { children: React.ReactNode }) {
 ```
 
 **`layouts/MobileLayout.tsx`:**
+> **Note:** Inline styles below are for quick scaffolding. **Production environments should replace them with SCSS modules** (e.g., `import styles from './MobileLayout.module.scss'`).
 ```tsx
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { HomeOutlined, AppstoreOutlined, UserOutlined } from '@ant-design/icons';

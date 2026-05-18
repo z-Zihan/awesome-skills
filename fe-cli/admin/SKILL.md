@@ -14,8 +14,8 @@ description: >
 
 Skip questions already answered in user's request.
 
-1. **Framework**: React 19 / Vue 3 (React recommended for admin, Ant Design is React-only)
-2. **Styling**: Ant Design (default, strongly recommended) / Tailwind CSS
+1. **Framework**: React 19 / Vue 3 (React recommended for admin, Ant Design is React-only; Vue admin 推荐 Element Plus)
+2. **Styling**: Ant Design (default for React) / Element Plus (default for Vue) / Tailwind CSS
 3. **CSS Preprocessor**: Sass / Less (default: Sass)
 4. **State Management**: Zustand / Redux Toolkit / None
 5. **i18n**: react-i18next / vue-i18n / None
@@ -29,15 +29,23 @@ Skip questions already answered in user's request.
 pnpm create vite <project-name> --template react-ts
 ```
 
+For Vue: `pnpm create vite <project-name> --template vue-ts`
+
 ### Step 3: Install Dependencies
 
+**React (Ant Design):**
 ```
 pnpm add antd @ant-design/icons @ant-design/v5-patch-for-react-19 react-router-dom dayjs
 ```
 
-Plus extras based on selections (zustand, redux, i18n, etc.)
+**Vue (Element Plus):**
+```
+pnpm add element-plus @element-plus/icons-vue vue-router dayjs
+```
 
-Also: `pnpm add moment` or `dayjs` for date handling.
+Plus extras based on selections (zustand, pinia, i18n, etc.)
+
+For date handling: `pnpm add dayjs` (recommended; moment is deprecated and not recommended).
 
 ### Step 4: Generate Admin-Specific Files
 
@@ -73,6 +81,7 @@ src/
 ### Step 5: Key Templates
 
 **`layouts/AdminLayout.tsx`** — Classic admin layout:
+> **Note:** Inline styles below are for quick scaffolding. **Production environments should replace them with SCSS modules** (e.g., `import styles from './AdminLayout.module.scss'`).
 ```tsx
 import { useState } from 'react';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
@@ -126,6 +135,7 @@ export default function AdminLayout() {
 ```
 
 **`pages/Login/index.tsx`** — Login page:
+> **Note:** Inline styles below are for quick scaffolding. **Production environments should replace them with SCSS modules**.
 ```tsx
 import { useState, type FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -199,6 +209,7 @@ export default function Dashboard() {
 ```
 
 **`pages/List/index.tsx`** — Table list template:
+> **Note:** Inline styles below are for quick scaffolding. **Production environments should replace them with SCSS modules**.
 ```tsx
 import { useState } from 'react';
 import { Table, Button, Input, Space, Tag, type TableColumnsType } from 'antd';
@@ -325,12 +336,195 @@ export default function App() {
 }
 ```
 
-### Step 6: Generate Shared Layer
+### Step 6: Vue Admin Templates (if Vue + Element Plus selected)
+
+**Vue file structure:**
+```
+src/
+├── components/
+│   ├── ErrorBoundary.vue
+│   ├── PageLoading.vue
+│   ├── EmptyState.vue
+│   └── ErrorState.vue
+├── layouts/
+│   └── AdminLayout.vue        # Element Plus sidebar layout
+├── pages/
+│   ├── Login.vue              # Login page
+│   ├── Dashboard.vue          # Dashboard with stats
+│   ├── List.vue               # Table list page
+│   ├── Form.vue               # Form page
+│   └── NotFound.vue
+├── stores/
+│   └── authStore.ts           # Pinia auth store
+├── router/
+│   └── index.ts               # Vue Router with permission guard
+├── App.vue
+└── main.ts
+```
+
+**`main.ts`:**
+```typescript
+import { createApp } from 'vue';
+import { createPinia } from 'pinia';
+import ElementPlus from 'element-plus';
+import zhCn from 'element-plus/es/locale/lang/zh-cn';
+import 'element-plus/dist/index.css';
+import App from './App.vue';
+import router from './router';
+
+const app = createApp(App);
+app.use(createPinia());
+app.use(router);
+app.use(ElementPlus, { locale: zhCn });
+app.mount('#app');
+```
+
+**`router/index.ts`:**
+```typescript
+import { createRouter, createWebHistory } from 'vue-router';
+import { useAuthStore } from '@/stores/authStore';
+
+const router = createRouter({
+  history: createWebHistory(),
+  routes: [
+    { path: '/login', component: () => import('@/pages/Login.vue') },
+    {
+      path: '/',
+      component: () => import('@/layouts/AdminLayout.vue'),
+      meta: { requiresAuth: true },
+      children: [
+        { path: '', redirect: '/dashboard' },
+        { path: 'dashboard', component: () => import('@/pages/Dashboard.vue') },
+        { path: 'list', component: () => import('@/pages/List.vue') },
+        { path: 'form', component: () => import('@/pages/Form.vue') },
+      ],
+    },
+    { path: '/:pathMatch(.*)*', component: () => import('@/pages/NotFound.vue') },
+  ],
+});
+
+router.beforeEach((to) => {
+  const authStore = useAuthStore();
+  if (to.meta.requiresAuth && !authStore.token) return '/login';
+});
+
+export default router;
+```
+
+**`stores/authStore.ts` (Pinia):**
+```typescript
+import { defineStore } from 'pinia';
+import { storage } from '@/utils/storage';
+
+export const useAuthStore = defineStore('auth', {
+  state: () => ({
+    token: storage.get<string>('token') || null,
+    user: storage.get<{ id: string; name: string; avatar?: string }>('user') || null,
+  }),
+  actions: {
+    login(token: string, user: this['user']) {
+      this.token = token;
+      this.user = user;
+      storage.set('token', token);
+      storage.set('user', user);
+    },
+    logout() {
+      this.token = null;
+      this.user = null;
+      storage.remove('token');
+      storage.remove('user');
+    },
+  },
+  getters: {
+    isLoggedIn: (state) => !!state.token,
+  },
+});
+```
+
+**`layouts/AdminLayout.vue`:**
+```vue
+<template>
+  <el-container style="min-height: 100vh">
+    <el-aside :width="isCollapsed ? '64px' : '220px'">
+      <div class="logo-placeholder" />
+      <el-menu
+        :default-active="route.path"
+        :collapse="isCollapsed"
+        background-color="#001529"
+        text-color="#ffffffa6"
+        active-text-color="#fff"
+        @select="(key: string) => router.push(key)"
+      >
+        <el-menu-item index="/dashboard"><el-icon><Odometer /></el-icon><span>仪表盘</span></el-menu-item>
+        <el-menu-item index="/list"><el-icon><Document /></el-icon><span>列表页</span></el-menu-item>
+        <el-menu-item index="/form"><el-icon><EditPen /></el-icon><span>表单页</span></el-menu-item>
+      </el-menu>
+    </el-aside>
+    <el-container>
+      <el-header class="admin-header">
+        <el-icon class="collapse-btn" @click="isCollapsed = !isCollapsed">
+          <component :is="isCollapsed ? 'Expand' : 'Fold'" />
+        </el-icon>
+        <el-dropdown @command="handleCommand">
+          <el-avatar :size="32"><el-icon><User /></el-icon></el-avatar>
+          <template #dropdown>
+            <el-dropdown-menu>
+              <el-dropdown-item command="logout">退出登录</el-dropdown-item>
+            </el-dropdown-menu>
+          </template>
+        </el-dropdown>
+      </el-header>
+      <el-main><router-view /></el-main>
+    </el-container>
+  </el-container>
+</template>
+
+<script setup lang="ts">
+import { ref } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
+import { Odometer, Document, EditPen, User, Expand, Fold } from '@element-plus/icons-vue';
+import { useAuthStore } from '@/stores/authStore';
+
+const route = useRoute();
+const router = useRouter();
+const authStore = useAuthStore();
+const isCollapsed = ref(false);
+
+function handleCommand(command: string) {
+  if (command === 'logout') {
+    authStore.logout();
+    router.push('/login');
+  }
+}
+</script>
+
+<style scoped lang="scss">
+/* Production: replace with SCSS module */
+.logo-placeholder {
+  height: 32px;
+  margin: 16px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 6px;
+}
+.admin-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+}
+.collapse-btn {
+  font-size: 20px;
+  cursor: pointer;
+}
+</style>
+```
+
+### Step 7: Generate Shared Layer
 
 Read `../references/shared-base.md` and `../references/shared-config.md`.
 Generate all shared files: services, utils, styles, configs, env.
 
-### Step 7: Final Setup
+### Step 8: Final Setup
 
 ```bash
 cd <project-name>

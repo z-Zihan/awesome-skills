@@ -11,6 +11,8 @@ Generate these files using `write` tool after the sub-skill has scaffolded the p
 // Lightweight fetch wrapper with interceptors
 // Supports: auto token injection, unified error handling, request/response logging
 
+const LOGIN_PATH = import.meta.env.VITE_LOGIN_PATH || '/login';
+
 const BASE_URL = import.meta.env.VITE_API_BASE_URL || '';
 
 interface RequestConfig extends Omit<RequestInit, 'body'> {
@@ -58,7 +60,7 @@ async function requestInterceptor(config: RequestConfig): Promise<RequestConfig>
 async function responseInterceptor<T>(response: Response): Promise<T> {
   if (response.status === 401) {
     localStorage.removeItem(TOKEN_KEY);
-    window.location.href = LOGIN_PATH; // LOGIN_PATH 为可配置常量，默认 '/login'
+    window.location.href = LOGIN_PATH;
     throw new RequestError(401, 'Unauthorized');
   }
 
@@ -549,6 +551,7 @@ interface ImportMetaEnv {
   readonly VITE_API_BASE_URL: string;
   readonly VITE_STORAGE_PREFIX: string;
   readonly VITE_APP_TITLE: string;
+  readonly VITE_LOGIN_PATH: string;
 }
 
 interface ImportMeta {

@@ -120,6 +120,7 @@ export default class ErrorBoundary extends Component<Props, State> {
 ```
 
 `components/PageLoading.tsx`:
+> **Note:** Inline styles below are for quick scaffolding. **Production environments should replace them with SCSS modules**.
 ```tsx
 // Pure CSS spinner — works regardless of UI library choice
 export default function PageLoading() {
@@ -136,6 +137,7 @@ export default function PageLoading() {
 ```
 
 `components/EmptyState.tsx`:
+> **Note:** Inline styles below are for quick scaffolding. **Production environments should replace them with SCSS modules**.
 ```tsx
 interface Props { description?: string; }
 export default function EmptyState({ description = '暂无数据' }: Props) {
@@ -144,6 +146,7 @@ export default function EmptyState({ description = '暂无数据' }: Props) {
 ```
 
 `components/ErrorState.tsx`:
+> **Note:** Inline styles below are for quick scaffolding. **Production environments should replace them with SCSS modules**.
 ```tsx
 interface Props { error?: Error; onRetry?: () => void; }
 export default function ErrorState({ error, onRetry }: Props) {

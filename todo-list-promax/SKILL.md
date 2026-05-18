@@ -1,6 +1,6 @@
 ---
 name: todo-list-promax
-version: "2.0.0"
+version: "2.0.1"
 description: >
   个人待办事项永久存储、智能分类与定时提醒系统。
   自动从聊天消息中捕获待办（文字/图片/附件），解析时间与优先级，每日晚上9点推送未完成提醒。
@@ -56,8 +56,9 @@ description: >
 2. 如果消息包含图片/附件，下载并保存到 `${workspace}/todo-list/attachments/`
 3. 解析时间要求（如有）
 4. 解析优先级（如有）
-5. 生成唯一 ID，写入 `${workspace}/todo-list/todos.json`
-6. 回复用户确认（简洁一行：ID + 摘要 + 优先级 + 截止时间）
+5. **提取标签（tags）**（见下方标签提取规则）
+6. 生成唯一 ID，写入 `${workspace}/todo-list/todos.json`
+7. 回复用户确认（简洁一行：ID + 摘要 + 优先级 + 截止时间 + 标签）
 
 **时间解析：**
 - 相对时间：今天、明天、后天、下周一、本周五、今晚、月底 等
@@ -77,10 +78,35 @@ description: >
 
 无法判断时默认 P1。
 
+**标签（tags）提取规则：**
+
+默认标签集：`工作`、`学习`、`购物`、`生活`、`健康`、`其他`
+
+提取方式：
+1. **手动指定**：用户使用 `#标签名` 语法，如 `TODO: 完成报告 #工作` → tags: ["工作"]
+2. **关键词映射**：从消息内容中识别名词类别关键词，自动映射到默认标签：
+
+| 关键词示例 | 映射标签 |
+|-----------|---------|
+| 周报、报告、会议、邮件、项目、汇报、评审、上线 | 工作 |
+| 论文、看书、课程、考试、练习、学习、培训 | 学习 |
+| 买、购物、下单、充值、充电线、耳机 | 购物 |
+| 打扫、做饭、取快递、缴费、搬家、洗衣服 | 生活 |
+| 体检、运动、吃药、跑步、挂号、看医生 | 健康 |
+
+3. **无匹配**：当消息中没有可识别的类别关键词且用户未手动指定标签时，tags 为空数组 `[]`
+4. **多标签**：一条待办可以有多个标签，如 `TODO: 买体检套餐 #健康 #购物` → tags: ["健康", "购物"]
+5. **自定义标签**：用户可以使用 `#标签名` 指定不在默认集中的标签，如 `TODO: 修复 bug #前端` → tags: ["前端"]
+
 **附件处理：**
 - 图片/文件：下载到 `${workspace}/todo-list/attachments/{todoId}_{原文件名}`
 - json 中记录 `attachments: [{path, type}]`，type 枚举：`image`（图片）、`file`（其他文件）
 - 同时有文字和图片时，两者都存储
+
+**附件清理机制：**
+- 每次操作 `todos.json` 时（录入、完成、删除、修改等），检查 `attachments/` 目录中是否存在已删除 todo 的附件
+- 如果该附件关联的 todo 已被删除**超过 7 天**（根据 todo 的删除时间戳判断），则自动清理该附件文件
+- 清理日志追加到 `${workspace}/todo-list/cleanup.log`
 
 ### 2. 待办查询
 
@@ -91,24 +117,24 @@ description: >
 - 按日期 → "周一的 todo"、"5月18日的待办"、"今天的" → 筛选 `due_time` 匹配该日期的未完成项
 - 按时间范围 → "本周"、"本月" → 筛选 `due_time` 在范围内
 - 按优先级 → "有哪些紧急的" → 筛选特定级别
-- 按标签 → "bug 相关的待办" → 筛选 `tags` 包含关键词
+- 按标签 → "工作相关的待办" → 筛选 `tags` 包含对应标签
 
 **输出格式：**
 ```
 📋 未完成待办（共 X 条）
 
 🔴 P0 重要紧急
-  #1 今天下班前提交周报  📅 今天
+  #1 今天下班前提交周报  📅 今天  🏷 工作
 
 🟡 P1 重要不紧急
-  #3 看完那篇论文  📅 下周一
-  #5 整理桌面  （无截止时间）
+  #3 看完那篇论文  📅 下周一  🏷 学习
+  #5 整理桌面  （无截止时间）  🏷 生活
 
 🟠 P2 急但不重要
-  #8 回复那个邮件  📅 明天
+  #8 回复那个邮件  📅 明天  🏷 工作
 
 🟢 P3 不急
-  #7 买个充电线  📅 有空再说
+  #7 买个充电线  📅 有空再说  🏷 购物
 ```
 
 ### 3. 待办操作
@@ -117,18 +143,37 @@ description: >
 **删除：** "删除 #1" 或 "TODO 删除 1" 或 "delete #1" → 回复待删除的 todo 内容摘要（ID + 内容 + 优先级），等用户确认后再移除。用户说"确认"或"删"时才执行
 **修改：** "#1 改成明天" 或 "#1 change to tomorrow" → 更新对应字段，回复确认
 
-**可修改字段：** `content`（内容）、`due_time`（截止时间）、`priority`（优先级）。语法：`#N 字段:新值`，如 `#1 截止:明天`、`#1 优先级:P0`、`#1 内容:新的任务描述`
+**可修改字段：** `content`（内容）、`due_time`（截止时间）、`priority`（优先级）、`tags`（标签）
 
-**撤销机制：** 用户说"撤销"或"undo"时，恢复最近一次操作的待办状态（从 `todos.json.bak` 读取上一版本）。仅支持撤销最近一次操作。
+**修改语法：**
+- 字段名语法：`#N due_time:明天`、`#N priority:P0`、`#N content:新的任务描述`、`#N tags:工作,学习`
+- 自然语言语法（同样支持）：`#1 截止:明天`、`#1 优先级:P0`、`#1 内容:新的任务描述`
+- 两种写法等价，系统都能识别
+
+**撤销机制：**
+- 用户说"撤销"或"undo"时，恢复到 `todos.json.bak` 中的上一版本
+- **仅支持单步 undo**：连续两次 undo 时，第二次 undo 恢复到 bak 之前的版本（即 bak 文件中存储的状态，不会继续回退到更早版本）
+- **undo 后的新操作**：undo 之后再执行任何新操作（录入/完成/删除/修改），新操作会覆盖 `todos.json.bak`，之前的 undo 状态不可再恢复
+- 简言之：永远只能撤销最近一次操作，undo 不是无限回退栈
 
 ### 4. 每日提醒
 
 - **时间：** 每天 21:00
-- **配置方式：** 使用 OpenClaw cron 功能创建每日提醒任务，或参考 `feishu-cron-reminder` skill 的配置方式。示例：每天 21:00 触发一个 session 读取 todos.json 并筛选未完成项推送。
-- **筛选：** 有 `due_time` 且 `status != done` 的待办
-- **排序：** 按优先级 P0 > P1 > P2 > P3
-- **输出：** 紧凑列表，只推未完成的。末尾附操作指引：`回复"完成 #N"标记完成 · 回复"TODOLIST"查看全部 · 回复"#N 改成X"修改 · 回复"撤销"恢复最近操作`
-- **跳过：** 如果没有需要提醒的待办，不推送
+- **配置方式（具体步骤）：**
+
+  使用 OpenClaw cron 创建每日提醒任务，最小步骤如下：
+
+  1. 创建 cron 任务，调度规则为 `0 21 * * *`（每天 21:00）
+  2. cron 任务触发时执行以下流程：
+     a. 读取 `${workspace}/todo-list/todos.json`
+     b. 筛选条件：`status != "done"` 且 `due_time != null`
+     c. 按优先级排序（P0 > P1 > P2 > P3）
+     d. 如有匹配项，生成紧凑列表消息并推送到用户聊天
+     e. 如无匹配项，不推送
+     f. 更新 `last_reminder_at` 为当前时间
+  3. 推送消息末尾附操作指引：`回复"完成 #N"标记完成 · 回复"TODOLIST"查看全部 · 回复"#N due_time:X"修改 · 回复"撤销"恢复最近操作`
+  4. cron 命令示例：`openclaw cron add --schedule "0 21 * * *" --task "Read todos.json, filter pending items with due_time, push reminder if any"`
+
 - **降级策略：** cron 不可用或执行失败时，在下次用户交互时补充推送未提醒项（检查 `last_reminder_at`，若超过 24 小时则补推）
 
 ## 数据结构
@@ -148,6 +193,7 @@ description: >
       "tags": ["工作"],
       "created_at": "2026-05-16T09:30:00+08:00",
       "completed_at": null,
+      "deleted_at": null,
       "attachments": [],
       "source_message": "TODO:今天下班前提交周报"
     }
@@ -162,9 +208,10 @@ description: >
 - `status`: `pending` | `done`
 - `priority`: `P0` | `P1` | `P2` | `P3`
 - `due_time`: 截止日期 YYYY-MM-DD，可为 null
-- `tags`: 标签数组，用于分类和筛选（如 `["bug", "通知"]`），可为空数组
+- `tags`: 标签数组，用于分类和筛选（如 `["工作", "bug"]`），可为空数组
 - `created_at`: 创建时间 ISO 8601
 - `completed_at`: 完成时间 ISO 8601，完成时填入
+- `deleted_at`: 删除时间 ISO 8601，删除时填入（用于附件 7 天清理判断）
 - `attachments`: `[{path, type}]` 附件列表
 - `source_message`: 原始消息内容
 - `last_reminder_at`: 上次提醒时间 ISO 8601（用于降级补推）
@@ -184,7 +231,8 @@ description: >
 - `todos.json` 或目录不存在时自动创建
 - 写入 json 前自动备份上一版本到 `todos.json.bak`
 - 读取 json 解析失败时，尝试使用 `todos.json.bak` 恢复
-- 删除 todo 后，attachments 目录中的文件**保留 7 天**后清理（避免误删后无法恢复）
+- 删除 todo 后，记录 `deleted_at` 时间戳，attachments 目录中的文件**保留 7 天**后自动清理（避免误删后无法恢复）
+- 每次操作 todos.json 时检查是否有超过 7 天的已删除 todo 附件，有则清理
 - Schema 升级：读取时检查 `version` 字段，若不匹配当前版本，执行迁移（如新增字段填默认值）并写回
 
 ---
@@ -192,169 +240,60 @@ description: >
 
 # English Version
 
-## Goal
+> **This skill is written in Chinese.** For full details, please read the Chinese section above.
+> You can ask AI to translate the Chinese section if needed.
 
-Provide a permanent, loss-proof todo management system. Auto-capture todos from chat messages, parse time & priority intelligently, and proactively remind daily.
+## Summary
 
-## Core Principles
+**todo-list-promax** — Personal todo management system with permanent storage, smart categorization, and daily reminders.
 
-1. **Zero-friction input** — User sends a casual message or image, system auto-identifies and stores
-2. **Permanent storage** — Done = mark as done, not delete. Deleted = actually removed
-3. **Smart parsing** — Auto-extract time, priority, and task content from natural language
-4. **Proactive reminders** — Unfinished tasks with deadlines get a daily push at 21:00
-5. **On-demand response** — Don't reply unless asked, avoid disturbance
+### Core Principles
+1. **Zero-friction input** — Auto-capture from casual messages or images
+2. **Permanent storage** — Done ≠ delete; deleted = actually removed
+3. **Smart parsing** — Auto-extract time, priority, tags from natural language
+4. **Daily reminders** — Push unfinished tasks at 21:00 via cron
+5. **On-demand** — Don't disturb unless asked
 
-## Responsibilities
+### Key Features
 
-### 1. Todo Capture
+| Feature | Details |
+|---------|---------|
+| Capture | Triggers: `TODO:`, `add todo`, `remind me to`, etc. Fuzzy input → ask, don't silently capture |
+| Query | Triggers: `TODOLIST`, `my todos`, etc. Filter by date/range/priority/tags |
+| Operations | Complete, delete (with confirmation), modify, undo (single-step only) |
+| Tags | Auto-extract via keyword mapping (工作/学习/购物/生活/健康/其他) or manual `#tag` syntax. Default: empty array |
+| Daily reminder | Cron at 21:00: read todos.json → filter pending with due_time → push if any. Fallback: push on next interaction if >24h since last reminder |
+| Attachments | Saved to `attachments/`, auto-cleaned 7 days after todo deletion |
 
-**Triggers:** `TODO:`, `add todo`, `remind me to`, `don't forget`, `note this`, `帮我记录一下`, `待办：`, `记一下`, `备忘`, `提醒我`
+### Modify Syntax
+- Field name syntax: `#1 due_time:明天`, `#1 priority:P0`, `#1 content:新内容`, `#1 tags:工作,学习`
+- Natural language also supported: `#1 截止:明天`, `#1 优先级:P0`, `#1 内容:新内容`
+- Both are equivalent
 
-**Fuzzy input rules:** Message must contain a **verb-object structure** or **clear action word** to trigger. Criteria:
-- ✅ Trigger: verb + object ("submit report", "buy cable", "read paper")
-- ✅ Trigger: clear action + target ("TODO: deploy test environment")
-- ❌ No trigger: pure state/intention ("I plan to eat", "tired lately", "want to learn Rust")
-- ❓ Ambiguous: **Ask instead of silently capturing.** E.g., "TODO: handle that thing" → reply "What todo would you like to record? Please specify the task"
+### Undo Specification
+- Single-step only: second consecutive undo restores to the bak version (no further rollback)
+- After undo, any new operation overwrites bak — previous undo state is lost
+- In short: always only the most recent operation can be undone
 
-**Operation priority:** If a single message matches both capture and operation triggers, prioritize the operation (complete > delete > modify > capture), do not create duplicates.
-
-**Contradiction handling:** When user message contains conflicting instructions (e.g., "completed #1 delete #1" or "TODO: delete all"):
-- Operation conflicts: execute the first by priority, ignore the conflicting second, inform user
-- Batch operations ("delete all"/"complete all"): list affected items, confirm one by one, no silent batch execution
-- Out-of-scope requests ("sync todos to Feishu"): reject with "todo-list only manages local todos, no external sync"
-
-**Flow:**
-1. Extract task content from user message
-2. If message contains images/attachments, download and save to `${workspace}/todo-list/attachments/`
-3. Parse time requirements (if any)
-4. Parse priority (if any)
-5. Generate unique ID, write to `${workspace}/todo-list/todos.json`
-6. Reply with confirmation (concise one-liner: ID + summary + priority + deadline)
-
-**Time Parsing:**
-- Relative: today, tomorrow, day after tomorrow, next Monday, this Friday, tonight, end of month, etc.
-- Absolute: May 20, 5-20, 2026/5/20, etc.
-- Vague: ASAP, when free, whenever → no deadline set
-- Precision: day-level only, no specific hours
-- Unparseable → no deadline, no follow-up questions
-
-**Priority Parsing:**
-
-| Level | Markers | Natural Language Cues |
-|-------|---------|-----------------------|
-| P0 | `[P0]`, `⚠️` | "urgent", "immediately", "right now", "must do today" |
-| P1 | `[P1]` or unmarked | "important", "need to do" (default) |
-| P2 | `[P2]`, `⚡` | "urgent but not important", "quick one" |
-| P3 | `[P3]`, `📌` | "no rush", "note to self", "whenever" |
-
-Default to P1 when unclear.
-
-**Attachment Handling:**
-- Images/files: download to `${workspace}/todo-list/attachments/{todoId}_{original_filename}`
-- Record in json: `attachments: [{path, type}]`, type enum: `image` (images), `file` (other files)
-- When both text and images are present, store both
-
-### 2. Todo Query
-
-**Triggers:** `TODOLIST`, `my todos`, `todo list`, `what's pending`, `show todos`, `待办列表`, `查看待办`, `我有哪些待办`, `还有什么没做`, `我的清单`
-
-**Query Modes:**
-- No filter → all pending todos, sorted by priority
-- By date → "Monday's todos", "May 18 todos", "today's" → filter `due_time` matching that date
-- By time range → "this week", "this month" → filter `due_time` within range
-- By priority → todos at a specific level (e.g., "what's urgent")
-- By tag → "bug-related todos" → filter `tags` containing the keyword
-
-**Output Format:**
-```
-📋 Pending Todos (X total)
-
-🔴 P0 Urgent & Important
-  #1 Submit weekly report before end of day  📅 Today
-
-🟡 P1 Important
-  #3 Read that paper  📅 Next Monday
-  #5 Clean up desk  (No deadline)
-
-🟠 P2 Urgent but not important
-  #8 Reply to that email  📅 Tomorrow
-
-🟢 P3 No Rush
-  #7 Buy a charging cable  📅 Whenever
-```
-
-### 3. Todo Operations
-
-**Complete:** "完成了 #1" or "TODO 完成 1" or "done #1" → mark `status: done`, record `completed_at`
-**Delete:** "删除 #1" or "TODO 删除 1" or "delete #1" → reply with the todo's summary, wait for user confirmation. Execute only when user says "确认" or "删"
-**Modify:** "#1 改成明天" or "#1 change to tomorrow" → update the corresponding field, reply with confirmation
-
-**Modifiable fields:** `content`, `due_time`, `priority`. Syntax: `#N field:new_value`, e.g., `#1 截止:明天`, `#1 优先级:P0`, `#1 内容:new task description`
-
-**Undo:** When user says "撤销" or "undo", restore the todo state from the previous version (`todos.json.bak`). Only the most recent operation can be undone.
-
-### 4. Daily Reminder
-
-- **Time:** Every day at 21:00
-- **Setup:** Use OpenClaw cron or `feishu-cron-reminder` skill. Example: trigger a session at 21:00 daily that reads todos.json and filters pending items.
-- **Filter:** Items with `due_time` and `status != done`
-- **Sort:** By priority P0 > P1 > P2 > P3
-- **Output:** Compact list, only pending items. Append action guide: `Reply "完成 #N" to mark done · Reply "TODOLIST" to view all · Reply "#N 改成X" to modify · Reply "撤销" to undo`
-- **Skip:** If no reminders needed, don't push
-- **Fallback:** If cron fails or is unavailable, push missed reminders on next user interaction (check `last_reminder_at`, if > 24h ago then push)
-
-## Data Schema
-
-Storage file: `${workspace}/todo-list/todos.json` (`workspace` = current OpenClaw working directory)
-
+### Data Schema
 ```json
 {
-  "version": 2,
-  "todos": [
-    {
-      "id": 1,
-      "content": "Submit weekly report",
-      "status": "pending",
-      "priority": "P0",
-      "due_time": "2026-05-16",
-      "tags": ["work"],
-      "created_at": "2026-05-16T09:30:00+08:00",
-      "completed_at": null,
-      "attachments": [],
-      "source_message": "TODO:Submit weekly report before end of day"
-    }
-  ],
-  "last_reminder_at": "2026-05-16T21:00:00+08:00"
+  "id": 1, "content": "...", "status": "pending|done",
+  "priority": "P0|P1|P2|P3", "due_time": "YYYY-MM-DD|null",
+  "tags": [], "created_at": "ISO8601", "completed_at": null,
+  "deleted_at": null, "attachments": [{"path":"","type":"image|file"}],
+  "source_message": "..."
 }
 ```
 
-Field Reference:
-- `id`: Auto-increment integer, never reuse
-- `content`: Task content (text summary)
-- `status`: `pending` | `done`
-- `priority`: `P0` | `P1` | `P2` | `P3`
-- `due_time`: Deadline date YYYY-MM-DD, nullable
-- `tags`: Tag array for categorization and filtering (e.g., `["bug", "notification"]`), can be empty
-- `created_at`: Creation time ISO 8601
-- `completed_at`: Completion time ISO 8601, set when done
-- `attachments`: `[{path, type}]` attachment list
-- `source_message`: Original message text
-- `last_reminder_at`: Last reminder time ISO 8601 (for fallback push)
+### Cron Setup (Minimal Steps)
+1. Create cron: `0 21 * * *`
+2. On trigger: read `todos.json` → filter `status != "done"` AND `due_time != null` → sort by priority → push if any → update `last_reminder_at`
+3. Append action guide to push message
 
-## Concurrency Safety
-
-Use atomic writes for todos.json: write to temp file `todos.json.tmp` first, then `mv` (rename) to replace original. Prevents data loss from concurrent session writes.
-
-## Constraints
-
-- Storage path: `${workspace}/todo-list/` (relative to current working directory)
-- Attachment path: `${workspace}/todo-list/attachments/`
-- ID auto-increments, deleted IDs are never reused
-- Do not modify original user messages
-- Delete operations require secondary confirmation
-- Time parsing precision: day-level only
-- Auto-create `todos.json` and directories if they don't exist
-- Auto-backup previous version to `todos.json.bak` before writing
-- If json parsing fails, attempt recovery from `todos.json.bak`
-- After deleting a todo, attachment files are **retained for 7 days** before cleanup (allows recovery from accidental deletion)
-- Schema upgrade: check `version` field on read; if mismatch, execute migration (e.g., add new fields with defaults) and write back
+### Constraints
+- Atomic writes (write to `.tmp` then `mv`)
+- Auto-backup to `todos.json.bak` before writes
+- Auto-recover from `.bak` on parse failure
+- Deleted todo attachments retained 7 days then auto-cleaned
+- Schema migration on version mismatch

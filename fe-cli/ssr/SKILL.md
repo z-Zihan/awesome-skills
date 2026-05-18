@@ -156,6 +156,7 @@ export async function request<T = unknown>(url: string, options: RequestOptions 
 ```
 
 **`app/page.tsx`** — Home with SSG:
+> **Note:** Inline styles below are for quick scaffolding. **Production environments should replace them with SCSS modules or CSS Modules**.
 ```tsx
 export default async function Home() {
   // Server-side data fetch (SSG by default)
@@ -170,6 +171,7 @@ export default async function Home() {
 ```
 
 **`app/loading.tsx`:**
+> **Note:** Inline styles below are for quick scaffolding. **Production environments should replace them with SCSS modules or CSS Modules**.
 ```tsx
 export default function Loading() {
   return (
@@ -181,6 +183,7 @@ export default function Loading() {
 ```
 
 **`app/error.tsx`:**
+> **Note:** Inline styles below are for quick scaffolding. **Production environments should replace them with SCSS modules or CSS Modules**.
 ```tsx
 'use client';
 export default function Error({ error, reset }: { error: Error; reset: () => void }) {
@@ -195,6 +198,7 @@ export default function Error({ error, reset }: { error: Error; reset: () => voi
 ```
 
 **`app/not-found.tsx`:**
+> **Note:** Inline styles below are for quick scaffolding. **Production environments should replace them with SCSS modules or CSS Modules**.
 ```tsx
 import Link from 'next/link';
 export default function NotFound() {

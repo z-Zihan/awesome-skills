@@ -1,6 +1,6 @@
 ---
 name: fe-cli
-version: "2.0.0"
+version: "2.0.1"
 homepage: https://github.com/z-Zihan/awesome-skills
 description: >
   前端项目脚手架 CLI。支持 React/Vue/Next.js + Tailwind/Ant Design/MUI + Zustand/Redux + i18n，
@@ -15,7 +15,7 @@ description: >
 
 ## 语言规则
 
-**检测用户使用的语言，全程使用同一语言输出。** 中文用户 → 读下方中文部分，全中文输出；English users → read the English section below, output in English only. 技术术语（React、Vite、pnpm 等）保留原文即可。
+**检测用户使用的语言，全程使用同一语言输出。** 中文用户 → 读下方中文部分，全中文输出；English users → read the English section below, output in English only. 技术术语（React、Vite、pnpm 等）保留原文即可。子技能文件为英文，AI 执行时根据用户语言输出对应语言的交互文本。
 
 ---
 
@@ -175,6 +175,16 @@ This file is for AI agents to quickly understand the project.
 - **Node 版本**：目标 Node 18+
 - **pnpm 构建脚本**：在 package.json 中使用 `pnpm.onlyBuiltDependencies` 自动批准原生构建（如 `@parcel/watcher`）。Vite 渲染层构建命令（`build:prod`、`build:test`）不应包含 `tsc -b`——Vite 处理 TS 转译；类型检查是独立的 `typecheck` 脚本。**Electron 主进程例外**：`electron/main.ts` 和 `preload.ts` 在 Node 环境运行，需要 `tsc -p tsconfig.electron.json` 编译。
 
+## 模板占位符参数化
+
+生成项目时，AI 应主动将模板中的占位值替换为用户提供的实际值，包括但不限于：
+- `com.example.app` → 用户指定的应用 ID
+- `https://api.example.com` → 用户指定的 API 地址
+- `My App` / `Your App` → 用户指定的应用名称
+- `https://update.example.com` → 用户指定的更新服务地址
+
+完成后提示用户确认："项目已生成，请确认以下占位值是否正确：[列出替换后的值]"
+
 ## 已有项目审查
 
 当用户要求检查已有项目时："检查这个前端项目"、"审查项目规范性"：
@@ -223,199 +233,12 @@ This file is for AI agents to quickly understand the project.
 
 # English Version
 
-Shared entry point for all frontend project types. Routes to type-specific sub-skills and generates the shared common layer (fetch utils, global styles, multi-env config, etc.).
+**fe-cli** is a unified entry point for scaffolding frontend projects. It detects the project type from user input and routes to one of 6 sub-skills: **web** (SPA), **admin** (dashboard/CRUD), **h5** (mobile), **electron** (desktop), **ssr** (Next.js/Nuxt), or **miniapp** (WeChat Mini Program). Each sub-skill handles type-specific questions, file generation, and setup.
 
-## Quick Start
+**Key rules:** Always use **pnpm**; default CSS preprocessor is **Sass (SCSS)**; path alias `@/` → `src/`; native **fetch** wrapper (no axios); always generate `.env` / `.env.development` / `.env.test` / `.env.production`; always generate `services/logger.ts` + `services/log-export.ts`; target Node 18+; Vite handles TS transpilation (separate `typecheck` script), except Electron main process needs `tsc -p tsconfig.electron.json`.
 
-### One-liner (skip all questions)
+After type-specific files, generate the **shared common layer** (request utils, global styles, multi-env config, utilities, type declarations). Finally, generate `.ai/PROJECT.md` for AI-readability. Supports **existing project audit** against the same standards.
 
-```
-User: "Initialize a React + Tailwind + Zustand admin project called my-admin"
-→ Identify type=admin → Delegate to fe-cli-admin quick mode
-```
+**Template placeholder rule:** When generating projects, AI should replace placeholders (`com.example.app`, `https://api.example.com`, etc.) with actual user-provided values and prompt the user to confirm.
 
-### Interactive mode
-
-```
-User: "Create a new frontend project"
-→ Ask: "What type?" → Route to sub-skill → Sub-skill asks detailed questions
-```
-
-## Project Type Detection
-
-Identify the type from the user's request:
-
-| Keywords | Type | Sub-Skill |
-|---|---|---|
-| Admin/Dashboard/CRUD | admin | fe-cli-admin |
-| Mobile/H5/WeChat H5 | h5 | fe-cli-h5 |
-| Electron/Desktop/Client | electron | fe-cli-electron |
-| SSR/Next.js/Nuxt/SEO | ssr | fe-cli-ssr |
-| MiniApp/WeChat Mini Program | miniapp | fe-cli-miniapp |
-| (Default/Web/SPA/Website) | web | fe-cli-web |
-
-If unsure, ask: "What type of project? Web SPA / Admin Dashboard / Mobile H5 / Electron Desktop / SSR / Mini App"
-
-### Input Clarification
-
-When the user's request is ambiguous, **must clarify before executing**：
-- **Vague input** (e.g., "help me set up", "new project") → Ask for project name + type + tech stack preference
-- **Contradictory request** (e.g., "use React and Vue") → Point out the contradiction, ask which one to use
-- **Out-of-scope request** (e.g., "deploy to server for me") → Reject and explain: "fe-cli only handles local project initialization, please use other tools for deployment"
-- **Non-frontend request** (e.g., "write a Python backend") → Reject and redirect: "fe-cli only supports frontend project scaffolding"
-
-### Degradation Strategy
-
-- `pnpm create vite` fails → Suggest manual creation: `pnpm init vite@latest`, or check network/Node version
-- Dependency install fails → Suggest checking network proxy, npm registry config, provide Taobao mirror command
-- Target directory already exists → Ask: "Directory already exists. Overwrite / Merge / Cancel?"
-- Referenced package version doesn't exist → Suggest user manually specify version, don't block the flow
-
-## Routing to Sub-Skills
-
-Once type is identified, read the corresponding sub-skill's SKILL.md：
-
-```
-Read: ./<type>/SKILL.md (relative to fe-cli/)
-```
-
-Each sub-skill handles：
-1. Type-specific questions (framework, UI library, state management, i18n, pre-commit)
-2. Type-specific file generation (layouts, pages, routes)
-3. Installation and post-setup
-
-## Shared Common Layer
-
-After the sub-skill generates type-specific files, generate these shared files into the project.
-Read `references/shared-base.md` and `references/shared-config.md` for code templates.
-
-### Directory structure to generate
-
-```
-project-name/
-├── src/
-│   ├── services/
-│   │   ├── request.ts         # Fetch request wrapper (with interceptors)
-│   │   ├── logger.ts          # Structured logger (leveled, rotated, persisted)
-│   │   ├── log-export.ts      # Log export (download .log/.json) + upload (TBD)
-│   │   └── api/
-│   │       └── index.ts       # API interface definitions
-│   ├── styles/
-│   │   ├── global.scss        # CSS variables + global styles
-│   │   ├── reset.scss         # CSS reset
-│   │   └── variables.scss     # Design tokens (colors, spacing, breakpoints)
-│   ├── utils/
-│   │   ├── index.ts           # Common utilities (debounce, deep copy, etc.)
-│   │   ├── storage.ts         # localStorage/sessionStorage wrapper
-│   │   ├── format.ts          # Date/number formatting
-│   │   └── validate.ts        # Form validation utilities
-│   └── types/
-│       └── global.d.ts        # Global type declarations
-├── .env                       # Common env variables
-├── .env.development           # Development environment
-├── .env.test                  # Test environment
-├── .env.production            # Production environment
-└── package.json               # Scripts config
-```
-
-### Package.json scripts
-
-```json
-{
-  "scripts": {
-    "dev": "vite --mode development",
-    "dev:test": "vite --mode test",
-    "build:test": "vite build --mode test",
-    "build:prod": "vite build --mode production",
-    "preview": "vite preview",
-    "lint": "eslint src --ext .ts,.tsx",
-    "lint:fix": "eslint src --ext .ts,.tsx --fix",
-    "typecheck": "tsc --noEmit"
-  }
-}
-```
-
-### Shared code templates
-
-All shared source code templates are in `references/shared-base.md` (including logger.ts and log-export.ts).
-Vite/tsconfig/eslint config templates are in `references/shared-config.md`.
-
-## AI-Readable Project Doc
-
-After generating ALL project files (shared layer + type-specific), generate `.ai/PROJECT.md` in the project root.
-This file is for AI agents to quickly understand the project.
-
-### .ai/PROJECT.md Goals
-
-- **Full directory tree** with every file listed and a one-line purpose
-- **Tech stack summary** (framework, UI library, state management, CSS, etc.)
-- **Architectural conventions** (path aliases, import order, naming rules)
-- **Commands** (dev, build, test, lint, typecheck)
-- **Key patterns** (routing, API calls, state management)
-
-### Template
-
-Full template is in `references/ai-project-md.md`, adjust the directory tree based on the specific project type.
-
-### Rules
-
-- Use `tree` command format for directories (├── and └──), files with one-line description
-- Every file entry must have a comment explaining its purpose
-- Group by directory; keep the same order as the actual file system
-- Update whenever project structure changes
-- Keep it concise — one line per file, not paragraphs
-
-## Key Rules
-
-- **Package manager**: Always use pnpm
-- **CSS preprocessor**: Sass (SCSS syntax) by default
-- **Path alias**: Configure `@/` → `src/` in tsconfig and vite config
-- **Responsive breakpoints**: Mobile < 768px < Tablet < 1024px < Desktop
-- **Network library**: Native fetch wrapper (not axios), see references/shared-base.md
-- **Environment files**: Always generate `.env`, `.env.development`, `.env.test`, `.env.production`
-- **Logging**: Always generate `services/logger.ts` + `services/log-export.ts`. Use `Logger.child("Module")` pattern. Max storage 5MB auto-cleanup. Console output only in dev mode. Upload endpoint is a placeholder (TBD).
-- **Node version**: Target Node 18+
-- **pnpm build scripts**: Use `pnpm.onlyBuiltDependencies` in package.json to auto-approve native builds (e.g., `@parcel/watcher`). Vite renderer build commands (`build:prod`, `build:test`) should not include `tsc -b` — Vite handles TS transpilation; type checking is a separate `typecheck` script. **Electron main process exception**: `electron/main.ts` and `preload.ts` run in Node environment and need `tsc -p tsconfig.electron.json` compilation.
-
-## Existing Project Audit
-
-When the user asks to check an existing project: "Check this frontend project", "Audit project standards":
-
-### Audit Steps
-
-1. Read `package.json` → Check required dependencies and scripts
-2. Check vite.config / tsconfig / eslint / prettier config
-3. Compare src directory structure against the above standards
-4. Output audit report
-
-### Audit Report Format
-
-```markdown
-## Project Audit Report
-
-### ✅ Compliant
-- [Items meeting standards]
-
-### ❌ Missing
-- [Missing item]: Description + suggested fix
-- ...
-
-### ⚠️ Suggestions
-- [Optional improvement]: Description
-```
-
-### Audit Checklist
-
-| Check | Standard |
-|---|---|
-| Package manager | Using pnpm |
-| Path alias | `@/` → `src/` in tsconfig + vite.config |
-| CSS preprocessor | Sass (SCSS) configured |
-| Environment files | `.env` / `.env.development` / `.env.test` / `.env.production` exist |
-| Request wrapper | `services/request.ts` using fetch wrapper (not axios) |
-| Logging | `services/logger.ts` exists, using `Logger.child("Module")` pattern |
-| Global styles | `styles/global.scss` + `reset.scss` + `variables.scss` |
-| Utility functions | `utils/index.ts` + `storage.ts` + `format.ts` + `validate.ts` |
-| Type declarations | `types/global.d.ts` contains ImportMetaEnv |
-| Scripts | Contains dev / build:prod / build:test / lint / typecheck |
-| .ai/PROJECT.md | Exists and matches actual project structure |
+Sub-skill files are in English; AI should output interaction text in the user's language during execution.
