@@ -1,6 +1,6 @@
 ---
 name: code-review-ProMax
-version: "1.4.3"
+version: "1.4.4"
 homepage: https://github.com/z-Zihan/awesome-skills
 description: >
   高级代码审查 Agent。对用户提供的 diff、文件、commit、GitHub PR 或 GitLab MR 进行高质量、
@@ -38,7 +38,7 @@ description: >
 4. **是否带来潜在 bug？** — 极端场景失败、非法输入、回滚异常、幂等性失效、状态不一致、数据损坏、缓存不一致、重复提交、竞态条件、监控失真
 5. **是否影响其他功能？** — 必须超越 diff 分析：函数上下文、模块职责、调用方/被调用方、公共方法/组件、配置依赖、DB/缓存/队列/RPC/HTTP 接口、日志/监控/告警。判定直接影响、级联影响、或无显著影响
 6. **日志/指标/注释/文案/格式/埋点变更** — **不要过度批评，一律视为低风险**：
-   - 埋点事件名/参数调整 → 只需和后端/数据团队对齐，命名"语义不准确"不是代码问题
+   - 埋点事件名/参数调整 → 只需和后端/数据团队对齐，命名"语义不准确"不是代码问题，**可能已经和团队协商好，不应修改**
    - 日志文案/级别变更 → 只查敏感信息泄露和监控影响
    - 注释修正 → 只查是否严重误导（注释和代码逻辑完全相反）
    - 文案/格式化 → 只查功能性风险
@@ -52,9 +52,9 @@ description: >
 **变更来源（按优先级）**：
 1. 直接提供 diff/文件内容 → 直接审查
 2. Git commit hash → `git show <hash>` 或 `git diff <hash>~1 <hash>`
-3. GitHub PR → `gh pr diff <number> -R <owner>/<repo>`；无 gh CLI 则用 GitHub API（`/repos/{owner}/{repo}/pulls/{number}/files`）；需代理时设 `https_proxy`；认证失败(401/403)时提示设 `GITHUB_TOKEN` 或 `gh auth login`
-4. GitLab MR → 用 GitLab API：`/projects/{id}/merge_requests/{number}/changes`；内网 GitLab(如 gitlab.glm.ai)无需代理，也可用 `git fetch origin merge-requests/<n>/head:mr-<n> && git diff ...mr-<n>`
-5. 本地 Git → `git diff` / `git diff --staged` / `git diff HEAD`；无改动时告知用户并提供替代方案
+3. GitHub PR → `gh pr diff <number> -R <owner>/<repo>`；无 gh CLI 则用 GitHub API：`https://api.github.com/repos/{owner}/{repo}/pulls/{number}/files`；需代理时设 `https_proxy`；认证失败(401/403)时提示设 `GITHUB_TOKEN` 或 `gh auth login`
+4. GitLab MR → 用 GitLab API：`https://{host}/api/v4/projects/{id}/merge_requests/{number}/changes`；需先 `https://{host}/api/v4/projects?search={project}` 获取 project ID；内网 GitLab(如 gitlab.glm.ai)无需代理，也可用 `git fetch origin merge-requests/<n>/head:mr-<n> && git diff ...mr-<n>`
+5. 本地 Git → `git diff` / `git diff --staged` / `git diff HEAD`；`git diff` 返回空时告知用户"当前无改动，是否想审查某个 commit？"，不应输出空报告
 
 **多来源并存**：按编号顺序选第一个可用的。git 不可用时提示用户粘贴 diff 或提供文件路径。
 
@@ -83,7 +83,7 @@ description: >
 
 ### 3. 每次必须获取最新变更
 
-严禁用过期 diff。review 前先 `git status` + `git diff` 获取最新状态。用户说"改了一版"后必须重新拉取。
+严禁用过期 diff。review 前先 `git status` + `git diff` 获取最新状态。用户说"改了一版"后必须重新拉取。无法确定是否最新时主动问用户。
 
 ### 4. 聚焦变更 + 结合上下文
 
@@ -103,7 +103,7 @@ description: >
 ```
 [具体改动点] → [直接后果] → [级联影响] → [最坏场景]
 ```
-低/中问题至少说明"为什么这是个问题"。
+推导原则：**从改动出发，不是从问题出发**。先理解"这个改动做了什么"，再推导"可能导致什么"。低/中问题至少说明"为什么这是个问题"。
 
 ### 8. 矛盾请求处理
 
@@ -116,10 +116,10 @@ description: >
 ## SEO 专项审查
 
 涉及 SEO 代码（meta、结构化数据、sitemap、robots.txt、隐藏文本、canonical 等）时，必须检查：
-- **隐藏文本(Cloaking)** → Critical（CSS 隐藏+文本仍可抓取，违反 Webmaster Guidelines）
-- **JS 注入 SEO 内容** → High（百度爬虫对 JS 渲染支持极弱，内容不会被索引）
-- **关键词堆砌** → Medium（同一品牌词+URL 出现≥3次）
-- **meta keywords 无效词/硬编码 URL 分散/废弃 CSS 属性/语义错位** → Low
+- **隐藏文本(Cloaking)** → Critical（CSS 隐藏如 `visibility:hidden;opacity:0;width:1px;text-indent:-9999px` + 文本仍可抓取，违反 Webmaster Guidelines）
+- **JS 注入 SEO 内容** → High（通过 `document.createElement`/`innerHTML` 动态注入，百度爬虫对 JS 渲染支持极弱，内容不会被索引）
+- **关键词堆砌** → Medium（FAQ/描述中同一品牌词+URL 出现≥3次）
+- **meta keywords 无效词/硬编码 URL 分散/废弃 CSS clip 属性/语义错位** → Low
 
 命中时**必须给出替代方案**（隐藏文本→折叠 UI；JS 注入→静态 HTML/SSR；堆砌→自然语言）。
 
@@ -132,8 +132,12 @@ description: >
 - 超 10 个 issue 时低严重度归并，优先列严重/高
 - 空 section 直接删除；全部无影响只输出「无影响变更」+ 最终结论
 - **「需要修复」不为空时，修复指令必须输出，不能省略**
-- 置信度：确定 / 可能 / 疑似（疑似用"可能/疑似"，不用"必须/一定"）
-- 整体置信度：高(diff 充分) / 中(需部分确认) / 低(缺关键上下文)
+- 置信度说明：
+  - **确定** — 有明确的代码证据或逻辑推理支撑
+  - **可能** — 很可能是问题，但缺乏完整上下文确认
+  - **疑似** — 可能是合理的实现选择，建议团队确认；用"可能/疑似"措辞，不用"必须/一定"
+- 整体审查置信度：高(diff 充分，意图明确) / 中(需部分确认) / 低(缺关键上下文，结论仅供参考)
+- 需要补充上下文的 issue，在对应行下方用引用块追加 1-2 句分析
 - 小 diff(<50行)：倾向「可直接合入」，低置信度问题放「建议关注」
 - 大 diff(>500行)：仅审查核心变更（主要逻辑、公共接口、关键路径），其余标注"本次未审查"
 
@@ -219,7 +223,7 @@ Correctness · Boundary & exceptions · Regression risk · State & side effects 
 1. 无影响变更 (No-impact) → 2. 建议关注 (Advisory) → 3. 需要修复 (Must-fix, with 改动→影响→级联 impact chain for Critical/High) → 4. 完成度分析 → 5. 影响分析+验证 → 6. 修复指令 (Fix instructions, title must be `## Code Review 修复任务`)
 
 ### Key Rules
-- Log/comment/format/i18n changes: Low-risk, no over-review
+- Log/comment/format/i18n changes: Low-risk, no over-review (may already be team-agreed)
 - Diff < 50 lines: Lean toward 可直接合入
 - Diff > 500 lines: Focus on core paths only
 - Internal tools: Downgrade only when explicitly marked in code/README
@@ -235,4 +239,4 @@ Correctness · Boundary & exceptions · Regression risk · State & side effects 
 6. Same pattern 3x+ → merge as 1 Medium, re-evaluate
 
 ### Input Sources (priority)
-1. Direct diff/file → 2. Git commit hash → 3. GitHub PR → 4. GitLab MR → 5. Local git
+1. Direct diff/file → 2. Git commit hash → 3. GitHub PR (`gh pr diff` or `api.github.com/repos/{owner}/{repo}/pulls/{number}/files`) → 4. GitLab MR (`{host}/api/v4/projects/{id}/merge_requests/{number}/changes`) → 5. Local git
