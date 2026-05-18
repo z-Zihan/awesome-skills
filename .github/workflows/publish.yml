@@ -24,18 +24,6 @@ jobs:
           CLAWHUB_TOKEN: ${{ secrets.CLAWHUB_TOKEN }}
         run: clawhub login --token "$CLAWHUB_TOKEN"
 
-      - name: Determine version
-        id: version
-        run: |
-          if [[ "$GITHUB_REF" == refs/tags/v* ]]; then
-            VERSION="${GITHUB_REF#refs/tags/v}"
-          else
-            # run_number always increments, guaranteed unique
-            VERSION="0.1.${{ github.run_number }}"
-          fi
-          echo "version=${VERSION}" >> $GITHUB_OUTPUT
-          echo "Publishing version: ${VERSION}"
-
       - name: Detect changed skills
         id: changed
         run: |
@@ -71,18 +59,54 @@ jobs:
           echo "skills=${CHANGED_SKILLS}" >> $GITHUB_OUTPUT
           echo "Changed skills:${CHANGED_SKILLS}"
 
-      - name: Debug skill file sizes
+      - name: Validate versions & check increments
         if: steps.changed.outputs.skills != ''
         run: |
+          npm i semver
           for slug in ${{ steps.changed.outputs.skills }}; do
-            echo "Checking ${slug}..."
-            echo "Files:"
-            find "./${slug}" -type f -maxdepth 3 -print0 | xargs -0 wc -c | sort -nr
-            echo ""
-            echo "SKILL.md stats:"
-            wc -c "./${slug}/SKILL.md" || true
-            wc -w "./${slug}/SKILL.md" || true
-            echo "---"
+            SLUG="$slug" node -e "
+            const fs = require('fs');
+            const semver = require('semver');
+            const { execSync } = require('child_process');
+
+            const slug = process.env.SLUG;
+            const skillFile = './' + slug + '/SKILL.md';
+
+            // Read version from SKILL.md frontmatter
+            const content = fs.readFileSync(skillFile, 'utf8');
+            const versionMatch = content.match(/^version:\\s*['\"]?([^'\"\\s]+)['\"]?/m);
+            if (!versionMatch) {
+              console.error('❌ ' + slug + ': Missing version in SKILL.md frontmatter');
+              process.exit(1);
+            }
+            const localVersion = versionMatch[1];
+            console.log('📌 ' + slug + ' SKILL.md version: ' + localVersion);
+
+            if (!semver.valid(localVersion)) {
+              console.error('❌ ' + slug + ': Invalid semver: ' + localVersion);
+              process.exit(1);
+            }
+
+            // Check against ClawHub latest version
+            try {
+              const result = execSync('clawhub inspect ' + slug + ' --json 2>/dev/null', { encoding: 'utf8' });
+              const meta = JSON.parse(result);
+              const remoteVersion = meta.latestVersion?.version || meta.version;
+              if (remoteVersion) {
+                console.log('🌐 ' + slug + ' ClawHub latest: ' + remoteVersion);
+                if (semver.lte(localVersion, remoteVersion)) {
+                  console.error('❌ ' + slug + ': SKILL.md version (' + localVersion + ') must be greater than ClawHub latest (' + remoteVersion + '). Please bump the version in SKILL.md.');
+                  process.exit(1);
+                }
+                console.log('✅ ' + slug + ': ' + localVersion + ' > ' + remoteVersion + ' (valid increment)');
+              } else {
+                console.log('🆕 ' + slug + ': No published version found, first publish');
+              }
+            } catch (e) {
+              // Skill not found on ClawHub yet — first publish
+              console.log('🆕 ' + slug + ': Not found on ClawHub, first publish');
+            }
+            "
           done
 
       - name: Log SKILL token size
@@ -117,10 +141,12 @@ jobs:
         if: steps.changed.outputs.skills != ''
         run: |
           for slug in ${{ steps.changed.outputs.skills }}; do
-            echo "Publishing ${slug}..."
+            # Read version from SKILL.md frontmatter
+            VERSION=$(grep -m1 '^version:' "./${slug}/SKILL.md" | sed "s/version: *//;s/['\"]//g")
+            echo "Publishing ${slug}@${VERSION}..."
             clawhub skill publish "./${slug}" \
               --slug "${slug}" \
-              --version "${{ steps.version.outputs.version }}" \
+              --version "${VERSION}" \
               --changelog "Auto-publish from commit ${{ github.sha }}"
             echo "---"
           done
