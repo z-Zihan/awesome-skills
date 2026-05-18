@@ -59,11 +59,13 @@ jobs:
             fi
 
             for file in ${CHANGED_FILES}; do
-              # Extract skill directory name (e.g., "code-review-ProMax/SKILL.md" -> "code-review-ProMax")
-              skill_dir=$(dirname "$file")
-              slug=$(basename "$skill_dir")
+              # Extract top-level directory as slug (handles nested paths like "code-review-ProMax/fix/SKILL.md")
+              slug=$(echo "$file" | cut -d'/' -f1)
               CHANGED_SKILLS="${CHANGED_SKILLS} ${slug}"
             done
+
+            # Deduplicate (nested sub-skills share the same top-level slug)
+            CHANGED_SKILLS=$(echo "$CHANGED_SKILLS" | tr ' ' '\n' | sort -u | tr '\n' ' ')
           fi
 
           echo "skills=${CHANGED_SKILLS}" >> $GITHUB_OUTPUT
