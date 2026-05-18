@@ -74,9 +74,29 @@ jobs:
         run: |
           for slug in ${{ steps.changed.outputs.skills }}; do
             echo "Publishing ${slug}..."
+
+            # Temporarily move sub-directories out to avoid embedding token limit
+            MOVED_DIR="/tmp/skill-backup-${slug}"
+            if ls "./${slug}"/*/SKILL.md 1>/dev/null 2>&1; then
+              echo "  Temporarily moving sub-skill dirs to avoid embedding limit..."
+              mkdir -p "$MOVED_DIR"
+              for subdir in "./${slug}"/*/; do
+                [ -d "$subdir" ] && mv "$subdir" "$MOVED_DIR/"
+                echo "  Moved: $(basename $subdir)"
+              done
+            fi
+
             clawhub skill publish "./${slug}" \
               --slug "${slug}" \
               --version "${{ steps.version.outputs.version }}" \
               --changelog "Auto-publish from commit ${{ github.sha }}"
+
+            # Restore sub-directories
+            if [ -d "$MOVED_DIR" ] && ls "$MOVED_DIR"/*/SKILL.md 1>/dev/null 2>&1; then
+              echo "  Restoring sub-skill dirs..."
+              mv "$MOVED_DIR"/* "./${slug}/" 2>/dev/null || true
+              rm -rf "$MOVED_DIR"
+            fi
+
             echo "---"
           done
