@@ -200,6 +200,14 @@ description: >
 
 ---
 
+## 维护规范 / Maintenance Rules
+
+- **ClawHub embedding 限制**：整个 skill 目录（含子目录）总内容会被 `text-embedding-ada-002` embedding，最大 **8192 tokens**（约 32KB 文本）。主 SKILL.md 建议控制在 **14KB 以内**，预留子目录空间
+- **中英双语**：所有内容必须中英双语，中文在前。description 用纯中文
+- **功能等价**：压缩时只减冗余不减规则，压缩前后功能必须完全一致
+- **修复指令标题**：必须使用 `## Code Review 修复任务`，客户端据此识别「复制修复指令」按钮，不能改名
+- **子目录 skill**：focused/ 和 iterative/ 是手动触发的专项模式，非核心流程。发布时如需排除子目录以控制总量，主 skill 不受影响
+
 # English Version
 
 > For full details, read the Chinese section above. Summary below.
