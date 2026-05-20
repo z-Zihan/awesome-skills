@@ -42,7 +42,8 @@ description: >
    - 日志文案/级别变更 → 只查敏感信息泄露和监控影响
    - 注释修正 → 只查是否严重误导（注释和代码逻辑完全相反）
    - 文案/格式化 → 只查功能性风险
-   - 无功能性风险 → 放入「建议关注」或「无影响变更」，**不放「需要修复」**
+   - 无功能性风险 → 放入「无影响变更」，**不放「建议关注」或「需要修复」**
+   - **判定规则**：有功能性风险（敏感信息泄露、监控失真、告警误触发）→「建议关注」；纯格式/文案/展示问题 →「无影响变更」
 7. **完成度分析** — 需求实现→逐条对照需求文档；Bug修复→检查场景覆盖和边界；重构→检查功能等价性。结论：完整/基本完成(遗漏)/部分/未完成
 
 ## 审查方法论
@@ -169,7 +170,7 @@ description: >
 ### 2. 建议关注（非阻塞）
 | # | 位置 | 说明 |
 
-### 3. 需要修复的问题（低→中→高→严重排序）
+### 3. 需要修复的问题
 严重/高必须含影响链: **改动**→**影响**→**级联**
 | # | 严重度 | 置信度 | 位置 | 问题描述 | 修复建议 |
 
@@ -182,9 +183,10 @@ description: >
 ### 修复指令（紧跟报告输出，必须包含）
 
 > **「需要修复的问题」不为空时，以下修复指令块必须输出，不能省略。**
-> **格式必须严格遵循下方模板**，标题用 `## Code Review 修复任务`，以便客户端识别并展示「复制修复指令」按钮。不要修改标题文字、不要省略标题、不要用其他格式替代。
+> **修复指令必须用 markdown 代码块（\`\`\`markdown ... \`\`\`）包裹**，这样客户端的代码块复制按钮可直接复制全部修复指令。标题保持 `## Code Review 修复任务`。
 
 ```
+​```markdown
 ## Code Review 修复任务
 审查结论: [可直接合入 / 修复后合入 / 建议进一步验证]
 
@@ -196,11 +198,12 @@ description: >
 - 仅修复上述问题，不改动其他代码
 - 保持现有代码风格
 - 修复后确认不影响已有功能
+​```
 ```
 
 ### 直接修复模式
 
-用户说"直接修复"/"fix"/"修复"时，切换到修复模式：读取 `fix/SKILL.md` 子 skill，按其流程逐条应用修复。用户也可选择「复制修复指令」手动交给其他 agent。
+用户说"直接修复"/"fix"/"修复"时，切换到修复模式：读取 `fix/SKILL.md` 子 skill，按其流程逐条应用修复。用户也可点击代码块右上角的复制按钮，复制修复指令手动交给其他 agent。
 
 ### 深度审查模式
 
@@ -233,11 +236,11 @@ description: >
 Correctness · Boundary & exceptions · Regression risk · State & side effects · Concurrency · Data impact · API compatibility · Performance · Security · Maintainability
 
 ### Output Structure
-1. 无影响变更 (No-impact) → 2. 建议关注 (Advisory) → 3. 需要修复 (Must-fix, with 改动→影响→级联 impact chain for Critical/High) → 4. 完成度分析 → 5. 影响分析+验证 → 6. 修复指令 (Fix instructions, title must be `## Code Review 修复任务`)
+1. 无影响变更 (No-impact) → 2. 建议关注 (Advisory) → 3. 需要修复 (Must-fix, with 改动→影响→级联 impact chain for Critical/High) → 4. 完成度分析 → 5. 影响分析+验证 → 6. 修复指令 (Fix instructions, wrapped in markdown code block for easy copy, title `## Code Review 修复任务`)
 
 ### Direct Fix Mode
 
-When user says "直接修复"/"fix"/"修复", switch to fix mode: read `fix/SKILL.md` sub-skill, follow its workflow to apply fixes one by one. User can also choose to「复制修复指令」and manually hand off to another agent.
+When user says "直接修复"/"fix"/"修复", switch to fix mode: read `fix/SKILL.md` sub-skill, follow its workflow to apply fixes one by one. User can also click the code block copy button to copy fix instructions and manually hand off to another agent.
 
 ### Focused Review Mode
 When user says "深度审查"/"专项审查"/"focused review", switch to focused mode: read `focused/SKILL.md` sub-skill for deep review on specific areas.
