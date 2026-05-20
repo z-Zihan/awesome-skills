@@ -1,6 +1,6 @@
 ---
 name: todo-list-promax
-version: "2.0.1"
+version: "2.0.2"
 description: >
   个人待办事项永久存储、智能分类与定时提醒系统。
   自动从聊天消息中捕获待办（文字/图片/附件），解析时间与优先级，每日晚上9点推送未完成提醒。
@@ -113,7 +113,7 @@ description: >
 **触发词：** `TODOLIST`、`待办列表`、`查看待办`、`看看待办`、`我有哪些待办`、`今天还有哪些未完成`、`还有什么没做`、`今天还要干嘛`、`今天的事做完了没`、`我的清单`、`my todos`、`todo list`、`what's pending`、`show todos`
 
 **查询模式：**
-- 无条件 → 所有未完成待办，按优先级排序
+- 无条件 → 所有未完成待办，按截止时间升序（无截止排最后），同截止时间再按优先级排序（P0 > P1 > P2 > P3）
 - 按日期 → "周一的 todo"、"5月18日的待办"、"今天的" → 筛选 `due_time` 匹配该日期的未完成项
 - 按时间范围 → "本周"、"本月" → 筛选 `due_time` 在范围内
 - 按优先级 → "有哪些紧急的" → 筛选特定级别
@@ -167,7 +167,7 @@ description: >
   2. cron 任务触发时执行以下流程：
      a. 读取 `${workspace}/todo-list/todos.json`
      b. 筛选条件：`status != "done"` 且 `due_time != null`
-     c. 按优先级排序（P0 > P1 > P2 > P3）
+     c. 按截止时间升序排序（无截止排最后），同截止时间再按优先级排序（P0 > P1 > P2 > P3）
      d. 如有匹配项，生成紧凑列表消息并推送到用户聊天
      e. 如无匹配项，不推送
      f. 更新 `last_reminder_at` 为当前时间
@@ -288,7 +288,7 @@ description: >
 
 ### Cron Setup (Minimal Steps)
 1. Create cron: `0 21 * * *`
-2. On trigger: read `todos.json` → filter `status != "done"` AND `due_time != null` → sort by priority → push if any → update `last_reminder_at`
+2. On trigger: read `todos.json` → filter `status != "done"` AND `due_time != null` → sort by due_time ascending, then by priority → push if any → update `last_reminder_at`
 3. Append action guide to push message
 
 ### Constraints
