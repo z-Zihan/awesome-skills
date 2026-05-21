@@ -15,35 +15,52 @@ description: >
 Skip questions already answered in user's request.
 
 1. **Framework**: React 19 / Vue 3 (React recommended for admin, Ant Design is React-only; Vue admin 推荐 Element Plus)
-2. **Styling**: Ant Design (default for React) / Element Plus (default for Vue) / Tailwind CSS
+2. **Styling/UI**: Ant Design (default React) / shadcn/ui + Lucide (React) / Element Plus (default Vue) / shadcn-vue + Vue Bits (Vue) / Tailwind CSS / MUI
 3. **CSS Preprocessor**: Sass / Less (default: Sass)
-4. **State Management**: Zustand / Redux Toolkit / None
-5. **i18n**: react-i18next / vue-i18n / None
-6. **Testing**: Vitest / None
-7. **Pre-commit hooks**: husky + lint-staged + commitlint? (default: No)
-8. **Project name**: string (required)
+4. **State Management**: Zustand / Redux Toolkit / Pinia (Vue) / None
+5. **Charts**: Recharts (lightweight) / ECharts (heavy) / None
+6. **i18n**: react-i18next / vue-i18n / None
+7. **Testing**: Vitest / None
+8. **Pre-commit hooks**: husky + lint-staged + commitlint? (default: No)
+9. **Project name**: string (required)
 
 ### Step 2: Scaffold Project
 
 ```
-pnpm create vite <project-name> --template react-ts
+bun create vite <project-name> --template react-ts
 ```
 
-For Vue: `pnpm create vite <project-name> --template vue-ts`
+For Vue: `bun create vite <project-name> --template vue-ts`
+
+(Use `pnpm create vite` if bun unavailable)
 
 ### Step 3: Install Dependencies
 
 **React (Ant Design):**
 ```
-pnpm add antd @ant-design/icons @ant-design/v5-patch-for-react-19 react-router-dom dayjs
+bun add antd @ant-design/icons @ant-design/v5-patch-for-react-19 react-router-dom dayjs
+```
+
+**React (shadcn/ui):**
+```
+bun add react-router-dom dayjs lucide-react && npx shadcn@latest init
 ```
 
 **Vue (Element Plus):**
 ```
-pnpm add element-plus @element-plus/icons-vue vue-router dayjs
+bun add element-plus @element-plus/icons-vue vue-router dayjs
 ```
 
-Plus extras based on selections (zustand, pinia, i18n, etc.)
+**Vue (shadcn-vue):**
+```
+bun add vue-router dayjs lucide-vue-next && npx shadcn-vue@latest init
+```
+
+Plus extras based on selections (zustand, pinia, i18n, charts, etc.)
+
+**Charts:**
+- Recharts: `bun add recharts`
+- ECharts: `bun add echarts echarts-for-react` (React) / `bun add echarts vue-echarts` (Vue)
 
 For date handling: `pnpm add dayjs` (recommended; moment is deprecated and not recommended).
 
@@ -528,8 +545,15 @@ Generate all shared files: services, utils, styles, configs, env.
 
 ```bash
 cd <project-name>
-pnpm install
-pnpm dev
+bun install  # or: pnpm install
+bun dev      # or: pnpm dev
 ```
 
 Announce completion with admin-specific info: login page at /login, dashboard at /dashboard, etc.
+
+**Vercel deployment** (recommended):
+```bash
+bun add -g vercel
+vercel
+```
+Or connect GitHub repo at vercel.com for auto-deploy.

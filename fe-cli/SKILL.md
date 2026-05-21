@@ -1,11 +1,12 @@
 ---
 name: fe-cli
-version: "2.0.1"
+version: "3.0.0"
 homepage: https://github.com/z-Zihan/awesome-skills
 description: >
-  前端项目脚手架 CLI。支持 React/Vue/Next.js + Tailwind/Ant Design/MUI + Zustand/Redux + i18n，
-  初始化标准化前端项目。支持 6 种项目类型：Web SPA、后台管理、移动 H5、Electron 桌面端、
-  SSR (Next.js/Nuxt)、小程序 (微信/Taro)。
+  前端项目脚手架 CLI。支持 React/Vue/Next.js/Nuxt.js/Astro/React Native + shadcn/Ant Design/MUI/Tailwind
+  + Zustand/Redux + i18n，初始化标准化前端项目。支持 9 种项目类型：Web SPA、后台管理、移动 H5、
+  Electron 桌面端、Tauri 桌面端、SSR (Next.js/Nuxt)、小程序 (微信/Taro)、React Native 移动端、
+  静态建站 (Astro/Gatsby/VitePress)。
   触发：用户要求创建新前端项目、初始化项目、搭建脚手架，
   或提到"新建前端项目"、"初始化项目"、"脚手架"、"创建 React/Vue 项目"。
   也可用于检查/审查已有前端项目的规范性。
@@ -48,11 +49,14 @@ description: >
 | 后台/管理/Admin/Dashboard/CRUD | admin | fe-cli-admin |
 | 移动/H5/手机/微信H5/Mobile | h5 | fe-cli-h5 |
 | 桌面/Electron/客户端/Desktop | electron | fe-cli-electron |
+| Tauri/轻量桌面/Rust桌面 | tauri | fe-cli-tauri |
 | SSR/Next.js/Nuxt/服务端渲染/SEO | ssr | fe-cli-ssr |
 | 小程序/微信小程序/MiniApp/WeChat | miniapp | fe-cli-miniapp |
+| React Native/RN/原生移动/App | rn | fe-cli-rn |
+| Astro/Gatsby/建站/博客/文档站/VitePress | astro | fe-cli-astro |
 | (默认/官网/Web/SPA/网页) | web | fe-cli-web |
 
-如果不确定，询问："这是什么类型的项目？Web SPA / 后台管理 / 移动H5 / Electron桌面 / SSR / 小程序"
+如果不确定，询问："这是什么类型的项目？Web SPA / 后台管理 / 移动H5 / Electron桌面 / Tauri桌面 / SSR / 小程序 / React Native / 静态建站"
 
 ### 输入澄清
 
@@ -64,7 +68,7 @@ description: >
 
 ### 降级策略
 
-- `pnpm create vite` 失败 → 提示用户手动创建：`pnpm init vite@latest`，或检查网络/Node 版本
+- `bun create vite` / `pnpm create vite` 失败 → 提示用户手动创建，或检查网络/Node/Bun 版本
 - 依赖安装失败 → 提示检查网络代理、npm registry 配置，提供淘宝镜像命令
 - 目标目录已存在 → 询问："目录已存在，覆盖 / 合并 / 取消？"
 - 模板中引用的包版本不存在 → 提示用户手动指定版本，不阻塞流程
@@ -165,7 +169,8 @@ This file is for AI agents to quickly understand the project.
 
 ## 关键规则
 
-- **包管理器**：始终使用 pnpm
+- **包管理器**：默认使用 **bun**（更快），备选 pnpm。检测方式：`bun --version` 存在则用 bun，否则用 pnpm
+- **运行时**：默认 Node.js，bun 也可作为运行时（`bun run` 替代 `node`）
 - **CSS 预处理器**：默认 Sass（SCSS 语法）
 - **路径别名**：在 tsconfig 和 vite config 中配置 `@/` → `src/`
 - **响应式断点**：Mobile < 768px < Tablet < 1024px < Desktop
@@ -173,7 +178,9 @@ This file is for AI agents to quickly understand the project.
 - **环境文件**：始终生成 `.env`、`.env.development`、`.env.test`、`.env.production`
 - **日志**：始终生成 `services/logger.ts` + `services/log-export.ts`。使用 `Logger.child("Module")` 模式。最大存储 5MB 自动清理。仅开发模式控制台输出。上报端点为占位符（待定）。
 - **Node 版本**：目标 Node 18+
-- **pnpm 构建脚本**：在 package.json 中使用 `pnpm.onlyBuiltDependencies` 自动批准原生构建（如 `@parcel/watcher`）。Vite 渲染层构建命令（`build:prod`、`build:test`）不应包含 `tsc -b`——Vite 处理 TS 转译；类型检查是独立的 `typecheck` 脚本。**Electron 主进程例外**：`electron/main.ts` 和 `preload.ts` 在 Node 环境运行，需要 `tsc -p tsconfig.electron.json` 编译。
+- **部署**：默认推荐 Vercel 部署（零配置），在项目生成后提供 `vercel` 初始化命令
+- **图表库**：轻量场景推荐 Recharts，重场景用 ECharts
+- **pnpm 构建脚本**：在 package.json 中使用 `pnpm.onlyBuiltDependencies` 自动批准原生构建（如 `@parcel/watcher`）。Vite 渲染层构建命令（`build:prod`、`build:test`）不应包含 `tsc -b`——Vite 处理 TS 转译；类型检查是独立的 `typecheck` 脚本。**Electron/Tauri 主进程例外**：主进程代码在 Node 环境运行，需要 `tsc -p tsconfig.electron.json` 编译。
 
 ## 模板占位符参数化
 
@@ -233,9 +240,9 @@ This file is for AI agents to quickly understand the project.
 
 # English Version
 
-**fe-cli** is a unified entry point for scaffolding frontend projects. It detects the project type from user input and routes to one of 6 sub-skills: **web** (SPA), **admin** (dashboard/CRUD), **h5** (mobile), **electron** (desktop), **ssr** (Next.js/Nuxt), or **miniapp** (WeChat Mini Program). Each sub-skill handles type-specific questions, file generation, and setup.
+**fe-cli** is a unified entry point for scaffolding frontend projects. It detects the project type from user input and routes to one of 9 sub-skills: **web** (SPA), **admin** (dashboard/CRUD), **h5** (mobile), **electron** (desktop), **tauri** (lightweight desktop), **ssr** (Next.js/Nuxt), **miniapp** (WeChat Mini Program), **rn** (React Native), or **astro** (Astro/Gatsby/VitePress static site). Each sub-skill handles type-specific questions, file generation, and setup.
 
-**Key rules:** Always use **pnpm**; default CSS preprocessor is **Sass (SCSS)**; path alias `@/` → `src/`; native **fetch** wrapper (no axios); always generate `.env` / `.env.development` / `.env.test` / `.env.production`; always generate `services/logger.ts` + `services/log-export.ts`; target Node 18+; Vite handles TS transpilation (separate `typecheck` script), except Electron main process needs `tsc -p tsconfig.electron.json`.
+**Key rules:** Default package manager is **bun** (fallback: pnpm); default CSS preprocessor is **Sass (SCSS)**; path alias `@/` → `src/`; native **fetch** wrapper (no axios); always generate `.env` / `.env.development` / `.env.test` / `.env.production`; always generate `services/logger.ts` + `services/log-export.ts`; target Node 18+; Vite handles TS transpilation (separate `typecheck` script), except Electron/Tauri main process needs `tsc -p tsconfig.electron.json`; default deployment: **Vercel**; chart libs: **Recharts** (lightweight) / **ECharts** (heavy); new UI libs: **shadcn/ui + Lucide** (React), **shadcn-vue + Vue Bits** (Vue), **Chakra UI**, **React Bits**.
 
 After type-specific files, generate the **shared common layer** (request utils, global styles, multi-env config, utilities, type declarations). Finally, generate `.ai/PROJECT.md` for AI-readability. Supports **existing project audit** against the same standards.
 

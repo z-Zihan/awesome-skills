@@ -3,6 +3,7 @@ name: fe-cli-electron
 description: >
   Scaffold an Electron desktop application. For macOS/Windows desktop apps using React/Vue.
   Features auto-update (electron-updater), IPC communication, system tray, native menus.
+  For lighter desktop apps, consider Tauri (fe-cli-tauri) instead.
   Triggered as a sub-skill of fe-cli when user wants Electron/桌面端 project.
 ---
 

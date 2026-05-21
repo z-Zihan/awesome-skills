@@ -19,22 +19,23 @@ Ask these questions. Skip questions whose answer is implied by the user's initia
 skip ALL questions and proceed directly to Step 2.
 
 1. **Framework**: React 19 / Vue 3
-2. **Styling**: Tailwind CSS / Ant Design / MUI / 纯 CSS (SCSS)
+2. **Styling/UI**: Tailwind CSS / shadcn/ui + Lucide (React) / shadcn-vue + Vue Bits (Vue) / Ant Design (React) / Element Plus (Vue) / MUI (React) / Chakra UI (React) / React Bits (React) / 纯 CSS (SCSS)
 3. **CSS Preprocessor**: Sass / Less / None (default: Sass if using SCSS approach)
 4. **State Management**: Zustand / Redux Toolkit / Pinia (for Vue) / None
 5. **Router**: React Router / Vue Router / None
-6. **i18n**: react-i18next / vue-i18n / None
-7. **Testing**: Vitest / None
-8. **Pre-commit hooks**: husky + lint-staged + commitlint? (default: No)
-9. **Project name**: string (required)
+6. **Charts**: Recharts (lightweight) / ECharts (heavy) / None
+7. **i18n**: react-i18next / vue-i18n / None
+8. **Testing**: Vitest / None
+9. **Pre-commit hooks**: husky + lint-staged + commitlint? (default: No)
+10. **Project name**: string (required)
 
 ### Step 2: Scaffold Project
 
-Use `pnpm create vite` as the base:
+Use `bun create vite` (or `pnpm create vite` if bun unavailable) as the base:
 
 ```
-pnpm create vite <project-name> --template react-ts   (for React)
-pnpm create vite <project-name> --template vue-ts     (for Vue)
+bun create vite <project-name> --template react-ts   (for React)
+bun create vite <project-name> --template vue-ts     (for Vue)
 ```
 
 Then `cd <project-name>` and install additional dependencies based on selections.
@@ -44,12 +45,20 @@ Then `cd <project-name>` and install additional dependencies based on selections
 | Selection | Packages |
 |---|---|
 | Tailwind CSS | `tailwindcss @tailwindcss/vite` |
+| shadcn/ui (React) | `npx shadcn@latest init` → adds components on demand. Requires Tailwind CSS. Include `lucide-react` |
+| shadcn-vue (Vue) | `npx shadcn-vue@latest init` → adds components on demand. Requires Tailwind CSS. Include `lucide-vue-next` |
 | Ant Design | `antd @ant-design/icons @ant-design/v5-patch-for-react-19` |
+| Element Plus | `element-plus @element-plus/icons-vue` |
 | MUI | `@mui/material @emotion/react @emotion/styled @mui/icons-material` |
+| Chakra UI | `@chakra-ui/react @emotion/react @emotion/styled framer-motion react-icons` |
+| React Bits | `react-bits` (animated UI components) |
+| Vue Bits | `vue-bits` (animated UI components for Vue) |
 | Zustand | `zustand` |
 | Redux Toolkit | `@reduxjs/toolkit react-redux` |
 | React Router | `react-router-dom` |
 | Vue Router | `vue-router` |
+| Recharts | `recharts` |
+| ECharts | `echarts echarts-for-react` (React) / `vue-echarts` (Vue) |
 | i18n (React) | `react-i18next i18next i18next-browser-languagedetector` |
 | i18n (Vue) | `vue-i18n` |
 | Vitest | `vitest @testing-library/react @testing-library/jest-dom jsdom` (React) |
@@ -215,8 +224,15 @@ and generate all shared files (services, utils, styles, configs, env).
 
 ```bash
 cd <project-name>
-pnpm install
-pnpm dev
+bun install  # or: pnpm install
+bun dev      # or: pnpm dev
 ```
 
 Announce completion: project name, framework, key dependencies, dev server URL (http://localhost:5173).
+
+**Vercel deployment** (recommended):
+```bash
+bun add -g vercel
+vercel
+```
+Or connect GitHub repo at vercel.com for auto-deploy.

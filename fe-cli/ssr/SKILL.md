@@ -13,28 +13,31 @@ description: >
 ### Step 1: Gather Options
 
 1. **Framework**: Next.js (React) / Nuxt (Vue)
-2. **Styling**: Tailwind CSS / Ant Design / MUI / 纯 SCSS
+2. **Styling/UI**: Tailwind CSS / shadcn/ui + Lucide (Next.js) / shadcn-vue + Vue Bits (Nuxt) / Ant Design (Next.js) / Element Plus (Nuxt) / MUI (Next.js) / 纯 SCSS
 3. **CSS Preprocessor**: Sass / Less
 4. **State Management**: Zustand / Redux Toolkit / Pinia (Nuxt) / None
-5. **i18n**: next-intl (Next.js) / @nuxtjs/i18n (Nuxt) / None
-6. **Database/ORM**: Prisma / Drizzle / None
-7. **Auth**: NextAuth.js / Lucia / None
-8. **Testing**: Vitest / Playwright / None
-9. **Pre-commit**: husky + lint-staged? (default: No)
-10. **Project name**: string
+5. **Charts**: Recharts (lightweight) / ECharts (heavy) / None
+6. **i18n**: next-intl (Next.js) / @nuxtjs/i18n (Nuxt) / None
+7. **Database/ORM**: Prisma / Drizzle / None
+8. **Auth**: NextAuth.js / Lucia / None
+9. **Testing**: Vitest / Playwright / None
+10. **Pre-commit**: husky + lint-staged? (default: No)
+11. **Project name**: string
 
 ### Step 2: Scaffold
 
 **Next.js:**
 ```
-pnpm create next-app <project-name> --typescript --tailwind --eslint --app --src-dir --import-alias "@/*"
+bun create next-app <project-name> --typescript --tailwind --eslint --app --src-dir --import-alias "@/*"
 ```
 Note: `--tailwind` flag may not exist in all Next.js versions. If not, manually install tailwind.
 
 **Nuxt:**
 ```
-pnpm dlx nuxi init <project-name> --packageManager pnpm
+bunx nuxi init <project-name> --packageManager bun
 ```
+
+(Use `pnpm dlx` if bun unavailable)
 
 ### Step 3: Install Dependencies
 
@@ -45,9 +48,13 @@ pnpm dlx nuxi init <project-name> --packageManager pnpm
 | Zustand | `zustand` |
 | Redux Toolkit | `@reduxjs/toolkit react-redux` |
 | Ant Design | `antd @ant-design/icons @ant-design/v5-patch-for-react-19` |
+| shadcn/ui (Next.js) | `npx shadcn@latest init` + `lucide-react` (requires Tailwind) |
+| shadcn-vue (Nuxt) | `npx shadcn-vue@latest init` + `lucide-vue-next` (requires Tailwind) |
+| Recharts | `recharts` |
+| ECharts | `echarts echarts-for-react` (Next.js) / `echarts vue-echarts` (Nuxt) |
 | Next.js i18n | `next-intl` |
 | Nuxt i18n | `@nuxtjs/i18n` |
-| Prisma | `prisma @prisma/client` → `pnpm prisma init` |
+| Prisma | `prisma @prisma/client` → `bunx prisma init` |
 | NextAuth | `next-auth@beta` |
 | Playwright | `@playwright/test` |
 
@@ -311,8 +318,15 @@ Only generate files that make sense for SSR context.
 
 ```bash
 cd <project-name>
-pnpm install
-pnpm dev
+bun install  # or: pnpm install
+bun dev      # or: pnpm dev
 ```
 
 Announce: SSR project with Next.js/Nuxt, URLs, and key features enabled.
+
+**Vercel deployment** (recommended, zero-config for Next.js/Nuxt):
+```bash
+bun add -g vercel
+vercel
+```
+Next.js has native Vercel support. Nuxt also works with `vercel` CLI.
