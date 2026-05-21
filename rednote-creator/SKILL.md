@@ -1,13 +1,13 @@
 ---
 name: rednote-creator
-version: "1.0.0"
+version: "1.0.1"
 homepage: https://github.com/z-Zihan/awesome-skills
 description: >
   小红书内容创作全流程 skill。覆盖选题策划、文案写作、标题生成、多图封面生成、发布策略和一键发布。
   支持6大热门赛道：美妆护肤、穿搭时尚、减脂健身、美食探店、旅行攻略、家居收纳。
   触发词：发小红书、小红书笔记、写小红书、rednote、小红书文案、
   小红书选题、小红书封面、发笔记、发种草、发攻略。
-  NOT for: 账号数据分析、竞品监控、自动刷量、批量关注点赞。
+  NOT for: 账号数据分析、竞品监控、自动刷量、批量关注点赞、生成虚假效果对比图。
 ---
 
 # RedNote Creator / 小红书创作助手
@@ -179,11 +179,14 @@ description: >
 
 用户说"发小红书"或描述想发什么内容时，按以下流程走：
 
+**回退规则：** 改赛道→回 Step 1；改标题→回 Step 2；改正文→当前 Step 重写；改封面→回 Step 4。
+
 ### Step 1：确认赛道+选题
 
 - 根据用户描述，匹配6大赛道之一
 - 从该赛道的"最容易爆的细分"中给2-3个选题方向
 - 如果用户已有明确选题，直接跳到 Step 2
+- **匹配失败时**：告知用户当前支持的6大赛道，请其选择最接近的；或按用户意图自由创作，不套赛道公式
 
 ### Step 2：生成标题
 
@@ -196,7 +199,7 @@ description: >
 
 - 按小红书风格写，参考该赛道爆款内容结构
 - 正文控制在 500-1000 字
-- emoji 自然使用，不是每句都加
+- emoji 规则：每3-5句话最多1个emoji，禁止连续2个emoji，标题不加emoji，emoji放在句子末尾
 - 分段清晰，重点加粗或用emoji标
 - **严格遵守AI味黑名单**
 - 用户确认后进入下一步
@@ -206,8 +209,12 @@ description: >
 - 根据该赛道"封面方向"设计封面描述
 - 调用 `autoglm-generate-image` 或 `autoglm-generate-image-seedream` 生图
 - **支持生成多张图片**（用户可以指定数量，默认2-3张）
-- 如果生图API不可用（返回登录错误），降级为：下载 unsplash/pexels 免费素材图到本地
-- 图片尺寸建议 3:4 竖版（720×960）或 4:3 横版
+- **生图降级策略**：如果API不可用（返回登录错误等），降级为下载免费素材图：
+  1. 从 unsplash/pexels 搜索相关关键词
+  2. 下载到本地（路径：`/tmp/rednote-covers/`）
+  3. 文件命名：`cover-{赛道}-{序号}.jpg`
+  4. 告知用户图片为免费素材，建议后续替换为原创
+- 图片尺寸推荐 3:4 竖版（720×960）或 4:3 横版，也支持 1:1 和 16:9
 - 用户确认后进入下一步
 
 ### Step 5：发布建议
@@ -221,16 +228,22 @@ description: >
 - 如果用户想自动发布，通过 `autoglm-browser-agent` 浏览器代理操作
 - **图片必须下载到本地再上传**（小红书网页版不支持直接传URL）
 - 发布前让用户确认所有内容
+- **发布失败处理**：
+  - 登录弹窗 → 提示用户手动登录后重试
+  - 网络超时 → 建议检查网络后重试
+  - 审核拒绝 → 告知可能原因，建议修改内容后重试
+  - 多次失败 → 提供完整文案和图片供用户手动发布
 - 发布后汇报结果
 
 ## 约束
 
-- 标题不超过20字
+- 标题不超过20字（小红书限制，详见 Step 2）
 - 正文500-1000字，太长没人看
-- emoji 用量自然，不要每词必加
+- emoji 规则：每3-5句最多1个，禁止连续2个（详见 Step 3）
 - 严格遵守AI味黑名单
 - 发布操作前必须用户确认
 - 不做刷量、批量关注等违规操作
+- 不生成虚假效果对比图（如伪造Before & After）
 
 ---
 
@@ -257,6 +270,9 @@ Never use these:
 - "In today's society..."
 - "With the development of..."
 - "I hope this post helps you"
+- "If you have the same problem"
+- "Dry goods sharing" (can use, but not as a generic opener)
+- Any sentence that sounds like an essay intro or conclusion
 
 **Instead, sound like this:**
 - "Girls! This is insane"
@@ -348,9 +364,11 @@ Never use these:
 
 When user says "post to Xiaohongshu" or describes content:
 
+**Rollback rules:** Change niche → back to Step 1; change title → back to Step 2; change content → rewrite current Step; change cover → back to Step 4.
+
 ### Step 1: Confirm Niche + Topic
 
-Match to one of 6 niches. Suggest 2-3 topic directions from the niche's hot sub-niches. Skip if user already has a clear topic.
+Match to one of 6 niches. Suggest 2-3 topic directions from the niche's hot sub-niches. Skip if user already has a clear topic. **No match?** Tell user the 6 supported niches and ask them to pick one, or create freely without niche formulas.
 
 ### Step 2: Generate Titles
 
@@ -358,11 +376,11 @@ Create 3-5 title candidates based on niche title formulas. Max 20 characters eac
 
 ### Step 3: Write Content
 
-Xiaohongshu-style writing. 500-1000 words. Natural emoji use. Clear paragraphs. **Strictly follow AI-speak blacklist.** User confirms.
+Xiaohongshu-style writing. 500-1000 words. Emoji rules: max 1 per 3-5 sentences, no consecutive emojis, no emoji in titles, place emoji at sentence end. Clear paragraphs. **Strictly follow AI-speak blacklist.** User confirms.
 
 ### Step 4: Generate Cover Images
 
-Design cover prompts based on niche cover ideas. Call `autoglm-generate-image` or `autoglm-generate-image-seedream`. **Support multiple images** (user can specify count, default 2-3). If image API unavailable, fallback to downloading free stock photos from unsplash/pexels. Recommended size: 3:4 vertical (720×960) or 4:3 horizontal.
+Design cover prompts based on niche cover ideas. Call `autoglm-generate-image` or `autoglm-generate-image-seedream`. **Support multiple images** (user can specify count, default 2-3). **Image API fallback**: if unavailable (login error etc.), download free stock photos: 1) Search unsplash/pexels by keyword 2) Download to `/tmp/rednote-covers/` 3) Name as `cover-{niche}-{number}.jpg` 4) Tell user these are stock photos, recommend replacing with originals later. Recommended size: 3:4 vertical (720×960) or 4:3 horizontal, also supports 1:1 and 16:9.
 
 ### Step 5: Publishing Tips
 
@@ -370,13 +388,14 @@ Recommend time slot. Generate 5-8 relevant hashtags (include 1-2 trending). Sugg
 
 ### Step 6: One-Click Publish (Optional)
 
-If user wants auto-publish, use `autoglm-browser-agent`. **Images must be local files** (web upload doesn't accept URLs). Confirm all content before publishing. Report result.
+If user wants auto-publish, use `autoglm-browser-agent`. **Images must be local files** (web upload doesn't accept URLs). Confirm all content before publishing. **Publish failure handling**: Login popup → ask user to log in manually then retry; Network timeout → suggest checking connection and retrying; Content rejected → explain possible reasons, suggest modifications; Repeated failures → provide full text + images for manual posting. Report result.
 
 ## Constraints
 
-- Title max 20 characters
+- Title max 20 characters (Xiaohongshu limit, see Step 2)
 - Content 500-1000 words
-- Natural emoji use, not every word
+- Emoji rules: max 1 per 3-5 sentences, no consecutive emojis (see Step 3)
 - Follow AI-speak blacklist strictly
 - Always confirm before publishing
 - No bot activity (mass follow/like/spam)
+- No fake effect comparison images (e.g. fabricated Before & After)
