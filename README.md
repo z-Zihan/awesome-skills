@@ -65,6 +65,12 @@
 
 **触发词**：评审 skill / 测评 skill / 改进 skill / 验证修复意见 / skill 评分 / skill 质量检查
 
+### 📕 rednote-creator — 小红书内容创作全流程
+
+选题策划、文案写作、标题生成、多图封面生成、发布策略和一键发布。覆盖6大热门赛道（美妆护肤、穿搭时尚、减脂健身、美食探店、旅行攻略、家居收纳），内置赛道爆款规律、标题公式、封面策略和发布节奏。AI味黑名单确保文案说人话。支持 autoglm-generate-image 生图 + autoglm-browser-agent 一键发布。
+
+**触发词**：发小红书 / 写小红书 / 小红书笔记 / rednote / 小红书文案 / 发笔记 / 发种草 / 发攻略
+
 ### 🧭 dev-mentor — 跨领域学习伴侣
 
 帮助有经验的开发者学习不熟悉的领域，通过连续对话从零完成项目的完整生命周期。首批支持：后端开发（TypeScript/Go/Python）、数据库、服务器部署（Docker/Nginx/HTTPS/CI-CD）、Rust 系统编程。自动识别用户已有经验，不重复教，用类比教学。专业名词自带解释，代码使用最新技术栈和最佳实践。
@@ -128,6 +134,7 @@ openclaw skills install project-onboarding
 openclaw skills install skill-creator-ProMax
 openclaw skills install skill-review-pro
 openclaw skills install dev-mentor
+openclaw skills install rednote-creator
 openclaw skills install todo-list-promax
 openclaw skills update --all
 ```
@@ -267,6 +274,12 @@ Modular Skill QA system. Evaluates Skills through static analysis + behavioral t
 
 **Triggers**: review skill / evaluate skill / improve skill / validate fix suggestions / skill score / skill quality check
 
+### 📕 rednote-creator — Xiaohongshu Content Creation Pipeline
+
+Topic planning, copywriting, title generation, multi-image cover generation, publishing strategy, and one-click publish. Covers 6 hot niches (beauty & skincare, fashion & OOTD, fitness & weight loss, food & restaurants, travel guides, home & organization) with built-in viral patterns, title formulas, cover strategies, and posting rhythms. AI-speak blacklist ensures human-like writing. Supports autoglm-generate-image for covers + autoglm-browser-agent for one-click publishing.
+
+**Triggers**: 发小红书 / 写小红书 / rednote / 小红书笔记 / 小红书文案 / post to xiaohongshu / xiaohongshu post / rednote post
+
 ### 🧭 dev-mentor — Cross-Domain Learning Companion
 
 Helps experienced developers learn unfamiliar domains by building a full project from zero to production via continuous conversation. First batch: backend (TypeScript/Go/Python), databases, server deployment (Docker/Nginx/HTTPS/CI-CD), Rust systems programming. Auto-detects existing skills, uses analogies from known domains, explains technical terms on first use.
@@ -330,6 +343,7 @@ openclaw skills install project-onboarding
 openclaw skills install skill-creator-ProMax
 openclaw skills install skill-review-pro
 openclaw skills install dev-mentor
+openclaw skills install rednote-creator
 openclaw skills install todo-list-promax
 openclaw skills update --all
 ```
