@@ -1,6 +1,6 @@
 ---
 name: todo-list-promax
-version: "2.0.2"
+version: "2.1.0"
 description: >
   个人待办事项永久存储、智能分类与定时提醒系统。
   自动从聊天消息中捕获待办（文字/图片/附件），解析时间与优先级，每日晚上9点推送未完成提醒。
@@ -56,9 +56,11 @@ description: >
 2. 如果消息包含图片/附件，下载并保存到 `${workspace}/todo-list/attachments/`
 3. 解析时间要求（如有）
 4. 解析优先级（如有）
-5. **提取标签（tags）**（见下方标签提取规则）
-6. 生成唯一 ID，写入 `${workspace}/todo-list/todos.json`
-7. 回复用户确认（简洁一行：ID + 摘要 + 优先级 + 截止时间 + 标签）
+5. **提取对接人（contact）**（见下方对接人提取规则）
+6. **提取备注（notes）**（见下方备注提取规则）
+7. **提取标签（tags）**（见下方标签提取规则）
+8. 生成唯一 ID，写入 `${workspace}/todo-list/todos.json`
+9. 回复用户确认（完整一行：ID + 摘要 + 优先级 + 截止时间 + 对接人 + 标签 + 备注摘要）
 
 **时间解析：**
 - 相对时间：今天、明天、后天、下周一、本周五、今晚、月底 等
@@ -77,6 +79,32 @@ description: >
 | P3 | `[P3]`、`📌` | "有空再说"、"随手记一下"、"不急" |
 
 无法判断时默认 P1。
+
+**对接人（contact）提取规则：**
+
+从用户消息中识别对接人/负责人信息，提取到 `contact` 字段：
+
+| 模式 | 示例 | 提取结果 |
+|------|------|---------|
+| "XX：" 前缀 | "覃波：输入框跟后台配置联动" | contact: "覃波" |
+| "@XXX" | "@薛柯 翻译完了发过来" | contact: "薛柯" |
+| "对接人：XX" | "适配 autoclaw，对接人郭雨竹" | contact: "郭雨竹" |
+| "找XX" / "跟XX对接" | "找郭雨竹对接多语言" | contact: "郭雨竹" |
+| "XX给XX后" | "薛柯给翻译文本后加到项目" | contact: "薛柯" |
+
+提取原则：
+- 如果消息中提及多处人名，提取最直接负责该任务的人
+- 无法确定时 `contact` 为空，不追问
+- **查询输出时**：有 contact → 显示 `👤 对接:XXX`；无 contact → 不显示
+
+**备注（notes）提取规则：**
+
+- 当用户在任务描述中附带额外说明（如"备注：XX"、"PS：XX"、"注意：XX"），提取到 `notes` 字段
+- 当用户使用括号补充关键信息（如"预装插件会不会重新安装（什么变了才会重新安装）"），括号内容自动提取为 notes
+- 飞书文档链接等参考资料自动归入 notes
+- `notes` 为可选字段，无额外信息时为空
+- **查询输出时**：有 notes → 显示 `📝 备注:XXX`；无 notes → 不显示
+- **查询输出时**：始终显示 `💬 原文: source_message`，保留完整原始信息
 
 **标签（tags）提取规则：**
 
@@ -124,18 +152,30 @@ description: >
 📋 未完成待办（共 X 条）
 
 🔴 P0 重要紧急
-  #1 今天下班前提交周报  📅 今天  🏷 工作
+  #1 今天下班前提交周报  📅 今天  👤 对接:张三  🏷 工作
+  📝 备注:需要附上数据报表
+  💬 原文: TODO:今天下班前提交周报，对接人张三，需要附上数据报表
 
 🟡 P1 重要不紧急
   #3 看完那篇论文  📅 下周一  🏷 学习
+  💬 原文: TODO:看完那篇论文 #学习
+
   #5 整理桌面  （无截止时间）  🏷 生活
+  💬 原文: 待办：整理桌面
 
 🟠 P2 急但不重要
-  #8 回复那个邮件  📅 明天  🏷 工作
+  #8 回复那个邮件  📅 明天  👤 对接:李四  🏷 工作
+  💬 原文: reminder: 回复李四那封邮件明天前
 
 🟢 P3 不急
   #7 买个充电线  📅 有空再说  🏷 购物
+  💬 原文: 备忘：买个充电线
 ```
+
+**格式说明：**
+- 每个待办第一行：emoji + **#ID** + content + 📅（截止时间）+ 👤（对接人，有则显示）+ 🏷（标签，有则显示）
+- 有 notes 时：第二行 `📝 备注:内容`
+- 始终显示：`💬 原文: source_message`（保留原始关键信息，永不省略）
 
 ### 3. 待办操作
 
@@ -143,11 +183,11 @@ description: >
 **删除：** "删除 #1" 或 "TODO 删除 1" 或 "delete #1" → 回复待删除的 todo 内容摘要（ID + 内容 + 优先级），等用户确认后再移除。用户说"确认"或"删"时才执行
 **修改：** "#1 改成明天" 或 "#1 change to tomorrow" → 更新对应字段，回复确认
 
-**可修改字段：** `content`（内容）、`due_time`（截止时间）、`priority`（优先级）、`tags`（标签）
+**可修改字段：** `content`（内容）、`due_time`（截止时间）、`priority`（优先级）、`contact`（对接人）、`notes`（备注）、`tags`（标签）
 
 **修改语法：**
-- 字段名语法：`#N due_time:明天`、`#N priority:P0`、`#N content:新的任务描述`、`#N tags:工作,学习`
-- 自然语言语法（同样支持）：`#1 截止:明天`、`#1 优先级:P0`、`#1 内容:新的任务描述`
+- 字段名语法：`#N due_time:明天`、`#N priority:P0`、`#N content:新的任务描述`、`#N contact:张三`、`#N notes:补充信息`、`#N tags:工作,学习`
+- 自然语言语法（同样支持）：`#1 截止:明天`、`#1 优先级:P0`、`#1 内容:新的任务描述`、`#1 对接人:张三`、`#1 备注:补充信息`
 - 两种写法等价，系统都能识别
 
 **撤销机制：**
@@ -190,12 +230,14 @@ description: >
       "status": "pending",
       "priority": "P0",
       "due_time": "2026-05-16",
+      "contact": "张三",
+      "notes": "需要附上数据报表",
       "tags": ["工作"],
       "created_at": "2026-05-16T09:30:00+08:00",
       "completed_at": null,
       "deleted_at": null,
       "attachments": [],
-      "source_message": "TODO:今天下班前提交周报"
+      "source_message": "TODO:今天下班前提交周报，对接人张三，需要附上数据报表"
     }
   ],
   "last_reminder_at": "2026-05-16T21:00:00+08:00"
@@ -208,12 +250,14 @@ description: >
 - `status`: `pending` | `done`
 - `priority`: `P0` | `P1` | `P2` | `P3`
 - `due_time`: 截止日期 YYYY-MM-DD，可为 null
+- `contact`: 对接人/负责人姓名（可选，无则为空字符串 `""`）
+- `notes`: 备注信息，含补充说明、参考链接等（可选，无则为空字符串 `""`）
 - `tags`: 标签数组，用于分类和筛选（如 `["工作", "bug"]`），可为空数组
 - `created_at`: 创建时间 ISO 8601
 - `completed_at`: 完成时间 ISO 8601，完成时填入
 - `deleted_at`: 删除时间 ISO 8601，删除时填入（用于附件 7 天清理判断）
 - `attachments`: `[{path, type}]` 附件列表
-- `source_message`: 原始消息内容
+- `source_message`: 原始消息内容（完整保留，永不修改）
 - `last_reminder_at`: 上次提醒时间 ISO 8601（用于降级补推）
 
 ## 并发安全
@@ -259,15 +303,15 @@ description: >
 | Feature | Details |
 |---------|---------|
 | Capture | Triggers: `TODO:`, `add todo`, `remind me to`, etc. Fuzzy input → ask, don't silently capture |
-| Query | Triggers: `TODOLIST`, `my todos`, etc. Filter by date/range/priority/tags |
+| Query | Triggers: `TODOLIST`, `my todos`, etc. Filter by date/range/priority/tags. Shows 👤contact, 📝notes, 💬source_message for every item |
 | Operations | Complete, delete (with confirmation), modify, undo (single-step only) |
 | Tags | Auto-extract via keyword mapping (工作/学习/购物/生活/健康/其他) or manual `#tag` syntax. Default: empty array |
 | Daily reminder | Cron at 21:00: read todos.json → filter pending with due_time → push if any. Fallback: push on next interaction if >24h since last reminder |
 | Attachments | Saved to `attachments/`, auto-cleaned 7 days after todo deletion |
 
 ### Modify Syntax
-- Field name syntax: `#1 due_time:明天`, `#1 priority:P0`, `#1 content:新内容`, `#1 tags:工作,学习`
-- Natural language also supported: `#1 截止:明天`, `#1 优先级:P0`, `#1 内容:新内容`
+- Field name syntax: `#1 due_time:明天`, `#1 priority:P0`, `#1 content:新内容`, `#1 contact:张三`, `#1 notes:补充说明`, `#1 tags:工作,学习`
+- Natural language also supported: `#1 截止:明天`, `#1 优先级:P0`, `#1 内容:新内容`, `#1 对接人:张三`
 - Both are equivalent
 
 ### Undo Specification
@@ -280,6 +324,7 @@ description: >
 {
   "id": 1, "content": "...", "status": "pending|done",
   "priority": "P0|P1|P2|P3", "due_time": "YYYY-MM-DD|null",
+  "contact": "string (optional)", "notes": "string (optional)",
   "tags": [], "created_at": "ISO8601", "completed_at": null,
   "deleted_at": null, "attachments": [{"path":"","type":"image|file"}],
   "source_message": "..."
