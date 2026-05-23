@@ -1,6 +1,6 @@
 ---
 name: fe-cli
-version: "3.1.0"
+version: "3.1.1"
 homepage: https://github.com/z-Zihan/awesome-skills
 description: >
   前端项目脚手架 CLI。支持 React/Vue/Next.js/Nuxt.js/Astro/React Native + shadcn/Ant Design/MUI/Tailwind
@@ -268,7 +268,7 @@ This file is for AI agents to quickly understand the project.
 
 | 检查项 | 标准 |
 |---|---|
-| 包管理器 | 使用 bun 或 pnpm |
+| 包管理器 | 使用 bun（优先）或 pnpm |
 | 路径别名 | tsconfig + vite.config 中 `@/` → `src/` |
 | CSS 预处理器 | 配置 Sass (SCSS) |
 | 环境文件 | 存在 `.env` / `.env.development` / `.env.test` / `.env.production` |

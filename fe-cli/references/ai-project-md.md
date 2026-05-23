@@ -45,15 +45,52 @@ pnpm typecheck    # TypeScript type check
 │   ├── assets/                 # Static assets (images, fonts, etc.)
 │   │
 │   ├── components/             # Shared/reusable UI components
+│   │   ├── AppProvider.tsx     # Root context provider wrapper
+│   │   ├── AuthGuard.tsx       # Route authentication guard
+│   │   ├── GlobalLoading.tsx   # Full-page loading overlay
+│   │   ├── ErrorBoundary.tsx   # React error boundary
+│   │   ├── PageLoading.tsx     # Page-level loading spinner
+│   │   ├── EmptyState.tsx      # Empty state placeholder
+│   │   └── ErrorState.tsx      # Error state with retry
+│   │
+│   ├── config/                 # App-level constants and route config
+│   │   ├── index.ts            # Constants, env config, route paths
+│   │   └── routes.tsx          # Centralized route definitions
 │   │
 │   ├── hooks/                  # Custom React/Vue hooks
+│   │   ├── index.ts            # Re-export all hooks
+│   │   ├── useRequest.ts       # Data fetching
+│   │   ├── useDebounce.ts      # Debounce value
+│   │   ├── useLocalStorage.ts  # Typed localStorage
+│   │   ├── useMediaQuery.ts    # CSS media query reactive
+│   │   ├── useClickAway.ts     # Click outside detector
+│   │   ├── useToggle.ts        # Boolean toggle
+│   │   ├── usePrevious.ts      # Previous value tracker
+│   │   └── useUpdateEffect.ts  # Skip-first-render effect
 │   │
-│   ├── layouts/                # Page layout components (header, sidebar, etc.)
+│   ├── layouts/                # Page layout components
+│   │   ├── AppLayout.tsx       # Main layout (sidebar + header + content)
+│   │   ├── Header.tsx          # Top bar (theme toggle, user menu)
+│   │   └── Sidebar.tsx         # Side navigation
+│   │
+│   ├── locales/                # i18n translations (if i18n selected)
+│   │   ├── index.ts            # i18n initialization
+│   │   ├── zh-CN.json          # Chinese translations
+│   │   ├── en-US.json          # English translations
+│   │   └── useLanguage.ts      # Language switch hook
+│   │
+│   ├── store/                  # State management (if selected)
+│   │   ├── index.ts            # Re-export stores
+│   │   ├── useUserStore.ts     # User auth & profile
+│   │   ├── useAppStore.ts      # App-level state (theme, locale, sidebar)
+│   │   └── middleware.ts       # Custom middleware (logger, persist)
+│   │
+│   ├── theme/                  # Theme system
+│   │   ├── index.ts            # ThemeProvider + theme logic
+│   │   ├── tokens.ts           # Light + dark design tokens
+│   │   └── useTheme.ts         # Theme hook
 │   │
 │   ├── pages/                  # Page-level components (one per route)
-│   │
-│   ├── router/                 # Route configuration
-│   │   └── index.{tsx|ts}      # Route definitions
 │   │
 │   ├── services/               # API layer
 │   │   ├── request.ts          # fetch wrapper — interceptors, error handling, auth header
@@ -61,8 +98,6 @@ pnpm typecheck    # TypeScript type check
 │   │   ├── log-export.ts        # Log export (download) + submit (endpoint TBD)
 │   │   └── api/
 │   │       └── index.ts        # API endpoint functions
-│   │
-│   ├── stores/                 # State management (Zustand/Pinia/Redux stores)
 │   │
 │   ├── styles/                 # Global styles
 │   │   ├── global.scss         # CSS custom properties + body/html defaults

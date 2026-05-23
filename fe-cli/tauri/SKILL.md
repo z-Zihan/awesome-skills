@@ -73,10 +73,11 @@ project-name/
 │   │   │   └── index.tsx
 │   │   └── NotFound.tsx
 │   ├── hooks/
-│   │   ├── useRequest.ts       # Data fetching hook
+│   │   ├── useRequest.ts       # Data fetching hook (from shared layer)
 │   │   └── useTauri.ts         # Tauri IPC hooks
-│   ├── stores/
-│   │   └── appStore.ts         # Zustand/Pinia
+│   ├── store/                  # State management (from shared infrastructure)
+│   ├── theme/                  # Theme system (from shared infrastructure)
+│   ├── config/                 # App constants + routes (from shared infrastructure)
 │   ├── App.tsx
 │   └── main.tsx
 ├── src-tauri/                  # Rust backend

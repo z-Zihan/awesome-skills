@@ -541,6 +541,96 @@ export type { ThemeMode } from './tokens';
 > }
 > ```
 
+**`src/theme/index.ts`** (Vue):
+```typescript
+import { provide, inject, ref, watchEffect, type InjectionKey, onMounted, onUnmounted } from 'vue';
+import { lightTokens, darkTokens, type ThemeMode } from './tokens';
+
+interface ThemeContextValue {
+  theme: ThemeMode;
+  resolvedTheme: 'light' | 'dark';
+  setTheme: (theme: ThemeMode) => void;
+}
+
+const THEME_KEY: InjectionKey<ThemeContextValue> = Symbol('theme');
+
+function getSystemTheme(): 'light' | 'dark' {
+  return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+}
+
+function applyTokens(theme: 'light' | 'dark') {
+  const tokens = theme === 'dark' ? darkTokens : lightTokens;
+  const root = document.documentElement;
+  Object.entries(tokens).forEach(([key, value]) => {
+    root.style.setProperty(key, value);
+  });
+  root.setAttribute('data-theme', theme);
+  root.classList.remove('light', 'dark');
+  root.classList.add(theme);
+}
+
+/**
+ * Call in App.vue setup() to provide theme to all descendants.
+ * Reads/writes localStorage('theme') for persistence.
+ */
+export function useThemeProvider() {
+  const theme = ref<ThemeMode>((localStorage.getItem('theme') as ThemeMode) || 'system');
+  const resolvedTheme = ref<'light' | 'dark'>(
+    theme.value === 'system' ? getSystemTheme() : theme.value
+  );
+
+  // Apply tokens reactively
+  watchEffect(() => {
+    resolvedTheme.value = theme.value === 'system' ? getSystemTheme() : theme.value;
+    applyTokens(resolvedTheme.value);
+    localStorage.setItem('theme', theme.value);
+  });
+
+  // Listen for system theme changes
+  let mqHandler: (() => void) | null = null;
+  onMounted(() => {
+    const mq = window.matchMedia('(prefers-color-scheme: dark)');
+    mqHandler = () => {
+      if (theme.value === 'system') {
+        resolvedTheme.value = getSystemTheme();
+        applyTokens(resolvedTheme.value);
+      }
+    };
+    mq.addEventListener('change', mqHandler);
+  });
+  onUnmounted(() => {
+    if (mqHandler) {
+      window.matchMedia('(prefers-color-scheme: dark)').removeEventListener('change', mqHandler);
+    }
+  });
+
+  const setTheme = (t: ThemeMode) => { theme.value = t; };
+
+  const ctx: ThemeContextValue = { theme: theme.value, resolvedTheme: resolvedTheme.value, setTheme };
+  provide(THEME_KEY, ctx);
+
+  return { theme, resolvedTheme, setTheme };
+}
+
+/**
+ * Use in any descendant component to read/switch theme.
+ */
+export function useTheme(): ThemeContextValue {
+  const ctx = inject(THEME_KEY);
+  if (!ctx) throw new Error('useTheme must be used inside a component that calls useThemeProvider()');
+  return ctx;
+}
+```
+
+> **Wire into `App.vue`:**
+> ```vue
+> <script setup lang="ts">
+> import { useThemeProvider } from '@/theme';
+> useThemeProvider();
+> </script>
+> ```
+> **Usage in descendant components:** `const { resolvedTheme, setTheme } = useTheme();`
+
 ---
 
 ## src/hooks/ — Common Custom Hooks

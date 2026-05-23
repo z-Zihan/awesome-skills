@@ -43,8 +43,18 @@ project-name/
 │   ├── preload.ts            # Preload script (contextBridge)
 │   └── updater.ts            # Auto-update logic (if selected)
 ├── src/                      # Renderer process (React/Vue)
-│   ├── ...                   # Same as Web SPA structure
-│   └── electron.d.ts         # IPC type declarations
+│   ├── components/           # Global components (from shared infrastructure)
+│   ├── pages/                # Page components
+│   ├── hooks/                # Common hooks (from shared infrastructure)
+│   ├── store/                # State management (from shared infrastructure)
+│   ├── theme/                # Theme system (from shared infrastructure)
+│   ├── config/               # App constants + routes (from shared infrastructure)
+│   ├── services/             # API layer (from shared base)
+│   ├── utils/                # Utilities (from shared base)
+│   ├── styles/               # Global styles (from shared base)
+│   ├── electron.d.ts         # IPC type declarations
+│   ├── App.tsx
+│   └── main.tsx
 ├── package.json
 ├── vite.config.ts
 ├── electron-builder.yml      # Build config
@@ -176,8 +186,8 @@ declare global {
 
 **`electron-builder.yml`:**
 ```yaml
-appId: com.example.app
-productName: Your App
+appId: <YOUR_APP_ID>           # e.g. com.yourcompany.yourapp — replace with actual app ID (see parameterization rule in main SKILL.md)
+productName: <YOUR_APP_NAME>   # e.g. My App — replace with actual app name
 directories:
   output: release
 files:
@@ -202,7 +212,7 @@ nsis:
   allowToChangeInstallationDirectory: true
 publish:
   - provider: generic
-    url: https://update.example.com
+    url: <YOUR_UPDATE_URL>     # e.g. https://update.yourcompany.com — replace with actual update server URL
 ```
 
 **`package.json` scripts:**
