@@ -1,6 +1,6 @@
 ---
 name: fe-cli
-version: "3.0.0"
+version: "3.1.0"
 homepage: https://github.com/z-Zihan/awesome-skills
 description: >
   前端项目脚手架 CLI。支持 React/Vue/Next.js/Nuxt.js/Astro/React Native + shadcn/Ant Design/MUI/Tailwind
@@ -96,23 +96,62 @@ Read `references/shared-base.md` and `references/shared-config.md` for code temp
 ```
 project-name/
 ├── src/
+│   ├── components/
+│   │   ├── AppProvider.tsx      # 根级 Context Provider 包裹层
+│   │   ├── AuthGuard.tsx        # 路由鉴权守卫（角色控制）
+│   │   ├── ErrorBoundary.tsx    # React 错误边界
+│   │   ├── GlobalLoading.tsx    # 全屏 Loading 遮罩
+│   │   ├── PageLoading.tsx      # 页面级 Loading
+│   │   ├── EmptyState.tsx       # 空状态占位
+│   │   └── ErrorState.tsx       # 错误状态（含重试）
+│   ├── config/
+│   │   ├── index.ts             # 应用常量 + 环境配置
+│   │   └── routes.tsx           # 集中式路由定义
+│   ├── hooks/
+│   │   ├── index.ts             # Re-export all hooks
+│   │   ├── useRequest.ts        # 数据请求
+│   │   ├── useDebounce.ts       # 防抖
+│   │   ├── useLocalStorage.ts   # 类型安全的 localStorage
+│   │   ├── useMediaQuery.ts     # CSS 媒体查询响应式
+│   │   ├── useClickAway.ts      # 点击外部检测
+│   │   ├── useToggle.ts         # 布尔切换
+│   │   ├── usePrevious.ts       # 上一次值追踪
+│   │   └── useUpdateEffect.ts   # 跳过首次渲染的 effect
+│   ├── layouts/
+│   │   ├── AppLayout.tsx        # 主布局（侧边栏 + 头部 + 内容）
+│   │   ├── Header.tsx           # 顶栏（主题切换、用户菜单）
+│   │   └── Sidebar.tsx          # 侧边导航
+│   ├── locales/                 # （仅 i18n 选中时生成）
+│   │   ├── index.ts             # i18n 初始化
+│   │   ├── zh-CN.json           # 中文翻译
+│   │   ├── en-US.json           # 英文翻译
+│   │   └── useLanguage.ts       # 语言切换 hook
+│   ├── store/                   # （仅状态管理选中时生成）
+│   │   ├── index.ts             # Re-export stores
+│   │   ├── useUserStore.ts      # 用户认证 & 信息
+│   │   ├── useAppStore.ts       # 应用级状态（主题、语言、侧边栏）
+│   │   └── middleware.ts        # 自定义中间件（logger、persist）
+│   ├── theme/
+│   │   ├── index.ts             # ThemeProvider + 主题逻辑
+│   │   ├── tokens.ts            # 亮色 + 暗色设计令牌
+│   │   └── useTheme.ts          # 主题 hook（读取/切换/主题感知类名）
 │   ├── services/
-│   │   ├── request.ts         # fetch 请求封装（含拦截器）
-│   │   ├── logger.ts          # 结构化日志（分级、轮转、持久化）
-│   │   ├── log-export.ts      # 日志导出（下载 .log/.json）+ 上报（待定）
+│   │   ├── request.ts           # fetch 请求封装（含拦截器）
+│   │   ├── logger.ts            # 结构化日志（分级、轮转、持久化）
+│   │   ├── log-export.ts        # 日志导出（下载 .log/.json）+ 上报（待定）
 │   │   └── api/
-│   │       └── index.ts       # API 接口定义
+│   │       └── index.ts         # API 接口定义
 │   ├── styles/
-│   │   ├── global.scss        # CSS 变量 + 全局样式
-│   │   ├── reset.scss         # CSS reset
-│   │   └── variables.scss     # 设计令牌（颜色、间距、断点）
+│   │   ├── global.scss          # CSS 变量 + 全局样式
+│   │   ├── reset.scss           # CSS reset
+│   │   └── variables.scss       # 设计令牌（颜色、间距、断点）
 │   ├── utils/
-│   │   ├── index.ts           # 通用工具函数（防抖、深拷贝等）
-│   │   ├── storage.ts         # localStorage/sessionStorage 封装
-│   │   ├── format.ts          # 日期/数字格式化
-│   │   └── validate.ts        # 表单校验工具
+│   │   ├── index.ts             # 通用工具函数（防抖、深拷贝等）
+│   │   ├── storage.ts           # localStorage/sessionStorage 封装
+│   │   ├── format.ts            # 日期/数字格式化
+│   │   └── validate.ts          # 表单校验工具
 │   └── types/
-│       └── global.d.ts        # 全局类型声明
+│       └── global.d.ts          # 全局类型声明
 ├── .env                       # 公共环境变量
 ├── .env.development           # 开发环境
 ├── .env.test                  # 测试环境
@@ -139,8 +178,14 @@ project-name/
 
 ### 共享代码模板
 
-所有共享源码模板见 `references/shared-base.md`（含 logger.ts 和 log-export.ts）。
-vite/tsconfig/eslint 配置模板见 `references/shared-config.md`。
+基础层模板见 `references/shared-base.md`（含 logger.ts 和 log-export.ts）。
+构建配置模板见 `references/shared-config.md`。
+基础设施层模板见 `references/shared-infrastructure.md`（状态管理、主题系统、i18n、通用 Hooks、全局组件、布局、路由守卫、常量配置）。
+
+**条件生成**：
+- 用户选了 Zustand/Redux Toolkit/Pinia → 生成 `src/store/`
+- 用户选了 i18n → 生成 `src/locales/`
+- **无论选什么都生成**：`src/hooks/`（通用 hooks）、`src/components/AppProvider.tsx`、`src/components/AuthGuard.tsx`、`src/components/GlobalLoading.tsx`、`src/config/`、`src/theme/`
 
 ## AI 可读项目文档
 
@@ -223,13 +268,21 @@ This file is for AI agents to quickly understand the project.
 
 | 检查项 | 标准 |
 |---|---|
-| 包管理器 | 使用 pnpm |
+| 包管理器 | 使用 bun 或 pnpm |
 | 路径别名 | tsconfig + vite.config 中 `@/` → `src/` |
 | CSS 预处理器 | 配置 Sass (SCSS) |
 | 环境文件 | 存在 `.env` / `.env.development` / `.env.test` / `.env.production` |
 | 请求封装 | `services/request.ts` 使用 fetch wrapper（非 axios） |
 | 日志 | `services/logger.ts` 存在，使用 `Logger.child("Module")` 模式 |
 | 全局样式 | `styles/global.scss` + `reset.scss` + `variables.scss` |
+| 主题系统 | `theme/` 目录存在，支持亮/暗模式切换 |
+| 状态管理 | 若选了状态管理 → `store/` 目录存在，含 userStore + appStore |
+| 多语言 | 若选了 i18n → `locales/` 目录存在，含 zh-CN + en-US |
+| 通用 Hooks | `hooks/` 目录存在，含 useDebounce、useLocalStorage、useMediaQuery 等 |
+| 全局组件 | `components/AppProvider.tsx` + `AuthGuard.tsx` + `GlobalLoading.tsx` |
+| 布局组件 | `layouts/` 目录存在，含 AppLayout + Header + Sidebar |
+| 路由配置 | `config/routes.tsx` 集中定义，非分散在各页面 |
+| 常量配置 | `config/index.ts` 含路由路径、HTTP 状态码、分页默认值等 |
 | 工具函数 | `utils/index.ts` + `storage.ts` + `format.ts` + `validate.ts` |
 | 类型声明 | `types/global.d.ts` 含 ImportMetaEnv |
 | Scripts | 含 dev / build:prod / build:test / lint / typecheck |

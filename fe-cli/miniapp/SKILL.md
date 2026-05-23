@@ -273,13 +273,22 @@ export function useRequest<T>(fetcher: () => Promise<T>, options: { manual?: boo
 }
 ```
 
-### Step 7: Shared Layer + Final
+### Step 7: Shared Layer + Infrastructure + Final
 
-Adapt shared files for Taro/mini-program environment:
+Read the following reference files and adapt for mini-program environment:
+1. `../references/shared-base.md` — services, utils, styles, types, env files
+2. `../references/shared-config.md` — tsconfig, eslint configs (skip vite configs)
+3. `../references/shared-infrastructure.md` — store, i18n, hooks, config/constants
+
+**Mini-program adaptations:**
 - `request.ts` uses Taro.request instead of fetch
 - `storage.ts` uses Taro Storage API
 - `format.ts` — same as shared, works in Taro
 - `validate.ts` — same as shared
+- Theme: skip `theme/` directory (mini-programs don't support CSS custom properties widely; use Taro theme config instead)
+- Layout components: skip (mini-programs use native tab bar + page stack)
+- AuthGuard: adapt to Taro page lifecycle (use `useDidShow` + redirect)
+- Store (Zustand): works, but use `taro-persistent-store` or manual `Taro.setStorageSync` for persistence
 - CSS variables — same as shared (Taro supports SCSS)
 
 Do NOT generate:

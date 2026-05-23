@@ -538,8 +538,15 @@ function handleCommand(command: string) {
 
 ### Step 7: Generate Shared Layer
 
-Read `../references/shared-base.md` and `../references/shared-config.md`.
-Generate all shared files: services, utils, styles, configs, env.
+Read the following reference files and generate all shared code:
+1. `../references/shared-base.md` — services, utils, styles, types, env files
+2. `../references/shared-config.md` — vite, tsconfig, eslint, prettier configs
+3. `../references/shared-infrastructure.md` — store, theme, i18n, hooks, layouts, auth guard, config/constants
+
+**Conditional generation** (only if user selected the corresponding option):
+- Selected Zustand/Redux Toolkit/Pinia → generate `src/store/`
+- Selected i18n → generate `src/locales/`
+- **Always generate**: `src/hooks/`, `src/components/AppProvider.tsx`, `src/components/AuthGuard.tsx`, `src/components/GlobalLoading.tsx`, `src/config/`, `src/theme/`
 
 ### Step 8: Final Setup
 

@@ -306,15 +306,27 @@ export function useRequest<T>(fetcher: () => Promise<T>) {
 }
 ```
 
-### Step 7: Shared Layer + Final
+### Step 7: Shared Layer + Infrastructure + Final
 
-For Next.js projects, adapt shared-base.md files:
+Read the following reference files and adapt for SSR context:
+1. `../references/shared-base.md` — services, utils, styles, types, env files
+2. `../references/shared-config.md` — tsconfig, eslint, prettier configs (skip vite configs)
+3. `../references/shared-infrastructure.md` — store, theme, i18n, hooks, layouts, auth guard, config/constants
+
+**SSR-specific adaptations:**
 - Use `lib/` instead of `src/services/` for universal code
 - Use `components/` instead of `src/components/`
 - `hooks/` become client-only (add `'use client'` directive)
-- Skip `vite.config.ts` and `tsconfig.node.json` (Next.js has its own build system)
+- Store (Zustand) must handle SSR hydration (use `useStore` with `useSyncExternalStore` or `skipHydration`)
+- Theme must handle server-side rendering (avoid flash of wrong theme)
+- i18n should use `next-intl` for Next.js or `@nuxtjs/i18n` for Nuxt instead of react-i18next/vue-i18n
+- Skip `vite.config.ts` and `tsconfig.node.json` (Next.js/Nuxt have their own build systems)
+- Only generate files that make sense for SSR context
 
-Only generate files that make sense for SSR context.
+**Conditional generation** (only if user selected the corresponding option):
+- Selected state management → generate `src/store/` (with SSR hydration)
+- Selected i18n → generate i18n config (platform-specific)
+- **Always generate**: `src/hooks/`, global components, `src/config/`, `src/theme/`
 
 ```bash
 cd <project-name>
