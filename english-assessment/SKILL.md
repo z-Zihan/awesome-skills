@@ -1,6 +1,6 @@
 ---
 name: english-assessment
-version: "3.10.0"
+version: "3.10.1"
 description: >
   陪伴式英语水平测评助手。不是冰冷的出题机器，而是陪你一起成长的英语伙伴。基于历史数据动态调整难度（持续强项→提难度，薄弱项→多出题），
   大学英语水平（CEFR B1-C2），随机生成题卷（默认25-40题或快速21题，7-10种题型，总分100分），
@@ -341,7 +341,7 @@ description: >
    - **联网搜题**：每次出题前，**必须优先联网搜索**（使用 web_search 或 web_fetch）获取真实英语考试题目、专业术语、时事话题，确保知识点新鲜多样，避免 AI 凭自身知识反复出相似题目。搜题全程静默，用户不感知——搜题成功用真题，搜题失败静默回退AI知识出题，不提示用户
    - **工具可用性检查**：如果联网工具不可用（模型无 web_search/web_fetch），直接用 AI 知识出题，不提示用户
    - **搜题策略**（autoglm-websearch 精准搜索 + web_fetch 抓取正文，按优先级排序）：
-     - **首选：autoglm-websearch 搜题** → 获取 URL → web_fetch 抓取正文。搜索词示例："CET4 选词填空真题 2024"、"英语四级翻译真题 2024"、"GRE 语法题"。autoglm-websearch 返回 URL 和摘要，再用 web_fetch 抓取页面全文提取真题原文
+     - **首选：autoglm-websearch 搜题** → 获取 URL → web_fetch 抓取正文。autoglm-websearch 返回 URL 和摘要，再用 web_fetch 抓取页面全文提取真题原文
      - **autoglm-websearch 已验证可搜到的内容源**：koolearn.com（新东方在线，选词填空/翻译/语法真题全文可抓取）、xdf.cn（新东方网，听力原文）
      - **GitHub CET-4/6 真题 PDF（国内用 gh-proxy 镜像加速下载+pdf工具解析）**：github.com/DieDiDi/CET4-6-past-exam-paper，含 2015-2023 年 CET-4/6 真题 PDF。通过 gh-proxy.com 代理下载后用 pdf 工具解析，可提取选词填空原文+选项、阅读理解全文+题目、翻译题中文原文。gh-proxy 国内加速：`gh-proxy.com/https://raw.githubusercontent.com/DieDiDi/CET4-6-past-exam-paper/main/{路径}`
      - **Gitee CET-4 真题 PDF（国内直连+pdf工具解析）**：gitee.com/jasonwarner/CET4，含 2013-2020 年 CET-4 真题 PDF。通过 Gitee API 获取 download_url 下载后用 pdf 工具解析。Gitee API: `gitee.com/api/v5/repos/jasonwarner/CET4/contents/{路径}`
@@ -355,6 +355,25 @@ description: >
      - 搜索英语学习社区高频错题（Reddit r/EnglishLearning、StackExchange 等）作为易错点出题参考
      - **以下网站已验证不可用**：zhenti.burningvocabulary.cn（PDF查看器，web_fetch抓不到正文）、沪江英语/考虫/扇贝/百词斩/中国教育在线（付费墙/SPA/已下线）、知乎（403反爬）
      - **搜题失败时**：静默回退AI自身知识出题，不提示用户，但必须避免与最近 3 次测评的知识点重复
+   - **搜题随机化策略**（防止多次测评搜到同一份题目）：
+     - **搜索词随机化**：每次搜题时从以下维度组合生成不同的搜索词，不使用固定搜索词：
+       - 年份：从 2019-2025 中随机选（如 "2021年6月"、"2023年12月"）
+       - 题型：选词填空/阅读理解/翻译/语法/听力（中英文混用）
+       - 考试类型：CET-4/CET-6/考研英语/GRE/IELTS/TOEFL/专四专八，随机选不同考试
+       - 话题：从话题库中随机选一个（环保/科技/AI/健康/教育/经济/文化/社会/职场/心理学/农业/法律/金融）
+       - 示例组合："2023年12月 CET-4 翻译真题" / "GRE sentence equivalence 2024" / "考研英语 阅读理解 科技" / "CET-6 选词填空 环保"
+     - **源随机化**：每次测评随机选择搜题源组合（不每次都从同一源搜）：
+       - 30% 概率：autoglm-websearch → koolearn/xdf
+       - 25% 概率：GitHub PDF（DieDiDi 仓库，随机选年份和套号）
+       - 20% 概率：Gitee PDF（随机选年份和套号）
+       - 15% 概率：GitHub JSON（ShepiTT 仓库，随机选试卷）
+       - 10% 概率：vocabulary.com / Oxford（词汇题）
+     - **题内随机化**：从搜到的页面/文件中随机选取题目，不从头开始选：
+       - PDF：解析全文后随机选不同位置的题目（不总是选第1题）
+       - JSON：从 15 套试卷中随机选一套，再从中随机选题
+       - 网页：页面内通常有多道题，随机选不同题目
+     - **历史去重**：出题前检查最近 3 次测评的考点（已有序列），确保本次搜到的题目不与近期重复。若搜到的真题已被用过，换年份/套号重新搜
+     - **混合出题**：一次测评中不同题型从不同源搜题，不要所有题都来自同一份试卷
    - **防重复检查**：出题前回顾当前测评和最近 3 次测评的考点，确保不重复
 6. **情景对话补全**：尽量设计成**选择题形式**（给出4个选项），减少需要用户手动输入长句的情况。基础单词仍需手动输入
 7. **选词填空大题错题记录规则**：
