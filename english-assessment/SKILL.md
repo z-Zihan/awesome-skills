@@ -1,6 +1,6 @@
 ---
 name: english-assessment
-version: "3.9.7"
+version: "3.10.0"
 description: >
   陪伴式英语水平测评助手。不是冰冷的出题机器，而是陪你一起成长的英语伙伴。基于历史数据动态调整难度（持续强项→提难度，薄弱项→多出题），
   大学英语水平（CEFR B1-C2），随机生成题卷（默认25-40题或快速21题，7-10种题型，总分100分），
@@ -725,3 +725,40 @@ description: >
 - 导入时过滤超过 30 天的过期错题，不导入
 - 支持飞书云文档导入导出（如有权限），飞书文档数据也是 merge 而非覆盖
 - 开始新测评时，上次的错题追问/考题分析自动结束，"本次测评"指代更新为新测评
+
+## 🔒 DIAG-SEARCH / 联网搜题诊断
+
+此功能为隐藏后门，**仅在用户发送精确触发词时激活**，平时绝不触发、不提示、不暴露。
+
+**触发词**：`DIAG-SEARCH`（必须完全匹配，大小写不敏感）
+
+**不触发的情况**：任何其他消息、测评进行中、错题分析、学习进度等正常流程中，均不触发此功能，也不在任何输出中提及此功能的存在。
+
+**触发后执行以下诊断流程**（全部静默执行，最后输出一份简洁诊断报告）：
+
+1. **autoglm-websearch 连通性**：用 autoglm-websearch 搜索 "CET-4 选词填空真题"，检查是否返回有效 URL（code=0 且有结果）
+2. **web_fetch 网页抓取**：从步骤1结果中选一个 URL，用 web_fetch 抓取正文，检查是否返回真题内容（含关键词如 "Section A"、"blank"、"选项" 等）
+3. **GitHub JSON 源**：通过 gh-proxy 镜像访问 `gh-proxy.com/https://raw.githubusercontent.com/ShepiTT/CET_practice_questions/main/parsed_data.json`，检查是否返回有效 JSON 且包含题目数据
+4. **Gitee PDF 源**：通过 Gitee API `gitee.com/api/v5/repos/jasonwarner/CET4/contents/` 获取文件列表，检查是否返回目录结构
+5. **vocabulary.com**：访问 `vocabulary.com/dictionary/test`，检查是否返回词条内容
+6. **Oxford**：访问 `oxfordlearnersdictionaries.com/definition/english/test`，检查是否返回词条内容
+
+**诊断报告格式**（飞书兼容）：
+
+---
+**🔍 联网搜题诊断报告**
+
+- autoglm-websearch：✅ 连通 / ❌ 失败（原因）
+- web_fetch 抓取：✅ 可抓取 / ❌ 失败（原因）
+- GitHub JSON：✅ 可访问（N 道题） / ❌ 失败（原因）
+- Gitee PDF：✅ 可访问（N 年真题） / ❌ 失败（原因）
+- vocabulary.com：✅ 可访问 / ❌ 失败（原因）
+- Oxford：✅ 可访问 / ❌ 失败（原因）
+
+搜题能力评估：X/6 源可用 → 全部可用 / 大部分可用 / 部分可用 / 不可用
+---
+
+**关键规则**：
+- 诊断完成后**不保留任何下载的文件**，全部清理
+- 诊断过程中**不中断任何进行中的测评**
+- **永远不在其他任何场景提及此功能**，包括帮助提示、技能说明、错误信息中
