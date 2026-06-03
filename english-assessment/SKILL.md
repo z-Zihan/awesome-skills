@@ -1,6 +1,6 @@
 ---
 name: english-assessment
-version: "4.2.0"
+version: "4.3.0"
 description: >
   陪伴式英语水平测评助手。不是冰冷的出题机器，而是陪你一起成长的英语伙伴。基于历史数据动态调整难度（持续强项→提难度，薄弱项→多出题），
   大学英语水平（CEFR B1-C2），随机生成题卷（默认25-40题或快速21题，7-10种题型，总分100分），
@@ -289,10 +289,10 @@ description: >
 1. **检查范围**：最近 3 次同模式测评的各维度正确率
 2. **提难度条件**：某维度在最近 3 次测评中正确率均 ≥ 80%
 3. **提难度方式**（提难度 + 扩题库）：
-   - 词汇题：使用更专业/生僻的词汇和熟词生义，从 B2-C2 提升到 C1-C2+，增加习语和短语动词，同时扩大搜题范围（增加 GRE/GMAT/CPE/考研英语等题源）
-   - 语法题：增加高阶语法点（虚拟语气多种用法、倒装句全部形式、强调句、独立主格、省略与替代、非谓语动词复合结构），难度对标 C1-C2，同时增加语法题来源（LSAT/GMAT 语法题、专八改错真题）
-   - 翻译题：增加长句翻译、专业术语翻译，同时扩大翻译题源（增加考研英语翻译真题、MTI翻译真题、政府工作报告双语对照）
-   - 阅读理解：文章加长至 300-500 词，增加深层推理题、作者态度题、段落关系题，难度对标 C1-C2，同时增加阅读题源（增加经济学人/BBC/NYT 等外刊原文、GRE阅读真题）
+   - 词汇题：使用更专业/生僻的词汇和熟词生义，从 B2-C2 提升到 C1-C2+，增加习语和短语动词，同时扩大搜题范围（增加 SEARCH_GRE_MANHATTAN/SEARCH_GITHUB_CAE/考研英语等题源）
+   - 语法题：增加高阶语法点（虚拟语气多种用法、倒装句全部形式、强调句、独立主格、省略与替代、非谓语动词复合结构），难度对标 C1-C2，同时增加语法题来源（SEARCH_GITHUB_CAE 的 Open Cloze/Word Formation、SEARCH_GITHUB_KAOYAN 语法真题）
+   - 翻译题：增加长句翻译、专业术语翻译，同时扩大翻译题源（增加 SEARCH_GITHUB_KAOYAN 考研翻译真题、MTI翻译真题、政府工作报告双语对照）
+   - 阅读理解：文章加长至 300-500 词，增加深层推理题、作者态度题、段落关系题，难度对标 C1-C2，同时增加阅读题源（增加 SEARCH_GITHUB_CAE 阅读、经济学人/BBC/NYT 等外刊原文、SEARCH_GITHUB_KAOYAN 考研阅读）
    - 实用表达：增加正式场景、跨文化沟通、学术/职场等多样化表达题目，同时增加表达题源（商务英语真题、职场沟通指南、学术论文写作规范）
 4. **降难度条件**：某维度连续 3 次正确率 < 40%
 5. **降难度方式**：适当降低该维度题目难度，偏向 B1-B2 水平
@@ -456,7 +456,7 @@ Because I didn't study hard, I failed the exam.
 6. **备选词标注词性**：原真题不标注词性，但加上词性标注能帮考生排除，15选10的备选词必须加 `(n.)` `(v.)` `(adj.)` `(adv.)` 标注
 7. **中文翻译题**：搜到的翻译真题原文如果太长（>2句），只截取1-2句作为单题，不要整段贴出
 8. **阅读理解**：搜到的原文如果是整份试卷（含听力+阅读+翻译），只提取阅读部分，其余丢弃
-9. **听力题跳过**：搜到的听力选择题（Part II Listening Comprehension）整段跳过，不出听力题。听力无法在文字测评中实现
+9. **听力题跳过**：搜到的听力选择题（Part II Listening Comprehension）整段跳过，不出听力题。但如果试卷附带听力原文（Tape Script / Transcript），可将原文转为阅读理解或翻译题素材——取 news report/passage 短文做阅读理解，取短句做翻译题，对话类（A: ... B: ...）跳过
 
 ### 非答案回复处理
 
@@ -929,7 +929,7 @@ Because I didn't study hard, I failed the exam.
 - **无官方答案时**（GitHub JSON、部分 PDF）：AI 自行判断正确答案并生成解析，解析末尾标注「💡 此题为 AI 解析，仅供参考」
 - **翻译题特殊处理**：SEARCH_XDF/SEARCH_KOOLEARN 上的翻译真题通常附带参考译文，直接作为评分标准。AI 评分时对照参考译文，不以 AI 自己的翻译为准
 - **阅读理解特殊处理**：阅读理解需要理解全文才能做对，AI 必须先完整阅读搜到的原文，再基于原文内容解析题目。如果原文不完整（截断），标注「⚠️ 原文不完整，解析可能不准确」
-- **听力题跳过**：搜到的整份试卷如果含听力部分，跳过不取（听力无法在文字测评中实现），只提取阅读/翻译/语法/词汇部分
+- **听力题跳过**：搜到的整份试卷如果含听力部分，听力选择题跳过（听力无法在文字测评中实现）。但如果试卷附带听力原文（Tape Script / Transcript），可将原文转为阅读理解或翻译题素材——取 news report/passage 短文做阅读理解，取短句做翻译题，对话类（A: ... B: ...）跳过。只提取阅读/翻译/语法/词汇部分
 - **选词填空特殊处理**：SEARCH_KOOLEARN 上的选词填空通常附带参考答案，AI 解析时对照参考答案逐空解释词性/语义/搭配原因
 
 ## 约束
@@ -971,11 +971,15 @@ Because I didn't study hard, I failed the exam.
 **触发后执行以下诊断流程**（全部静默执行，最后输出一份简洁诊断报告）：
 
 1. **autoglm-websearch 连通性**：用 autoglm-websearch 搜索 "CET-4 选词填空真题"，检查是否返回有效 URL（code=0 且有结果）
-2. **web_fetch 网页抓取**：从步骤1结果中选一个 URL，用 web_fetch 抓取正文，检查是否返回真题内容（含关键词如 "Section A"、"blank"、"选项" 等）
-3. **GitHub JSON 源**：通过 gh-proxy 镜像访问 `gh-proxy.com/https://raw.githubusercontent.com/ShepiTT/CET_practice_questions/main/parsed_data.json`，检查是否返回有效 JSON 且包含题目数据
-4. **Gitee PDF 源**：通过 Gitee API `gitee.com/api/v5/repos/jasonwarner/CET4/contents/` 获取文件列表，检查是否返回目录结构
-5. **vocabulary.com**：访问 `vocabulary.com/dictionary/test`，检查是否返回词条内容
-6. **Oxford**：访问 `oxfordlearnersdictionaries.com/definition/english/test`，检查是否返回词条内容
+2. **web_fetch 网页抓取**：从步骤1结果中选一个 koolearn URL，用 web_fetch 抓取正文，检查是否返回真题内容（含关键词如 "Section A"、"blank"、"选项" 等）
+3. **GitHub Markdown 真题**⭐：通过 gh-proxy 镜像访问 `gh-proxy.com/https://raw.githubusercontent.com/wamich/english-exem-md/main/CET4/2023.12/cet4-2023-12-1.md`，检查是否返回 Markdown 真题内容（含 "Reading Comprehension" 或 "选词填空" 或 "Translation"）
+4. **GitHub JSON 源**：通过 gh-proxy 镜像访问 `gh-proxy.com/https://raw.githubusercontent.com/ShepiTT/CET_practice_questions/main/parsed_data.json`，检查是否返回有效 JSON 且包含题目数据
+5. **GitHub CAE C1 源**⭐：通过 gh-proxy 访问 `gh-proxy.com/https://raw.githubusercontent.com/gunqiuwang/cae-question-bank/main/cae_advanced_practice.md`，检查是否返回 CAE 题目（含 "Multiple Choice Cloze" 或 "Open Cloze"）
+6. **GitHub 考研源**：通过 gh-proxy 访问 GitHub API `api.github.com/repos/youngflysky/KaoYanZhenTi-PDF/contents/英一历年真题`，检查是否返回考研英语真题文件列表
+7. **Gitee PDF 源**：通过 Gitee API `gitee.com/api/v5/repos/jasonwarner/CET4/contents/` 获取文件列表，检查是否返回目录结构
+8. **vocabulary.com**：访问 `vocabulary.com/dictionary/test`，检查是否返回词条内容
+9. **Oxford**：访问 `oxfordlearnersdictionaries.com/definition/english/test`，检查是否返回词条内容
+10. **Manhattan GRE**：访问 `manhattanreview.com/free-gre-practice-questions`，检查是否返回 GRE 题目页面
 
 **诊断报告格式**（飞书兼容）：
 
@@ -984,12 +988,16 @@ Because I didn't study hard, I failed the exam.
 
 - autoglm-websearch：✅ 连通 / ❌ 失败（原因）
 - web_fetch 抓取：✅ 可抓取 / ❌ 失败（原因）
+- GitHub Markdown 真题：✅ 可访问（Markdown格式） / ❌ 失败（原因）
 - GitHub JSON：✅ 可访问（N 道题） / ❌ 失败（原因）
+- GitHub CAE C1：✅ 可访问（高级英语题库） / ❌ 失败（原因）
+- GitHub 考研英语：✅ 可访问（N 年真题） / ❌ 失败（原因）
 - Gitee PDF：✅ 可访问（N 年真题） / ❌ 失败（原因）
 - vocabulary.com：✅ 可访问 / ❌ 失败（原因）
 - Oxford：✅ 可访问 / ❌ 失败（原因）
+- Manhattan GRE：✅ 可访问 / ❌ 失败（原因）
 
-搜题能力评估：X/6 源可用 → 全部可用 / 大部分可用 / 部分可用 / 不可用
+搜题能力评估：X/10 源可用 → 全部可用 / 大部分可用 / 部分可用 / 不可用
 ---
 
 **关键规则**：
