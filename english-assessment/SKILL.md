@@ -1,6 +1,6 @@
 ---
 name: english-assessment
-version: "3.9.6"
+version: "3.9.7"
 description: >
   陪伴式英语水平测评助手。不是冰冷的出题机器，而是陪你一起成长的英语伙伴。基于历史数据动态调整难度（持续强项→提难度，薄弱项→多出题），
   大学英语水平（CEFR B1-C2），随机生成题卷（默认25-40题或快速21题，7-10种题型，总分100分），
@@ -343,7 +343,8 @@ description: >
    - **搜题策略**（autoglm-websearch 精准搜索 + web_fetch 抓取正文，按优先级排序）：
      - **首选：autoglm-websearch 搜题** → 获取 URL → web_fetch 抓取正文。搜索词示例："CET4 选词填空真题 2024"、"英语四级翻译真题 2024"、"GRE 语法题"。autoglm-websearch 返回 URL 和摘要，再用 web_fetch 抓取页面全文提取真题原文
      - **autoglm-websearch 已验证可搜到的内容源**：koolearn.com（新东方在线，选词填空/翻译/语法真题全文可抓取）、xdf.cn（新东方网，听力原文）
-     - **Gitee CET-4 真题 PDF（已验证可下载+解析）**：gitee.com/jasonwarner/CET4，含 2013-2020 年 CET-4 真题 PDF。下载后用 pdf 工具解析，可提取选词填空原文+选项、阅读理解全文+题目、翻译题中文原文。Gitee API: `gitee.com/api/v5/repos/jasonwarner/CET4/contents/{路径}` 获取 download_url
+     - **GitHub CET-4/6 真题 PDF（国内用 gh-proxy 镜像加速下载+pdf工具解析）**：github.com/DieDiDi/CET4-6-past-exam-paper，含 2015-2023 年 CET-4/6 真题 PDF。通过 gh-proxy.com 代理下载后用 pdf 工具解析，可提取选词填空原文+选项、阅读理解全文+题目、翻译题中文原文。gh-proxy 国内加速：`gh-proxy.com/https://raw.githubusercontent.com/DieDiDi/CET4-6-past-exam-paper/main/{路径}`
+     - **Gitee CET-4 真题 PDF（国内直连+pdf工具解析）**：gitee.com/jasonwarner/CET4，含 2013-2020 年 CET-4 真题 PDF。通过 Gitee API 获取 download_url 下载后用 pdf 工具解析。Gitee API: `gitee.com/api/v5/repos/jasonwarner/CET4/contents/{路径}`
      - **GitHub CET-4 真题库（国内用 gh-proxy 镜像加速）**：`gh-proxy.com/https://raw.githubusercontent.com/ShepiTT/CET_practice_questions/main/parsed_data.json`，含 2023-2025 CET-4 听力+阅读选择题，JSON 格式直接解析
      - **词汇/语法参考站（已验证可抓取）**：vocabulary.com（高频词+释义+真实语料例句）、Oxford Learners Dictionaries（Oxford 3000/5000+CEFR等级+搭配）
      - 搜索专业领域最新术语和表达（科技、医学、法律、金融等）
