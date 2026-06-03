@@ -1,6 +1,6 @@
 ---
 name: english-assessment
-version: "4.3.0"
+version: "4.4.0"
 description: >
   陪伴式英语水平测评助手。不是冰冷的出题机器，而是陪你一起成长的英语伙伴。基于历史数据动态调整难度（持续强项→提难度，薄弱项→多出题），
   大学英语水平（CEFR B1-C2），随机生成题卷（默认25-40题或快速21题，7-10种题型，总分100分），
@@ -872,14 +872,14 @@ Because I didn't study hard, I failed the exam.
 
 - **首选：autoglm-websearch 搜题** → 获取 URL → web_fetch 抓取正文。autoglm-websearch 返回 URL 和摘要，再用 web_fetch 抓取页面全文提取真题原文
 - **autoglm-websearch 已验证可搜到的内容源**：SEARCH_KOOLEARN（新东方在线四级，选词填空/翻译/语法真题全文可抓取）、SEARCH_KOOLEARN_TEM4（专四真题+答案，具体年份页面需二次跳转）、SEARCH_KOOLEARN_CET6（六级真题+答案）、SEARCH_XDF（新东方网，阅读/翻译真题原文）
-- **GitHub Markdown 真题库（最友好格式，国内用 SEARCH_GH_PROXY 加速）**⭐：SEARCH_GITHUB_MD，含 CET-4/6 2023年真题，Markdown 格式直接使用，选项独立成行，无需 PDF 解析或格式校准。优先级高于 PDF 源
-- **GitHub CET-4/6 真题 PDF（国内用 SEARCH_GH_PROXY 镜像加速下载+pdf工具解析）**：SEARCH_GITHUB_CET_PDF，含 2015-2023 年 CET-4/6 真题 PDF。通过 SEARCH_GH_PROXY 代理下载后用 pdf 工具解析，可提取选词填空原文+选项、阅读理解全文+题目、翻译题中文原文。加速路径：`SEARCH_GH_PROXY/https://raw.githubusercontent.com/DieDiDi/CET4-6-past-exam-paper/main/{路径}`
+- **GitHub Markdown 真题库（最友好格式，国内用 SEARCH_GH_PROXY 加速）**⭐：SEARCH_GITHUB_MD，含 CET-4/6 2023年真题，Markdown 格式直接使用，选项独立成行，无需 PDF 解析或格式校准。优先级高于 PDF 源。目录浏览：`SEARCH_GH_PROXY/https://api.github.com/repos/wamich/english-exem-md/contents/`，文件下载：`SEARCH_GH_PROXY/https://raw.githubusercontent.com/wamich/english-exem-md/main/{路径}`
+- **GitHub CET-4/6 真题 PDF（国内用 SEARCH_GH_PROXY 镜像加速下载+pdf工具解析）**：SEARCH_GITHUB_CET_PDF，含 2015-2023 年 CET-4/6 真题 PDF。通过 SEARCH_GH_PROXY 代理下载后用 pdf 工具解析，可提取选词填空原文+选项、阅读理解全文+题目、翻译题中文原文。目录浏览：`SEARCH_GH_PROXY/https://api.github.com/repos/DieDiDi/CET4-6-past-exam-paper/contents/{路径}`，文件下载：`SEARCH_GH_PROXY/https://raw.githubusercontent.com/DieDiDi/CET4-6-past-exam-paper/main/{路径}`
 - **Gitee CET-4 真题 PDF（国内直连+pdf工具解析）**：SEARCH_GITEE_CET_PDF，含 2013-2020 年 CET-4 真题 PDF。通过 Gitee API 获取 download_url 下载后用 pdf 工具解析。Gitee API: `gitee.com/api/v5/repos/jasonwarner/CET4/contents/{路径}`
-- **GitHub CET-4 真题库（国内用 SEARCH_GH_PROXY 镜像加速）**：SEARCH_GITHUB_CET_JSON，含 2023-2025 CET-4 阅读选择题，JSON 格式直接解析（听力部分跳过）。加速路径：`SEARCH_GH_PROXY/https://raw.githubusercontent.com/ShepiTT/CET_practice_questions/main/parsed_data.json`
+- **GitHub CET-4 真题库（国内用 SEARCH_GH_PROXY 镜像加速）**：SEARCH_GITHUB_CET_JSON，含 2023-2025 CET-4 阅读选择题，JSON 格式直接解析（听力部分跳过）。文件下载：`SEARCH_GH_PROXY/https://raw.githubusercontent.com/ShepiTT/CET_practice_questions/main/parsed_data.json`
 - **词汇/语法参考站（已验证可抓取）**：SEARCH_VOCABULARY（高频词+释义+真实语料例句）、SEARCH_OXFORD（Oxford 3000/5000+CEFR等级+搭配）
 - **GRE 题源**：SEARCH_GRE_MANHATTAN（免费 GRE Verbal 练习题+详细解析，含 Sentence Equivalence 和 Text Completion）
-- **考研英语 PDF（国内用 SEARCH_GH_PROXY 加速下载+pdf工具解析）**：SEARCH_GITHUB_KAOYAN，含考研英语一 2002-2021 真题 PDF、六级 2016-2021 真题 PDF。通过 SEARCH_GH_PROXY 代理下载后用 pdf 工具解析。考研翻译题可直接用，阅读理解可提取
-- **CAE C1 高级英语（Markdown 格式）**⭐：SEARCH_GITHUB_CAE，含 CAE C1 Multiple Choice Cloze、Open Cloze、Word Formation 等题型，Markdown 格式含答案，难度对标 CEFR C1-C2，适合高难度测评
+- **考研英语 PDF（国内用 SEARCH_GH_PROXY 加速下载+pdf工具解析）**：SEARCH_GITHUB_KAOYAN，含考研英语一 2002-2021 真题 PDF、六级 2016-2021 真题 PDF。目录浏览：`SEARCH_GH_PROXY/https://api.github.com/repos/youngflysky/KaoYanZhenTi-PDF/contents/{路径}`，文件下载：`SEARCH_GH_PROXY/https://raw.githubusercontent.com/youngflysky/KaoYanZhenTi-PDF/main/{路径}`。考研翻译题可直接用，阅读理解可提取
+- **CAE C1 高级英语（Markdown 格式）**⭐：SEARCH_GITHUB_CAE，含 CAE C1 Multiple Choice Cloze、Open Cloze、Word Formation 等题型，Markdown 格式含答案，难度对标 CEFR C1-C2，适合高难度测评。目录浏览：`SEARCH_GH_PROXY/https://api.github.com/repos/gunqiuwang/cae-question-bank/contents/`，文件下载：`SEARCH_GH_PROXY/https://raw.githubusercontent.com/gunqiuwang/cae-question-bank/main/{路径}`
 - 搜索专业领域最新术语和表达（科技、医学、法律、金融等）
 - 搜索时事热点相关英语表达，确保内容与时俱进
 - 搜索外刊原文（经济学人、BBC、NYT、Guardian 等）作为阅读理解和词汇题素材
@@ -975,7 +975,7 @@ Because I didn't study hard, I failed the exam.
 3. **GitHub Markdown 真题**⭐：通过 gh-proxy 镜像访问 `gh-proxy.com/https://raw.githubusercontent.com/wamich/english-exem-md/main/CET4/2023.12/cet4-2023-12-1.md`，检查是否返回 Markdown 真题内容（含 "Reading Comprehension" 或 "选词填空" 或 "Translation"）
 4. **GitHub JSON 源**：通过 gh-proxy 镜像访问 `gh-proxy.com/https://raw.githubusercontent.com/ShepiTT/CET_practice_questions/main/parsed_data.json`，检查是否返回有效 JSON 且包含题目数据
 5. **GitHub CAE C1 源**⭐：通过 gh-proxy 访问 `gh-proxy.com/https://raw.githubusercontent.com/gunqiuwang/cae-question-bank/main/cae_advanced_practice.md`，检查是否返回 CAE 题目（含 "Multiple Choice Cloze" 或 "Open Cloze"）
-6. **GitHub 考研源**：通过 gh-proxy 访问 GitHub API `api.github.com/repos/youngflysky/KaoYanZhenTi-PDF/contents/英一历年真题`，检查是否返回考研英语真题文件列表
+6. **GitHub 考研源**：通过 gh-proxy 访问 GitHub API `gh-proxy.com/https://api.github.com/repos/youngflysky/KaoYanZhenTi-PDF/contents/英一历年真题`，检查是否返回考研英语真题文件列表
 7. **Gitee PDF 源**：通过 Gitee API `gitee.com/api/v5/repos/jasonwarner/CET4/contents/` 获取文件列表，检查是否返回目录结构
 8. **vocabulary.com**：访问 `vocabulary.com/dictionary/test`，检查是否返回词条内容
 9. **Oxford**：访问 `oxfordlearnersdictionaries.com/definition/english/test`，检查是否返回词条内容
