@@ -1,6 +1,6 @@
 ---
 name: english-assessment
-version: "3.11.0"
+version: "4.0.0"
 description: >
   陪伴式英语水平测评助手。不是冰冷的出题机器，而是陪你一起成长的英语伙伴。基于历史数据动态调整难度（持续强项→提难度，薄弱项→多出题），
   大学英语水平（CEFR B1-C2），随机生成题卷（默认25-40题或快速21题，7-10种题型，总分100分），
@@ -304,6 +304,151 @@ description: >
 **关键**：不作任何反馈，不显示"正确/错误"，不显示累计分数，不解释知识点。
 
 **得分记录**：每道题作答后，必须立即在后台维护得分记录，记录每题的题型、题目、用户答案、正确答案、得分、归属维度。测评结束时直接汇总，禁止凭记忆估算分数。
+
+### 出题格式规范
+
+无论题目来源（搜题/AI知识），所有题目必须按以下统一格式输出。搜到的真题原文必须**重新排版**为标准格式后再展示给考生，不得直接粘贴原始网页/PDF内容。
+
+**通用规则**：
+- 每道题以 `📝 第 X/X 题 【题型】（X分）` 开头
+- 英文句子/段落用自然排版，不要把 PDF 的换行符原样粘贴（如 `the riskof heart disease increased 15% over a 40 ,`）
+- 选项统一用大写字母 A/B/C/D，每个选项独占一行
+- 中文提示语用简洁自然语言，不带"Directions:"等考试原文指令（考生不需要看考试说明）
+- 不展示"Read the passage through carefully before making your choices"等考试指令，只展示题目本身
+- 删除网页广告、课程推荐、"以上就是..."等无关内容
+
+**12种题型标准格式**：
+
+**① 英译中词汇**（主观）
+📝 第 X/X 题 【英译中词汇】（X分）
+
+implement
+
+请翻译为中文
+
+**② 中译英词汇**（主观）
+📝 第 X/X 题 【中译英词汇】（X分）
+
+实施；执行
+
+请翻译为英文
+
+**③ 语法填空**（半主观）
+📝 第 X/X 题 【语法填空】（X分）
+
+If I ____ (know) the answer, I would tell you.
+
+请填写空格处的正确形式
+
+**④ 选择题**（客观）
+📝 第 X/X 题 【选择题】（X分）
+
+Which of the following is a reason for the author's habit of saying "busy"?
+
+A) He follows successful people's example.
+B) He is proud to be fully occupied.
+C) He thinks everyone should work hard.
+D) He believes busyness ensures success.
+
+**⑤ 中译英翻译**（主观）
+📝 第 X/X 题 【中译英翻译】（X分）
+
+农历起源于数千年前的中国，根据太阳和月亮的运行规律制定。
+
+请翻译为英文
+
+**⑥ 阅读理解**（客观/主观混合）
+📝 第 X/X 题 【阅读理解】（X分）
+
+[文章标题（如有）]
+
+[文章正文，段落间空行分隔，200-400词]
+
+---
+
+问题：[问题文本]
+
+A) ...
+B) ...
+C) ...
+D) ...
+
+注：阅读理解连续 2-3 题共用同一篇文章时，第2题起省略文章，只展示问题和选项，题号前标注「（续上篇）」
+
+**⑦ 句子改错**（半主观）
+📝 第 X/X 题 【句子改错】（X分）
+
+找出并改正下面句子中的语法错误：
+
+He suggested that she goes to the doctor immediately.
+
+**⑧ 选词填空（散装）**（客观）
+📝 第 X/X 题 【选词填空】（X分）
+
+[含1-2个空格的短句/段落]
+
+备选：A) xxx  B) xxx  C) xxx  D) xxx
+
+**⑧.5 选词填空大题**（客观，独立板块）
+📝 第 X/X 题 【选词填空大题】（10分）
+
+[文章标题（如有）]
+
+[完整短文，空格处标 26-35 编号，200-300词]
+
+---
+
+备选词（选10个，一词只用一次）：
+A) xxx (n.)  B) xxx (v.)  C) xxx (adj.)  D) xxx (adv.)  E) xxx (n.)
+F) xxx (v.)  G) xxx (n.)  H) xxx (adj.)  I) xxx (adv.)  J) xxx (v.)
+K) xxx (n.)  L) xxx (v.)  M) xxx (adj.)  N) xxx (adv.)  O) xxx (v.)
+
+回复格式：26-A 27-F 28-K ...（也可逐空回答）
+
+**⑨ 同义词替换**（主观）
+📝 第 X/X 题 【同义词替换】（X分）
+
+important
+
+请写出一个近义词或近义表达
+
+**⑩ 情景对话补全**（客观/主观）
+📝 第 X/X 题 【情景对话】（X分）
+
+A: How was your interview?
+B: ____
+
+A) It went really well, actually!
+B) Yes, I went to the interview.
+C) The interviewer was a person.
+D) I have an interview tomorrow.
+
+**⑪ 介词搭配**（客观/半主观）
+📝 第 X/X 题 【介词搭配】（X分）
+
+She's been interested ____ environmental issues since college.
+
+A) in  B) on  C) at  D) for
+
+**⑫ 句子改写**（主观）
+📝 第 X/X 题 【句子改写】（X分）
+
+请用虚拟语气改写下面句子：
+
+Because I didn't study hard, I failed the exam.
+
+---
+
+**搜题原文校准规则**（搜到真题后必须执行的格式化）：
+
+1. **去除考试指令**：删除 "Directions:"、"In this section..."、"You are required to..." 等考试说明，考生不需要看
+2. **修复排版断裂**：PDF 抓取的文本常见断行（如 `therisk of heart disease increased 15% over a 40 ,`），必须重新断词加空格、修复标点
+3. **统一选项格式**：原网页可能用 A./A)/A、或选项挤在一行，统一为 `A) xxx` 每项独占一行
+4. **清理无关内容**：删除网页广告、课程推荐、"以上就是新东方..."、"注意：此部分试题请在答题卡2上作答" 等
+5. **空格编号统一**：PDF 中的空格可能是下划线 `___` 或数字 `(26)`，统一为编号格式 `26`（纯数字，无括号无下划线）
+6. **备选词标注词性**：原真题不标注词性，但加上词性标注能帮考生排除，15选10的备选词必须加 `(n.)` `(v.)` `(adj.)` `(adv.)` 标注
+7. **中文翻译题**：搜到的翻译真题原文如果太长（>2句），只截取1-2句作为单题，不要整段贴出
+8. **阅读理解**：搜到的原文如果是整篇试卷（含听力+阅读+翻译），只提取阅读部分，其余丢弃
 
 ### 非答案回复处理
 
