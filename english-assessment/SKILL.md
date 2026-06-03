@@ -1,6 +1,6 @@
 ---
 name: english-assessment
-version: "4.7.3"
+version: "4.8.0"
 description: >
   陪伴式英语水平测评助手。不是冰冷的出题机器，而是陪你一起成长的英语伙伴。基于历史数据动态调整难度（持续强项→提难度，薄弱项→多出题），
   大学英语水平（CEFR B1-C2），随机生成题卷（默认25-40题或快速21题，7-10种题型，总分100分），
@@ -274,13 +274,17 @@ description: >
 
 ### 开始阶段
 
-用户说"开始英语测评"时，按以下逻辑判断模式：
+用户说"开始英语测评"时，按以下流程执行：
 
-1. **读取历史进度**，执行自适应难度调整（见「自适应难度」）
-2. **读取错题集**，统计错题数量
-3. 如果错题数 ≥ 35 → 先问用户："你的错题集有 X 道错题，要清理错题集吗？（清理=清空全部 / 保留 / 先做错题重测）"
-4. 等用户回复后，再进入模式选择
-5. 输出模式选择的同时，**立即开始搜题和出题准备**（两种模式只是题量不同，题目内容和知识点可以提前准备。AI 串行执行时，在输出模式选择提示后立即执行搜题，用户回复选择时题目已准备就绪）：
+**第一步：并行准备（在输出模式选择的同时）**
+
+当用户说"开始英语测评"时，在同一个 turn 内同时执行：
+1. 读取历史进度 + 错题集
+2. 自适应难度调整
+3. **立即启动后台搜题**：并行抓取 2-3 个快速源（优先 ⚡ 级源，见搜题引擎「按速度分级」），下载真题素材
+4. 输出模式选择提示（这是用户唯一看到的内容，搜题过程不可见）
+
+这样用户阅读模式选择 + 思考 + 回复的 5-30 秒窗口内，搜题已在后台完成，题目素材已就绪。
 
 🎯 请选择测评模式：
 
@@ -289,10 +293,15 @@ description: >
 
 回复 1 或 2 开始
 
-6. 用户选择后，根据模式调整题数即可快速开始，无需等待搜题
-7. 如果错题数 ≥ 15，额外显示：`3️⃣ 错题重测 — 10 道错题专项练习`
-8. 用户选择后开始出题。如果用户回复多个选项（如"1和2"）→ 提示"请只选择一个模式，回复 1、2 或 3"
-9. **强制默认测评**：如果考生最近 5 次测评（不含错题重测）均为快速测评，本次必须进行默认测评——不显示快速测评选项，提示"你已经连续5次快速测评，建议做一次完整测评更全面哦 📊"，仅显示默认测评选项
+**第二步：用户选择后秒出首题**
+
+用户选择模式后，回复内容**直接就是第一道题**，零工具调用。题目来自已准备好的素材或 AI 即时出题。
+
+**错题集处理**：如果错题数 ≥ 35 → 在模式选择前先问清理；如果错题数 ≥ 15，模式选择额外显示 `3️⃣ 错题重测`
+
+**强制默认测评**：如果考生最近 5 次测评（不含错题重测）均为快速测评，本次必须进行默认测评，仅显示默认测评选项
+
+**用户选择多个模式时**：提示"请只选择一个模式，回复 1、2 或 3"
 
 ### 自适应难度
 
@@ -907,6 +916,16 @@ Because I didn't study hard, I failed the exam.
 - **AI 题目不影响比例**：前几题用 AI 出的题计入 AI 出题比例，后续搜题时相应调整，确保整份试卷真题/AI 比例仍在 40-70%/30-60% 范围内
 - **前几题选型**：优先选**客观题**（选择题、填空题）作为前几题，因为客观题判分无争议、出题快、考生上手容易
 
+### 搜题源按速度分级
+
+搜题时**优先使用快速源**，慢速源仅作为补充，减少整体等待时间：
+
+- ⚡ **快速（<1秒）**：SEARCH_GITHUB_MD（Markdown 直取）、SEARCH_GITHUB_CET_JSON（JSON 直取）、SEARCH_KOOLEARN / SEARCH_KOOLEARN_TEM4 / SEARCH_KOOLEARN_CET6（网页直抓）、SEARCH_XDF（网页直抓）、Gitee API 目录浏览
+- 🟡 **中等（1-3秒）**：SEARCH_GITHUB_CAE（Markdown，含答案）、SEARCH_GITHUB_CET_PDF（GitHub API 目录浏览 + 下载 + PDF 解析）、SEARCH_GITHUB_KAOYAN（GitHub API 目录浏览 + 下载 + PDF 解析）、SEARCH_GRE_MANHATTAN（海外站，~1.4秒）
+- 🐢 **慢速（>3秒）**：SEARCH_VOCABULARY（~0.8秒可用，但页面大需筛选）、SEARCH_OXFORD（~12秒，极慢，仅作为词汇参考，不作为出题主源）、autoglm-websearch API（响应不稳定，当前签名问题待修复）
+
+**搜题优先级**：⚡ 快速源优先出题 → 🟡 中等源补充多样性 → 🐢 慢速源仅用于词汇查证/难度参考，不依赖其出题。每次测评的真题来源中，⚡快速源占比 ≥ 60%
+
 ### 搜题策略（autoglm-websearch 精准搜索 + web_fetch 抓取正文，按优先级排序）
 
 - **首选：autoglm-websearch 搜题** → 获取 URL → web_fetch 抓取正文。autoglm-websearch 返回 URL 和摘要，再用 web_fetch 抓取页面全文提取真题原文
@@ -947,15 +966,16 @@ Because I didn't study hard, I failed the exam.
   - 考试类型：CET-4/CET-6/考研英语/GRE/IELTS/TOEFL/专四专八，随机选不同考试
   - 话题：从话题库中随机选一个（环保/科技/AI/健康/教育/经济/文化/社会/职场/心理学/农业/法律/金融）
   - 示例组合："2023年12月 CET-4 翻译真题" / "GRE sentence equivalence 2024" / "考研英语 阅读理解 科技" / "CET-6 选词填空 环保"
-- **源随机化**：每次测评随机选择搜题源组合（不每次都从同一源搜）：
-  - 20% 概率：autoglm-websearch → SEARCH_KOOLEARN/SEARCH_KOOLEARN_TEM4/SEARCH_KOOLEARN_CET6/SEARCH_XDF
-  - 18% 概率：GitHub Markdown（SEARCH_GITHUB_MD，最友好格式，优先于 PDF）
-  - 15% 概率：GitHub PDF（SEARCH_GITHUB_CET_PDF 仓库，随机选年份和套号）
-  - 12% 概率：考研英语 PDF（SEARCH_GITHUB_KAOYAN，考研翻译/阅读真题）
-  - 10% 概率：CAE C1 高级英语（SEARCH_GITHUB_CAE，Markdown 格式，C1-C2 难度）
-  - 10% 概率：Gitee PDF（SEARCH_GITEE_CET_PDF，随机选年份和套号）
-  - 8% 概率：GitHub JSON（SEARCH_GITHUB_CET_JSON，随机选试卷，跳过听力题）
-  - 7% 概率：SEARCH_VOCABULARY / SEARCH_OXFORD / SEARCH_GRE_MANHATTAN（词汇/GRE）
+- **源随机化**：每次测评随机选择搜题源组合（不每次都从同一源搜），⚡快速源占比 ≥ 60%：
+  - ⚡ 25% 概率：SEARCH_KOOLEARN / SEARCH_KOOLEARN_TEM4 / SEARCH_KOOLEARN_CET6 / SEARCH_XDF（网页直抓，最快）
+  - ⚡ 20% 概率：GitHub Markdown（SEARCH_GITHUB_MD，最友好格式，秒取）
+  - ⚡ 15% 概率：GitHub JSON（SEARCH_GITHUB_CET_JSON，JSON 直取，跳过听力题）
+  - ⚡ 10% 概率：Gitee CET-4 PDF（SEARCH_GITEE_CET_PDF，国内直连）
+  - 🟡 12% 概率：CAE C1 高级英语（SEARCH_GITHUB_CAE，Markdown 格式，C1-C2 难度）
+  - 🟡 10% 概率：GitHub PDF（SEARCH_GITHUB_CET_PDF 仓库，需下载+解析）
+  - 🟡 5% 概率：考研英语 PDF（SEARCH_GITHUB_KAOYAN，需下载+解析）
+  - 🐢 3% 概率：SEARCH_VOCABULARY / SEARCH_GRE_MANHATTAN（词汇参考/GRE）
+  - 🐢 0% 概率：SEARCH_OXFORD（仅作为词汇查证参考，不直接出题，太慢）
 - **题内随机化**：从搜到的页面/文件中随机选取题目，不从头开始选：
   - PDF：解析全文后随机选不同位置的题目（不总是选第1题）
   - JSON：从 15 套试卷中随机选一套，再从中随机选题
