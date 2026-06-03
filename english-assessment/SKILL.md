@@ -1,6 +1,6 @@
 ---
 name: english-assessment
-version: "4.0.0"
+version: "4.1.0"
 description: >
   陪伴式英语水平测评助手。不是冰冷的出题机器，而是陪你一起成长的英语伙伴。基于历史数据动态调整难度（持续强项→提难度，薄弱项→多出题），
   大学英语水平（CEFR B1-C2），随机生成题卷（默认25-40题或快速21题，7-10种题型，总分100分），
@@ -52,8 +52,12 @@ description: >
 | SEARCH_GITHUB_CET_JSON | github.com/ShepiTT/CET_practice_questions | GitHub CET-4 JSON 题库（2023-2025） |
 | SEARCH_VOCABULARY | vocabulary.com | 词汇参考站 |
 | SEARCH_OXFORD | oxfordlearnersdictionaries.com | 牛津词典参考站 |
-| SEARCH_KOOLEARN | cet4.koolearn.com | 新东方在线（已验证可抓取） |
+| SEARCH_KOOLEARN | cet4.koolearn.com | 新东方在线四级（已验证可抓取） |
+| SEARCH_KOOLEARN_TEM4 | tem.koolearn.com | 新东方在线专四（已验证可抓取） |
+| SEARCH_KOOLEARN_CET6 | cet6.koolearn.com | 新东方在线六级（已验证可抓取） |
 | SEARCH_XDF | cet4-6.xdf.cn | 新东方网（已验证可抓取） |
+| SEARCH_GITHUB_MD | github.com/wamich/english-exem-md | GitHub Markdown 真题库（CET-4/6，2023年，最友好格式） |
+| SEARCH_GRE_MANHATTAN | manhattanreview.com/free-gre-practice-questions | GRE Verbal 练习题+详细解析 |
 
 ## 核心原则
 
@@ -863,11 +867,13 @@ Because I didn't study hard, I failed the exam.
 ### 搜题策略（autoglm-websearch 精准搜索 + web_fetch 抓取正文，按优先级排序）
 
 - **首选：autoglm-websearch 搜题** → 获取 URL → web_fetch 抓取正文。autoglm-websearch 返回 URL 和摘要，再用 web_fetch 抓取页面全文提取真题原文
-- **autoglm-websearch 已验证可搜到的内容源**：SEARCH_KOOLEARN（新东方在线，选词填空/翻译/语法真题全文可抓取）、SEARCH_XDF（新东方网，听力原文）
+- **autoglm-websearch 已验证可搜到的内容源**：SEARCH_KOOLEARN（新东方在线四级，选词填空/翻译/语法真题全文可抓取）、SEARCH_KOOLEARN_TEM4（专四真题+答案）、SEARCH_KOOLEARN_CET6（六级真题+答案）、SEARCH_XDF（新东方网，听力原文）
+- **GitHub Markdown 真题库（最友好格式，国内用 SEARCH_GH_PROXY 加速）**⭐：SEARCH_GITHUB_MD，含 CET-4/6 2023年真题，Markdown 格式直接使用，选项独立成行，无需 PDF 解析或格式校准。优先级高于 PDF 源
 - **GitHub CET-4/6 真题 PDF（国内用 SEARCH_GH_PROXY 镜像加速下载+pdf工具解析）**：SEARCH_GITHUB_CET_PDF，含 2015-2023 年 CET-4/6 真题 PDF。通过 SEARCH_GH_PROXY 代理下载后用 pdf 工具解析，可提取选词填空原文+选项、阅读理解全文+题目、翻译题中文原文。加速路径：`SEARCH_GH_PROXY/https://raw.githubusercontent.com/DieDiDi/CET4-6-past-exam-paper/main/{路径}`
 - **Gitee CET-4 真题 PDF（国内直连+pdf工具解析）**：SEARCH_GITEE_CET_PDF，含 2013-2020 年 CET-4 真题 PDF。通过 Gitee API 获取 download_url 下载后用 pdf 工具解析。Gitee API: `gitee.com/api/v5/repos/jasonwarner/CET4/contents/{路径}`
 - **GitHub CET-4 真题库（国内用 SEARCH_GH_PROXY 镜像加速）**：SEARCH_GITHUB_CET_JSON，含 2023-2025 CET-4 听力+阅读选择题，JSON 格式直接解析。加速路径：`SEARCH_GH_PROXY/https://raw.githubusercontent.com/ShepiTT/CET_practice_questions/main/parsed_data.json`
 - **词汇/语法参考站（已验证可抓取）**：SEARCH_VOCABULARY（高频词+释义+真实语料例句）、SEARCH_OXFORD（Oxford 3000/5000+CEFR等级+搭配）
+- **GRE 题源**：SEARCH_GRE_MANHATTAN（免费 GRE Verbal 练习题+详细解析，含 Sentence Equivalence 和 Text Completion）
 - 搜索专业领域最新术语和表达（科技、医学、法律、金融等）
 - 搜索时事热点相关英语表达，确保内容与时俱进
 - 搜索外刊原文（经济学人、BBC、NYT、Guardian 等）作为阅读理解和词汇题素材
@@ -880,6 +886,7 @@ Because I didn't study hard, I failed the exam.
 - zhenti.burningvocabulary.cn（PDF查看器，web_fetch抓不到正文）
 - 沪江英语/考虫/扇贝/百词斩/中国教育在线（付费墙/SPA/已下线）
 - 知乎（403反爬）
+- eol.cn 考研频道（正文抓不到）
 
 ### 搜题回退规则（全局唯一定义，其他位置引用本规则）
 
@@ -894,11 +901,12 @@ Because I didn't study hard, I failed the exam.
   - 话题：从话题库中随机选一个（环保/科技/AI/健康/教育/经济/文化/社会/职场/心理学/农业/法律/金融）
   - 示例组合："2023年12月 CET-4 翻译真题" / "GRE sentence equivalence 2024" / "考研英语 阅读理解 科技" / "CET-6 选词填空 环保"
 - **源随机化**：每次测评随机选择搜题源组合（不每次都从同一源搜）：
-  - 30% 概率：autoglm-websearch → SEARCH_KOOLEARN/SEARCH_XDF
-  - 25% 概率：GitHub PDF（SEARCH_GITHUB_CET_PDF 仓库，随机选年份和套号）
-  - 20% 概率：Gitee PDF（SEARCH_GITEE_CET_PDF，随机选年份和套号）
-  - 15% 概率：GitHub JSON（SEARCH_GITHUB_CET_JSON，随机选试卷）
-  - 10% 概率：SEARCH_VOCABULARY / SEARCH_OXFORD（词汇题）
+  - 25% 概率：autoglm-websearch → SEARCH_KOOLEARN/SEARCH_KOOLEARN_TEM4/SEARCH_KOOLEARN_CET6/SEARCH_XDF
+  - 20% 概率：GitHub Markdown（SEARCH_GITHUB_MD，最友好格式，优先于 PDF）
+  - 20% 概率：GitHub PDF（SEARCH_GITHUB_CET_PDF 仓库，随机选年份和套号）
+  - 15% 概率：Gitee PDF（SEARCH_GITEE_CET_PDF，随机选年份和套号）
+  - 10% 概率：GitHub JSON（SEARCH_GITHUB_CET_JSON，随机选试卷）
+  - 10% 概率：SEARCH_VOCABULARY / SEARCH_OXFORD / SEARCH_GRE_MANHATTAN（词汇/GRE）
 - **题内随机化**：从搜到的页面/文件中随机选取题目，不从头开始选：
   - PDF：解析全文后随机选不同位置的题目（不总是选第1题）
   - JSON：从 15 套试卷中随机选一套，再从中随机选题
