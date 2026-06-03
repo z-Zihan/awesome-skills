@@ -1,6 +1,6 @@
 ---
 name: english-assessment
-version: "3.9.4"
+version: "3.9.5"
 description: >
   陪伴式英语水平测评助手。不是冰冷的出题机器，而是陪你一起成长的英语伙伴。基于历史数据动态调整难度（持续强项→提难度，薄弱项→多出题），
   大学英语水平（CEFR B1-C2），随机生成题卷（默认25-40题或快速21题，7-10种题型，总分100分），
@@ -340,17 +340,18 @@ description: >
    - **禁止重复考点**：同一测评中不出现重复考点；跨测评也必须尽量扩大题目多样性
    - **联网搜题**：每次出题前，**必须优先联网搜索**（使用 web_search 或 web_fetch）获取真实英语考试题目、专业术语、时事话题，确保知识点新鲜多样，避免 AI 凭自身知识反复出相似题目。搜题全程静默，用户不感知——搜题成功用真题，搜题失败静默回退AI知识出题，不提示用户
    - **工具可用性检查**：如果联网工具不可用（模型无 web_search/web_fetch），直接用 AI 知识出题，不提示用户
-   - **搜题策略**（多途径扩大题库，按验证可用性排序）：
-     - **GitHub CET-4 真题库（已验证，国内用 gh-proxy 镜像）**：`gh-proxy.com/https://raw.githubusercontent.com/ShepiTT/CET_practice_questions/main/parsed_data.json`，含 2023-2025 CET-4 听力理解+阅读理解选择题，JSON 格式直接解析。覆盖：听力、阅读选择题。不覆盖：选词填空、语法、翻译、词汇题
-     - **词汇/语法参考站（已验证可抓取）**：vocabulary.com（高频词表+释义+真实语料例句）、Oxford Learners Dictionaries（Oxford 3000/5000词表+CEFR等级标注，适合词汇难度标定）
-     - 搜索真实考试题源：雅思/托福/GRE/GMAT/专四专八/CPE/考研英语/LSAT 等真题或模拟题
+   - **搜题策略**（autoglm-websearch 精准搜索 + web_fetch 抓取正文，按优先级排序）：
+     - **首选：autoglm-websearch 搜题** → 获取 URL → web_fetch 抓取正文。搜索词示例："CET4 选词填空真题 2024"、"英语四级翻译真题 2024"、"GRE 语法题"。autoglm-websearch 返回 URL 和摘要，再用 web_fetch 抓取页面全文提取真题原文
+     - **autoglm-websearch 已验证可搜到的内容源**：koolearn.com（新东方在线，选词填空/翻译/语法真题全文可抓取）、xdf.cn（新东方网，听力原文）
+     - **GitHub CET-4 真题库（国内用 gh-proxy 镜像加速）**：`gh-proxy.com/https://raw.githubusercontent.com/ShepiTT/CET_practice_questions/main/parsed_data.json`，含 2023-2025 CET-4 听力+阅读选择题，JSON 格式直接解析
+     - **词汇/语法参考站（已验证可抓取）**：vocabulary.com（高频词+释义+真实语料例句）、Oxford Learners Dictionaries（Oxford 3000/5000+CEFR等级+搭配）
      - 搜索专业领域最新术语和表达（科技、医学、法律、金融等）
      - 搜索时事热点相关英语表达，确保内容与时俱进
      - 搜索外刊原文（经济学人、BBC、NYT、Guardian 等）作为阅读理解和词汇题素材
      - 搜索双语对照资源（政府工作报告、UN文件、学术论文摘要）作为翻译题素材
      - 搜索商务英语/职场沟通资源作为实用表达题素材
      - 搜索英语学习社区高频错题（Reddit r/EnglishLearning、StackExchange 等）作为易错点出题参考
-     - **以下网站已验证不可用，不要作为搜题源**：沪江英语/新东方在线/考虫/扇贝/百词斩/中国教育在线（真题在付费墙后或前端动态渲染无法抓取）、知乎（403反爬）、Gitee真题仓库（均为docx/pdf二进制文件无法读取）
+     - **以下网站已验证不可用**：zhenti.burningvocabulary.cn（PDF查看器，web_fetch抓不到正文）、沪江英语/考虫/扇贝/百词斩/中国教育在线（付费墙/SPA/已下线）、知乎（403反爬）、Gitee真题仓库（均为docx/pdf二进制无法读取）
      - **搜题失败时**：静默回退AI自身知识出题，不提示用户，但必须避免与最近 3 次测评的知识点重复
    - **防重复检查**：出题前回顾当前测评和最近 3 次测评的考点，确保不重复
 6. **情景对话补全**：尽量设计成**选择题形式**（给出4个选项），减少需要用户手动输入长句的情况。基础单词仍需手动输入
