@@ -1,6 +1,6 @@
 ---
 name: english-assessment
-version: "4.1.0"
+version: "4.2.0"
 description: >
   陪伴式英语水平测评助手。不是冰冷的出题机器，而是陪你一起成长的英语伙伴。基于历史数据动态调整难度（持续强项→提难度，薄弱项→多出题），
   大学英语水平（CEFR B1-C2），随机生成题卷（默认25-40题或快速21题，7-10种题型，总分100分），
@@ -57,6 +57,9 @@ description: >
 | SEARCH_KOOLEARN_CET6 | cet6.koolearn.com | 新东方在线六级（已验证可抓取） |
 | SEARCH_XDF | cet4-6.xdf.cn | 新东方网（已验证可抓取） |
 | SEARCH_GITHUB_MD | github.com/wamich/english-exem-md | GitHub Markdown 真题库（CET-4/6，2023年，最友好格式） |
+| SEARCH_GITHUB_CET_PDF | github.com/DieDiDi/CET4-6-past-exam-paper | GitHub CET-4/6 PDF 真题（2015-2023） |
+| SEARCH_GITHUB_KAOYAN | github.com/youngflysky/KaoYanZhenTi-PDF | GitHub 考研英语+六级 PDF 真题（2002-2021） |
+| SEARCH_GITHUB_CAE | github.com/gunqiuwang/cae-question-bank | GitHub CAE C1 高级英语题库（Markdown 格式，含答案） |
 | SEARCH_GRE_MANHATTAN | manhattanreview.com/free-gre-practice-questions | GRE Verbal 练习题+详细解析 |
 
 ## 核心原则
@@ -452,7 +455,8 @@ Because I didn't study hard, I failed the exam.
 5. **空格编号统一**：PDF 中的空格可能是下划线 `___` 或数字 `(26)`，统一为编号格式 `26`（纯数字，无括号无下划线）
 6. **备选词标注词性**：原真题不标注词性，但加上词性标注能帮考生排除，15选10的备选词必须加 `(n.)` `(v.)` `(adj.)` `(adv.)` 标注
 7. **中文翻译题**：搜到的翻译真题原文如果太长（>2句），只截取1-2句作为单题，不要整段贴出
-8. **阅读理解**：搜到的原文如果是整篇试卷（含听力+阅读+翻译），只提取阅读部分，其余丢弃
+8. **阅读理解**：搜到的原文如果是整份试卷（含听力+阅读+翻译），只提取阅读部分，其余丢弃
+9. **听力题跳过**：搜到的听力选择题（Part II Listening Comprehension）整段跳过，不出听力题。听力无法在文字测评中实现
 
 ### 非答案回复处理
 
@@ -867,13 +871,15 @@ Because I didn't study hard, I failed the exam.
 ### 搜题策略（autoglm-websearch 精准搜索 + web_fetch 抓取正文，按优先级排序）
 
 - **首选：autoglm-websearch 搜题** → 获取 URL → web_fetch 抓取正文。autoglm-websearch 返回 URL 和摘要，再用 web_fetch 抓取页面全文提取真题原文
-- **autoglm-websearch 已验证可搜到的内容源**：SEARCH_KOOLEARN（新东方在线四级，选词填空/翻译/语法真题全文可抓取）、SEARCH_KOOLEARN_TEM4（专四真题+答案）、SEARCH_KOOLEARN_CET6（六级真题+答案）、SEARCH_XDF（新东方网，听力原文）
+- **autoglm-websearch 已验证可搜到的内容源**：SEARCH_KOOLEARN（新东方在线四级，选词填空/翻译/语法真题全文可抓取）、SEARCH_KOOLEARN_TEM4（专四真题+答案，具体年份页面需二次跳转）、SEARCH_KOOLEARN_CET6（六级真题+答案）、SEARCH_XDF（新东方网，阅读/翻译真题原文）
 - **GitHub Markdown 真题库（最友好格式，国内用 SEARCH_GH_PROXY 加速）**⭐：SEARCH_GITHUB_MD，含 CET-4/6 2023年真题，Markdown 格式直接使用，选项独立成行，无需 PDF 解析或格式校准。优先级高于 PDF 源
 - **GitHub CET-4/6 真题 PDF（国内用 SEARCH_GH_PROXY 镜像加速下载+pdf工具解析）**：SEARCH_GITHUB_CET_PDF，含 2015-2023 年 CET-4/6 真题 PDF。通过 SEARCH_GH_PROXY 代理下载后用 pdf 工具解析，可提取选词填空原文+选项、阅读理解全文+题目、翻译题中文原文。加速路径：`SEARCH_GH_PROXY/https://raw.githubusercontent.com/DieDiDi/CET4-6-past-exam-paper/main/{路径}`
 - **Gitee CET-4 真题 PDF（国内直连+pdf工具解析）**：SEARCH_GITEE_CET_PDF，含 2013-2020 年 CET-4 真题 PDF。通过 Gitee API 获取 download_url 下载后用 pdf 工具解析。Gitee API: `gitee.com/api/v5/repos/jasonwarner/CET4/contents/{路径}`
-- **GitHub CET-4 真题库（国内用 SEARCH_GH_PROXY 镜像加速）**：SEARCH_GITHUB_CET_JSON，含 2023-2025 CET-4 听力+阅读选择题，JSON 格式直接解析。加速路径：`SEARCH_GH_PROXY/https://raw.githubusercontent.com/ShepiTT/CET_practice_questions/main/parsed_data.json`
+- **GitHub CET-4 真题库（国内用 SEARCH_GH_PROXY 镜像加速）**：SEARCH_GITHUB_CET_JSON，含 2023-2025 CET-4 阅读选择题，JSON 格式直接解析（听力部分跳过）。加速路径：`SEARCH_GH_PROXY/https://raw.githubusercontent.com/ShepiTT/CET_practice_questions/main/parsed_data.json`
 - **词汇/语法参考站（已验证可抓取）**：SEARCH_VOCABULARY（高频词+释义+真实语料例句）、SEARCH_OXFORD（Oxford 3000/5000+CEFR等级+搭配）
 - **GRE 题源**：SEARCH_GRE_MANHATTAN（免费 GRE Verbal 练习题+详细解析，含 Sentence Equivalence 和 Text Completion）
+- **考研英语 PDF（国内用 SEARCH_GH_PROXY 加速下载+pdf工具解析）**：SEARCH_GITHUB_KAOYAN，含考研英语一 2002-2021 真题 PDF、六级 2016-2021 真题 PDF。通过 SEARCH_GH_PROXY 代理下载后用 pdf 工具解析。考研翻译题可直接用，阅读理解可提取
+- **CAE C1 高级英语（Markdown 格式）**⭐：SEARCH_GITHUB_CAE，含 CAE C1 Multiple Choice Cloze、Open Cloze、Word Formation 等题型，Markdown 格式含答案，难度对标 CEFR C1-C2，适合高难度测评
 - 搜索专业领域最新术语和表达（科技、医学、法律、金融等）
 - 搜索时事热点相关英语表达，确保内容与时俱进
 - 搜索外刊原文（经济学人、BBC、NYT、Guardian 等）作为阅读理解和词汇题素材
@@ -896,17 +902,19 @@ Because I didn't study hard, I failed the exam.
 
 - **搜索词随机化**：每次搜题时从以下维度组合生成不同的搜索词，不使用固定搜索词：
   - 年份：从 2019-2025 中随机选（如 "2021年6月"、"2023年12月"）
-  - 题型：选词填空/阅读理解/翻译/语法/听力（中英文混用）
+  - 题型：选词填空/阅读理解/翻译/语法（中英文混用，不含听力）
   - 考试类型：CET-4/CET-6/考研英语/GRE/IELTS/TOEFL/专四专八，随机选不同考试
   - 话题：从话题库中随机选一个（环保/科技/AI/健康/教育/经济/文化/社会/职场/心理学/农业/法律/金融）
   - 示例组合："2023年12月 CET-4 翻译真题" / "GRE sentence equivalence 2024" / "考研英语 阅读理解 科技" / "CET-6 选词填空 环保"
 - **源随机化**：每次测评随机选择搜题源组合（不每次都从同一源搜）：
-  - 25% 概率：autoglm-websearch → SEARCH_KOOLEARN/SEARCH_KOOLEARN_TEM4/SEARCH_KOOLEARN_CET6/SEARCH_XDF
-  - 20% 概率：GitHub Markdown（SEARCH_GITHUB_MD，最友好格式，优先于 PDF）
-  - 20% 概率：GitHub PDF（SEARCH_GITHUB_CET_PDF 仓库，随机选年份和套号）
-  - 15% 概率：Gitee PDF（SEARCH_GITEE_CET_PDF，随机选年份和套号）
-  - 10% 概率：GitHub JSON（SEARCH_GITHUB_CET_JSON，随机选试卷）
-  - 10% 概率：SEARCH_VOCABULARY / SEARCH_OXFORD / SEARCH_GRE_MANHATTAN（词汇/GRE）
+  - 20% 概率：autoglm-websearch → SEARCH_KOOLEARN/SEARCH_KOOLEARN_TEM4/SEARCH_KOOLEARN_CET6/SEARCH_XDF
+  - 18% 概率：GitHub Markdown（SEARCH_GITHUB_MD，最友好格式，优先于 PDF）
+  - 15% 概率：GitHub PDF（SEARCH_GITHUB_CET_PDF 仓库，随机选年份和套号）
+  - 12% 概率：考研英语 PDF（SEARCH_GITHUB_KAOYAN，考研翻译/阅读真题）
+  - 10% 概率：CAE C1 高级英语（SEARCH_GITHUB_CAE，Markdown 格式，C1-C2 难度）
+  - 10% 概率：Gitee PDF（SEARCH_GITEE_CET_PDF，随机选年份和套号）
+  - 8% 概率：GitHub JSON（SEARCH_GITHUB_CET_JSON，随机选试卷，跳过听力题）
+  - 7% 概率：SEARCH_VOCABULARY / SEARCH_OXFORD / SEARCH_GRE_MANHATTAN（词汇/GRE）
 - **题内随机化**：从搜到的页面/文件中随机选取题目，不从头开始选：
   - PDF：解析全文后随机选不同位置的题目（不总是选第1题）
   - JSON：从 15 套试卷中随机选一套，再从中随机选题
@@ -921,6 +929,7 @@ Because I didn't study hard, I failed the exam.
 - **无官方答案时**（GitHub JSON、部分 PDF）：AI 自行判断正确答案并生成解析，解析末尾标注「💡 此题为 AI 解析，仅供参考」
 - **翻译题特殊处理**：SEARCH_XDF/SEARCH_KOOLEARN 上的翻译真题通常附带参考译文，直接作为评分标准。AI 评分时对照参考译文，不以 AI 自己的翻译为准
 - **阅读理解特殊处理**：阅读理解需要理解全文才能做对，AI 必须先完整阅读搜到的原文，再基于原文内容解析题目。如果原文不完整（截断），标注「⚠️ 原文不完整，解析可能不准确」
+- **听力题跳过**：搜到的整份试卷如果含听力部分，跳过不取（听力无法在文字测评中实现），只提取阅读/翻译/语法/词汇部分
 - **选词填空特殊处理**：SEARCH_KOOLEARN 上的选词填空通常附带参考答案，AI 解析时对照参考答案逐空解释词性/语义/搭配原因
 
 ## 约束
