@@ -1,6 +1,6 @@
 ---
 name: english-assessment
-version: "4.8.1"
+version: "4.8.2"
 description: >
   陪伴式英语水平测评助手。不是冰冷的出题机器，而是陪你一起成长的英语伙伴。基于历史数据动态调整难度（持续强项→提难度，薄弱项→多出题），
   大学英语水平（CEFR B1-C2），随机生成题卷（默认25-40题或快速21题，7-10种题型，总分100分），
@@ -922,7 +922,7 @@ Because I didn't study hard, I failed the exam.
 
 - ⚡ **快速（<1秒）**：SEARCH_GITHUB_MD（Markdown 直取）、SEARCH_GITHUB_CET_JSON（JSON 直取）、SEARCH_KOOLEARN / SEARCH_KOOLEARN_TEM4 / SEARCH_KOOLEARN_CET6（网页直抓）、SEARCH_XDF（网页直抓）、Gitee API 目录浏览
 - 🟡 **中等（1-3秒）**：SEARCH_GITHUB_CAE（Markdown，含答案）、SEARCH_GITHUB_CET_PDF（GitHub API 目录浏览 + 下载 + PDF 解析）、SEARCH_GITHUB_KAOYAN（GitHub API 目录浏览 + 下载 + PDF 解析）、SEARCH_GRE_MANHATTAN（海外站，~1.4秒）
-- 🐢 **慢速（>3秒）**：SEARCH_VOCABULARY（~0.8秒可用，但页面大需筛选）、SEARCH_OXFORD（~12秒，极慢，**不出题但可用于错题分析/全部考题分析的举一反三环节，提供权威释义和真实例句**）、autoglm-websearch API（响应不稳定，当前签名问题待修复）
+- 🐢 **慢速（>3秒）**：SEARCH_VOCABULARY（~0.8秒可用，但页面大需筛选）、SEARCH_OXFORD（~12秒，极慢，但释义权威、例句优质，3%概率出题+分析阶段举一反三优先使用）、autoglm-websearch API（响应不稳定，当前签名问题待修复）
 
 **搜题优先级**：⚡ 快速源优先出题 → 🟡 中等源补充多样性 → 🐢 慢速源仅用于词汇查证/难度参考，不依赖其出题。每次测评的真题来源中，⚡快速源占比 ≥ 60%
 
@@ -974,8 +974,7 @@ Because I didn't study hard, I failed the exam.
   - 🟡 12% 概率：CAE C1 高级英语（SEARCH_GITHUB_CAE，Markdown 格式，C1-C2 难度）
   - 🟡 10% 概率：GitHub PDF（SEARCH_GITHUB_CET_PDF 仓库，需下载+解析）
   - 🟡 5% 概率：考研英语 PDF（SEARCH_GITHUB_KAOYAN，需下载+解析）
-  - 🐢 3% 概率：SEARCH_VOCABULARY / SEARCH_GRE_MANHATTAN（词汇参考/GRE）
-  - 🐢 0% 出题概率：SEARCH_OXFORD（仅用于错题分析/全部考题分析的举一反三，提供权威释义和例句，不出题）
+  - 🐢 3% 概率：SEARCH_VOCABULARY / SEARCH_OXFORD / SEARCH_GRE_MANHATTAN（词汇/GRE/权威词典，慢但质量高）
 - **题内随机化**：从搜到的页面/文件中随机选取题目，不从头开始选：
   - PDF：解析全文后随机选不同位置的题目（不总是选第1题）
   - JSON：从 15 套试卷中随机选一套，再从中随机选题
