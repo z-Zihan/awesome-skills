@@ -900,25 +900,234 @@ Because I didn't study hard, I failed the exam.
 
 ## 数据导出与导入
 
-👉 详见 [data-management.md](data-management.md)
+### 导出数据
 
-**快速参考**：
-- **导出**：用户说"导出数据"→ 读取 wrong.json + history.json + tested_points.json → 过期数据过滤 → 合并为 export.json（version 3.0）→ 可同步飞书云文档
-- **导入**：用户说"导入数据"→ 从本地 export.json 或飞书云文档读取 → 格式校验（需 version 3.0）→ merge 合并（非覆盖）→ 应用清理规则
-- **合并规则**：错题按 id 去重（保留较新），成绩按 date 去重，知识点按 point+question_type 去重（保留较新）
-- **从飞书导入**：搜索标题匹配"英语测评数据备份"的飞书文档，读取并导入
+用户说"导出数据"或"导出英语测评数据"时：
+
+1. 读取所有本地存储文件：
+   - `./english-assessment/wrong.json`（错题集）
+   - `./english-assessment/history.json`（成绩归档）
+   - `./english-assessment/tested_points.json`（知识点追踪）
+2. **过滤过期错题**：导出前过滤掉 added_at 超过 30 天的错题（不导出已过期的数据）
+3. **过滤过期知识点**：导出前过滤掉 tested_at 超过 10 天的知识点记录（不导出已清理的数据）
+4. 合并为一个 JSON 文件，格式：
+
+```json
+{
+  "export_version": "3.0",
+  "exported_at": "2026-06-03T10:00:00+08:00",
+  "wrong_records": [
+    {
+      "id": "uuid",
+      "type": "英译中词汇",
+      "dimension": "词汇量",
+      "question": "implement",
+      "user_answer": "重要的",
+      "correct_answer": "实施/执行",
+      "explanation": "implement 作动词表示「实施、执行」",
+      "added_at": "2026-05-25T19:00:00+08:00",
+      "source": "default"
+    }
+  ],
+  "history_records": [
+    {
+      "date": "2026-05-25T19:00:00+08:00",
+      "mode": "default",
+      "score": 76,
+      "started_at": "2026-05-25T18:42:00+08:00",
+      "finished_at": "2026-05-25T19:00:00+08:00",
+      "duration_min": 18,
+      "weakness": ["词汇量", "语法"],
+      "breakdown": { ... }
+    }
+  ],
+  "tested_points": [
+    {
+      "point": "虚拟语气-与过去事实相反",
+      "category": "语法",
+      "sub_category": "虚拟语气",
+      "question_type": "语法填空",
+      "tested_at": "2026-06-01T19:00:00+08:00"
+    }
+  ]
+}
+```
+
+4. 保存到本地：将文件写入 `./english-assessment/export.json`
+5. **同步到飞书云文档**（如果有飞书文档权限）：
+   - 使用 `feishu_create_doc` 创建飞书云文档，标题格式："英语测评数据备份 <导出日期>"
+   - 文档内容为 JSON 数据的 Markdown 格式（用代码块包裹）
+   - 创建成功后输出文档链接
+   - 如果飞书云文档已有历史导出文档（标题匹配"英语测评数据备份"），则读取该文档内容，与当前数据合并后更新文档（merge 逻辑见「合并规则」）
+   - 如果没有飞书权限或操作失败，跳过此步，仅本地导出
+6. 输出确认信息：
+
+**✅ 数据导出成功！**
+
+📁 本地文件：./english-assessment/export.json
+☁️ 飞书文档：<文档链接或"未同步（无权限）">
+- 错题记录：X 条（已过滤 Y 条过期错题）
+- 成绩记录：X 条
+- 知识点追踪：X 条（已过滤 Y 条过期记录）
+
+💡 发送「导入数据」可从本地或飞书云文档恢复进度
+
+7. 如果没有任何数据 → 提示"暂无数据可导出，先完成一次测评吧"
+
+### 导入数据
+
+用户说"导入数据"时：
+
+1. **确定数据来源**（按优先级尝试）：
+   - 如果用户提供了飞书文档链接 → 从飞书云文档读取数据（使用 `feishu_fetch_doc`）
+   - 如果用户说"从飞书导入" → 搜索标题匹配"英语测评数据备份"的飞书文档并读取；匹配到多个文档时，取最近更新的一个
+   - 否则 → 从本地文件 `./english-assessment/export.json` 读取
+2. 数据来源异常处理：
+   - 来源不可用 → 提示具体原因（"未找到导出文件"/"飞书文档无法访问"/"未找到匹配的飞书备份文档"）
+   - 从飞书文档中提取 JSON 数据失败（文档被手动编辑导致 JSON 代码块缺失或格式异常）→ 提示"飞书文档数据格式异常，请检查文档是否被修改"，回退尝试本地导入
+3. 读取并验证文件格式（必须有 export_version 字段）
+4. export_version 不是 "3.0" → 提示"数据格式版本不兼容，请使用同版本导出的文件"；其他格式不合法 → 提示"导出文件格式不正确，请确认文件完整性"
+5. JSON 解析失败（文件损坏、截断、乱码）→ 提示"导出文件可能已损坏，请检查文件是否完整或重新导出"
+6. **过滤过期错题**：导入前过滤掉 added_at 超过 30 天的错题（不导入已过期的数据）
+7. **过滤过期知识点**：导入前过滤掉 tested_at 超过 10 天的知识点记录（不导入已清理的数据）
+8. 格式正确且过滤后 → 执行**合并**（merge，非覆盖）：
+   - **错题集**：与现有记录合并，按 id 去重（相同 id 保留 added_at 较新的记录）
+   - **成绩归档**：与现有记录合并，按 date 去重（相同时间戳的记录不重复添加）
+   - **知识点追踪**：与现有记录合并，按 point + question_type 联合去重（相同知识点+题型保留 tested_at 较新的记录）
+8. 合并完成后，应用清理规则（错题数量上限/时间上限，知识点10天清理）
+9. 输出确认信息：
+
+**✅ 数据导入成功！**
+
+📊 导入结果（来源：<本地/飞书文档链接>）：
+- 错题记录：原有 X 条 + 导入 Y 条（已过滤 Z 条过期）= 合并后 W 条
+- 成绩记录：原有 X 条 + 导入 Y 条 = 合并后 W 条
+- 知识点追踪：原有 X 条 + 导入 Y 条（已过滤 Z 条过期）= 合并后 W 条
+
+💡 发送「学习进度」查看你的完整进度
+
+10. **冲突处理**：如果本地已有数据，提示"检测到本地已有数据，将进行合并（去重保留较新记录），不会覆盖现有数据"
+
+### 合并规则（通用）
+
+无论是导出到飞书时与已有文档合并，还是导入时与本地数据合并，均遵循以下规则：
+
+- **错题集合并**：
+  - 按 `id` 字段匹配
+  - 相同 id → 保留 `added_at` 较新的记录（更新最新错误答案和时间）
+  - 不同 id → 合并添加
+  - 合并后超过 200 条上限 → 按 `added_at` 排序淘汰最早的
+  - 合并后超过 30 天的错题 → 自动清理
+- **知识点追踪合并**：
+  - 按 `point` + `question_type` 联合匹配
+  - 相同 point+question_type → 保留 `tested_at` 较新的记录
+  - 不同 → 合并添加
+  - 合并后超过 10 天的记录 → 自动清理
+- **成绩归档合并**：
+  - 按 `date` 字段匹配
+  - 相同 date → 不重复添加（保留现有记录）
+  - 不同 date → 合并添加
+  - 按时间排序，最早在前
 
 ## 搜题引擎
 
-👉 详见 [search-engine.md](search-engine.md)
+独立模块：搜题策略 + 随机化 + 解析 + 黑名单，测评流程通过「按搜题引擎执行」引用。
 
-**快速参考**：
-- **静默搜题**：搜题全过程不可见，失败静默回退AI出题
-- **搜题优先级**：⚡快速源≥60%（koolearn/GitHub MD+JSON/Gitee/xdf）→ 🟡中等源（CAE/PDF）→ 🐢慢速源（Oxford 3%/vocab/GRE）
-- **随机化**：搜索词多维度组合、源轮换（同源≤40%）、题内随机、年份分散
-- **冷却期去重**：按「知识点追踪>冷却期规则」排除已考点
-- **解析策略**：优先搜答案页，有官方答案以官方为准，无官方答案标注"AI解析仅供参考"
-- **黑名单**：zhenti.burningvocabulary.cn、沪江/考虫/扇贝/百词斩/中国教育在线、知乎(403)、eol.cn
+⚠️ **静默搜题（强制）**：搜题全过程对考生完全不可见——不在聊天中叙述搜题进度，不展示搜到的原始 URL 或文件路径，搜题失败静默回退。详见核心原则第3条。
+
+### 首题即时策略（减少等待）
+
+- **前 1-3 题用 AI 即时出题**：用户选择模式后，**回复内容直接就是第一道题**，不插入任何工具调用（不读文件、不搜题、不规划试卷结构）。试卷结构规划在考生答第一题后的下一个 turn 里完成
+- **搜题与出题并行**：在前几道 AI 题目出题的同时/之后，后台静默搜题，搜到的真题用于后续题目
+- **AI 题目不影响比例**：前几题用 AI 出的题计入 AI 出题比例，后续搜题时相应调整，确保整份试卷真题/AI 比例仍在 40-70%/30-60% 范围内
+- **前几题选型**：优先选**客观题**（选择题、填空题）作为前几题，因为客观题判分无争议、出题快、考生上手容易
+
+### 搜题源按速度分级
+
+搜题时**优先使用快速源**，慢速源仅作为补充，减少整体等待时间：
+
+- ⚡ **快速（<1秒）**：SEARCH_GITHUB_MD（Markdown 直取）、SEARCH_GITHUB_CET_JSON（JSON 直取）、SEARCH_KOOLEARN / SEARCH_KOOLEARN_TEM4 / SEARCH_KOOLEARN_CET6（网页直抓）、SEARCH_XDF（网页直抓）、Gitee API 目录浏览
+- 🟡 **中等（1-3秒）**：SEARCH_GITHUB_CAE（Markdown，含答案）、SEARCH_GITHUB_CET_PDF_REPO（GitHub API 目录浏览 + 下载 + PDF 解析）、SEARCH_GITHUB_KAOYAN（GitHub API 目录浏览 + 下载 + PDF 解析）、SEARCH_GRE_MANHATTAN（海外站，~1.4秒）
+- 🐢 **慢速（>3秒）**：SEARCH_VOCABULARY（~0.8秒可用，但页面大需筛选）、SEARCH_OXFORD（~12秒，极慢，但释义权威、例句优质，3%概率出题+分析阶段举一反三优先使用）
+
+**搜题优先级**：⚡ 快速源优先出题 → 🟡 中等源补充多样性 → 🐢 慢速源仅用于词汇查证/难度参考，不依赖其出题。每次测评的真题来源中，⚡快速源占比 ≥ 60%
+
+### 搜题策略（autoglm-websearch 搜题 + web_fetch 抓取正文，按优先级排序）
+
+- **autoglm-websearch 搜题** → 获取 URL → web_fetch 抓取正文。autoglm-websearch 返回 URL 和摘要，再用 web_fetch 抓取页面全文提取真题原文
+  - **API 调用方式**：POST `https://autoglm-api.zhipuai.cn/agentdr/v1/assistant/skills/web-search`
+  - **请求体**：`{"queries": [{"query": "<搜索词>"}]}`
+  - **签名 Headers**（每次动态生成）：
+    - `X-Auth-Appid`: `100003`
+    - `X-Auth-TimeStamp`: 当前秒级 Unix 时间戳
+    - `X-Auth-Sign`: MD5(`100003` + "&" + timestamp + "&" + `38d2391985e2369a5fb8227d8e6cd5e5`)
+    - `Authorization`: Bearer token（从 `http://127.0.0.1:18432/get_token` 获取）
+  - ⚠️ 注意：app_id 是 `100003` 不是 `10000`；签名必须按上述规则动态生成，不能只传 app_key
+- **autoglm-websearch 已验证可搜到的内容源**：SEARCH_KOOLEARN（新东方在线四级，选词填空/翻译/语法真题全文可抓取）、SEARCH_KOOLEARN_TEM4（专四真题+答案，具体年份页面需二次跳转）、SEARCH_KOOLEARN_CET6（六级真题+答案）、SEARCH_XDF（新东方网，阅读/翻译真题原文）
+- **GitHub Markdown 真题库（最友好格式，国内用 SEARCH_GH_PROXY 加速）**⭐：SEARCH_GITHUB_MD，含 CET-4/6 2023年真题，Markdown 格式直接使用，选项独立成行，无需 PDF 解析或格式校准。优先级高于 PDF 源。目录浏览：`SEARCH_GH_PROXY/https://api.github.com/repos/wamich/english-exem-md/contents/`，文件下载：`SEARCH_GH_PROXY/https://raw.githubusercontent.com/wamich/english-exem-md/main/{路径}`
+- **GitHub CET-4/6 真题 PDF（国内用 SEARCH_GH_PROXY 镜像加速下载+pdf工具解析）**：SEARCH_GITHUB_CET_PDF_REPO，含 2015-2023 年 CET-4/6 真题 PDF。通过 SEARCH_GH_PROXY 代理下载后用 pdf 工具解析，可提取选词填空原文+选项、阅读理解全文+题目、翻译题中文原文。目录浏览：`SEARCH_GH_PROXY/https://api.github.com/repos/DieDiDi/CET4-6-past-exam-paper/contents/{路径}`，文件下载：`SEARCH_GH_PROXY/https://raw.githubusercontent.com/DieDiDi/CET4-6-past-exam-paper/main/{路径}`
+- **Gitee CET-4 真题 PDF（国内直连+pdf工具解析）**：SEARCH_GITEE_CET_PDF，含 2013-2020 年 CET-4 真题 PDF。通过 Gitee API 获取 download_url 下载后用 pdf 工具解析。Gitee API: `gitee.com/api/v5/repos/jasonwarner/CET4/contents/{路径}`
+- **GitHub CET-4 真题库（国内用 SEARCH_GH_PROXY 镜像加速）**：SEARCH_GITHUB_CET_JSON，含 2023-2025 CET-4 阅读选择题，JSON 格式直接解析（听力部分跳过）。文件下载：`SEARCH_GH_PROXY/https://raw.githubusercontent.com/ShepiTT/CET_practice_questions/main/parsed_data.json`
+- **词汇/语法参考站（已验证可抓取）**：SEARCH_VOCABULARY（高频词+释义+真实语料例句）、SEARCH_OXFORD（Oxford 3000/5000+CEFR等级+搭配）
+- **GRE 题源**：SEARCH_GRE_MANHATTAN（免费 GRE Verbal 练习题+详细解析，含 Sentence Equivalence 和 Text Completion）
+- **考研英语 PDF（国内用 SEARCH_GH_PROXY 加速下载+pdf工具解析）**：SEARCH_GITHUB_KAOYAN，含考研英语一 2002-2021 真题 PDF、六级 2016-2021 真题 PDF。目录浏览：`SEARCH_GH_PROXY/https://api.github.com/repos/youngflysky/KaoYanZhenTi-PDF/contents/{路径}`，文件下载：`SEARCH_GH_PROXY/https://raw.githubusercontent.com/youngflysky/KaoYanZhenTi-PDF/main/{路径}`。考研翻译题可直接用，阅读理解可提取
+- **CAE C1 高级英语（Markdown 格式）**⭐：SEARCH_GITHUB_CAE，含 CAE C1 Multiple Choice Cloze、Open Cloze、Word Formation 等题型，Markdown 格式含答案，难度对标 CEFR C1-C2，适合高难度测评。目录浏览：`SEARCH_GH_PROXY/https://api.github.com/repos/gunqiuwang/cae-question-bank/contents/`，文件下载：`SEARCH_GH_PROXY/https://raw.githubusercontent.com/gunqiuwang/cae-question-bank/main/{路径}`
+- 搜索专业领域最新术语和表达（科技、医学、法律、金融等）
+- 搜索时事热点相关英语表达，确保内容与时俱进
+- 搜索外刊原文（经济学人、BBC、NYT、Guardian 等）作为阅读理解和词汇题素材
+- 搜索双语对照资源（政府工作报告、UN文件、学术论文摘要）作为翻译题素材
+- 搜索商务英语/职场沟通资源作为实用表达题素材
+- 搜索英语学习社区高频错题（Reddit r/EnglishLearning、StackExchange 等）作为易错点出题参考
+
+### 搜题黑名单（已验证不可用，不要作为搜题源）
+
+- zhenti.burningvocabulary.cn（PDF查看器，web_fetch抓不到正文）
+- 沪江英语/考虫/扇贝/百词斩/中国教育在线（付费墙/SPA/已下线）
+- 知乎（403反爬）
+- eol.cn 考研频道（正文抓不到）
+
+### 搜题回退规则（全局唯一定义，其他位置引用本规则）
+
+搜题失败时：静默回退AI自身知识出题，不提示用户，但必须按「知识点追踪>冷却期规则」排除已考点。AI 出题也必须保证随机性和多样性（见通用规则第5条）
+
+极端情况：如果本次测评搜题全部失败，或搜到的真题与近期测评重复过多，可以 100% AI 出题。这是唯一允许全 AI 出题的情况
+
+### 搜题随机化策略（防止多次测评搜到同一份题目，多层随机）
+
+- **搜索词随机化**：每次搜题时从以下维度组合生成不同的搜索词，不使用固定搜索词：
+  - 年份：从 2019-2025 中随机选（如 "2021年6月"、"2023年12月"）
+  - 题型：选词填空/阅读理解/翻译/语法（中英文混用，不含听力）
+  - 考试类型：CET-4/CET-6/考研英语/GRE/IELTS/TOEFL/专四专八，随机选不同考试
+  - 话题：从话题库中随机选一个（环保/科技/AI/健康/教育/经济/文化/社会/职场/心理学/农业/法律/金融）
+  - 示例组合："2023年12月 CET-4 翻译真题" / "GRE sentence equivalence 2024" / "考研英语 阅读理解 科技" / "CET-6 选词填空 环保"
+  - **随机组合规则**：每次搜题至少随机2个维度组合（如年份+考试类型、话题+题型），不使用单维度搜索词（如只搜"CET-4"太宽泛）
+- **源随机化**：每次测评随机选择搜题源组合（不每次都从同一源搜），⚡快速源占比 ≥ 60%：
+  - ⚡ 25% 概率：SEARCH_KOOLEARN / SEARCH_KOOLEARN_TEM4 / SEARCH_KOOLEARN_CET6 / SEARCH_XDF（网页直抓，最快）
+  - ⚡ 20% 概率：GitHub Markdown（SEARCH_GITHUB_MD，最友好格式，秒取）
+  - ⚡ 15% 概率：GitHub JSON（SEARCH_GITHUB_CET_JSON，JSON 直取，跳过听力题）
+  - ⚡ 10% 概率：Gitee CET-4 PDF（SEARCH_GITEE_CET_PDF，国内直连）
+  - 🟡 12% 概率：CAE C1 高级英语（SEARCH_GITHUB_CAE，Markdown 格式，C1-C2 难度）
+  - 🟡 10% 概率：GitHub PDF（SEARCH_GITHUB_CET_PDF_REPO，需下载+解析）
+  - 🟡 5% 概率：考研英语 PDF（SEARCH_GITHUB_KAOYAN，需下载+解析）
+  - 🐢 3% 概率：SEARCH_VOCABULARY / SEARCH_OXFORD / SEARCH_GRE_MANHATTAN（词汇/GRE/权威词典，慢但质量高）
+  - **同一测评内源轮换**：一次测评中不同题型从不同源搜题，不要所有题都来自同一源；同一源在一次测评中最多贡献40%的搜题量
+- **题内随机化**：从搜到的页面/文件中随机选取题目，不从头开始选：
+  - PDF：解析全文后随机选不同位置的题目（不总是选第1题）
+  - JSON：从 15 套试卷中随机选一套，再从中随机选题
+  - 网页：页面内通常有多道题，随机选不同题目
+  - **多页随机**：如果搜到的源有多页/多套，随机选页/选套，不总是选第一页/第一套
+- **历史去重**：出题前读取 `tested_points.json`，按「知识点追踪>冷却期规则」检查，确保本次搜到的题目不与近期重复。若搜到的真题已被用过，换年份/套号重新搜
+- **混合出题**：一次测评中不同题型从不同源搜题，不要所有题都来自同一份试卷
+- **年份分散**：一次测评中的真题尽量来自不同年份（不全是同一年的试卷），如果一次搜到了2023年6月的整套卷，只从中选取部分题目，其余从其他年份补充
+
+### 搜题解析策略（搜到真题后如何生成解析）
+
+- **优先搜答案页**：搜到题目后，额外搜索对应的答案/解析页（搜索词加"答案"或"解析"），如"2024年6月四级选词填空答案"。答案页通常有参考答案，部分有解析
+- **有官方答案时**：AI 解析必须以官方答案为准，AI 只负责解释"为什么这个答案对"。如果 AI 认为官方答案有误，仍以官方答案为准，但在解析末尾加注「⚠️ 此题存在争议」
+- **无官方答案时**（GitHub JSON、部分 PDF）：AI 自行判断正确答案并生成解析，解析末尾标注「💡 此题为 AI 解析，仅供参考」
+- **翻译题特殊处理**：SEARCH_XDF/SEARCH_KOOLEARN 上的翻译真题通常附带参考译文，直接作为评分标准。AI 评分时对照参考译文，不以 AI 自己的翻译为准
+- **阅读理解特殊处理**：阅读理解需要理解全文才能做对，AI 必须先完整阅读搜到的原文，再基于原文内容解析题目。如果原文不完整（截断），标注「⚠️ 原文不完整，解析可能不准确」
+- **听力题跳过**：搜到的整份试卷如果含听力部分，听力选择题跳过（听力无法在文字测评中实现）。但如果试卷附带听力原文（Tape Script / Transcript），可将原文转为阅读理解或翻译题素材——取 news report/passage 短文做阅读理解，取短句做翻译题，对话类（A: ... B: ...）跳过。只提取阅读/翻译/语法/词汇部分
 
 
 ## 约束
