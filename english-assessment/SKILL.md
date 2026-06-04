@@ -1,6 +1,6 @@
 ---
 name: english-assessment
-version: "4.8.2"
+version: "4.9.0"
 description: >
   陪伴式英语水平测评助手。不是冰冷的出题机器，而是陪你一起成长的英语伙伴。基于历史数据动态调整难度（持续强项→提难度，薄弱项→多出题），
   大学英语水平（CEFR B1-C2），随机生成题卷（默认25-40题或快速21题，7-10种题型，总分100分），
@@ -45,7 +45,7 @@ description: >
 
 | 常量 | 值 | 说明 |
 |---|---|---|
-| SEARCH_AUTOGLM_API | autoglm-api.zhipuai.cn/agentdr/v1/assistant/skills/web-search | autoglm-websearch API 地址 |
+| SEARCH_AUTOGLM_API | autoglm-api.zhipuai.cn/agentdr/v1/assistant/skills/web-search | autoglm-websearch API（app_id=100003，需动态签名，见搜题引擎） |
 | SEARCH_GH_PROXY | gh-proxy.com | GitHub Raw 国内镜像 |
 | SEARCH_GITHUB_CET_PDF | github.com/DieDiDi/CET4-6-past-exam-paper | GitHub CET-4/6 真题 PDF 仓库（2015-2023） |
 | SEARCH_GITEE_CET_PDF | gitee.com/jasonwarner/CET4 | Gitee CET-4 真题 PDF 仓库（2013-2020） |
@@ -57,7 +57,7 @@ description: >
 | SEARCH_KOOLEARN_CET6 | cet6.koolearn.com | 新东方在线六级（已验证可抓取） |
 | SEARCH_XDF | cet4-6.xdf.cn | 新东方网（已验证可抓取） |
 | SEARCH_GITHUB_MD | github.com/wamich/english-exem-md | GitHub Markdown 真题库（CET-4/6，2023年，最友好格式） |
-| SEARCH_GITHUB_CET_PDF | github.com/DieDiDi/CET4-6-past-exam-paper | GitHub CET-4/6 PDF 真题（2015-2023） |
+| SEARCH_GITHUB_CET_PDF_REPO | github.com/DieDiDi/CET4-6-past-exam-paper | GitHub CET-4/6 PDF 真题文件浏览（API目录+下载+PDF解析，2015-2023） |
 | SEARCH_GITHUB_KAOYAN | github.com/youngflysky/KaoYanZhenTi-PDF | GitHub 考研英语+六级 PDF 真题（2002-2021） |
 | SEARCH_GITHUB_CAE | github.com/gunqiuwang/cae-question-bank | GitHub CAE C1 高级英语题库（Markdown 格式，含答案） |
 | SEARCH_GRE_MANHATTAN | manhattanreview.com/free-gre-practice-questions | GRE Verbal 练习题+详细解析 |
@@ -66,16 +66,16 @@ description: >
 
 1. **严格评分**：不给同情分，具体扣分标准见「评分规则」
 2. **静默判分**：每题作答后只出下一题，不反馈对错、不显示得分、不解释知识点
-3. **静默搜题**：搜题过程对考生完全不可见，不叙述搜题进度，搜题失败静默回退AI出题
-3. **随机题卷**：每次测评开始时随机确定题数、题型组合、分值分配，总分固定100分
-4. **测评隔离**：测评进行中，用户发非测评相关消息时，回复"当前正在英语测评中，如需退出请发送「退出测评」"，不执行其他指令。想执行其他操作必须先退出测评
-5. **可退出**：用户说"退出测评"/"结束测评"/"不做了"→ 立即按已完成题目生成报告
-6. **错题持久化**：错题存入本地文件，支持错题重测和查看讲解
-7. **成绩归档**：每次测评成绩存入本地文件，支持学习进度分析
-8. **自适应难度**：测评开始时参考历史进度，对持续高分维度适当提高难度
-9. **薄弱项侧重**：对持续弱项维度增加出题量，帮助针对性补短板
-10. **数据可迁移**：支持导出/导入全部本地数据，换电脑不丢进度
-11. **个性化鼓励**：测评报告结尾根据历史进步趋势附一句个性化鼓励语（如"语法进步明显，继续保持！💪"），首次测评附通用鼓励
+3. **静默搜题**：搜题过程不可见，搜题失败静默回退，详情见「搜题引擎」
+4. **随机题卷**：每次测评开始时随机确定题数、题型组合、分值分配，总分固定100分
+5. **测评隔离**：测评进行中，用户发非测评相关消息时，回复"当前正在英语测评中，如需退出请发送「退出测评」"，不执行其他指令。想执行其他操作必须先退出测评
+6. **可退出**：用户说"退出测评"/"结束测评"/"不做了"→ 立即按已完成题目生成报告
+7. **错题持久化**：错题存入本地文件，支持错题重测和查看讲解
+8. **成绩归档**：每次测评成绩存入本地文件，支持学习进度分析
+9. **自适应难度**：测评开始时参考历史进度，对持续高分维度适当提高难度
+10. **薄弱项侧重**：对持续弱项维度增加出题量，帮助针对性补短板
+11. **数据可迁移**：支持导出/导入全部本地数据，换电脑不丢进度
+12. **个性化鼓励**：测评报告结尾根据历史进步趋势附一句个性化鼓励语（如"语法进步明显，继续保持！💪"），首次测评附通用鼓励
 
 ## 快速参考
 
@@ -92,7 +92,7 @@ description: >
 4. **句子改错≤2**，**情景对话≤2**，**其他题型≤4**（选词大题固定1题除外）
 5. **每种选中题型至少1题**
 6. **考试中不显示来源**，只在错题/考题分析解析中标注 📖 出处
-7. **静默搜题**：搜题全过程不可见，不叙述进度，不展示URL，搜题失败静默回退
+7. **静默搜题**：搜题全过程不可见，不叙述进度，不展示URL
 8. **首题即时**：前1-3题用AI即时出题，不等搜题
 9. **标签不暗示考点**：介词搭配→显示【选择题】，语法填空→显示【填空题】
 
@@ -907,7 +907,7 @@ Because I didn't study hard, I failed the exam.
 
 独立模块：搜题策略 + 随机化 + 解析 + 黑名单，测评流程通过「按搜题引擎执行」引用。
 
-⚠️ **静默搜题（强制）**：搜题全过程对考生完全不可见——不在聊天中叙述搜题进度（如"正在搜题…"、"找到了…"、"真题源已下载"），不在出题前输出任何搜题中间状态，不展示搜到的原始 URL 或文件路径。考生只能看到题目本身。搜题的所有 exec/curl/web_fetch/pdf 操作在一个 turn 内静默完成，任何搜题失败的回退也静默进行。
+⚠️ **静默搜题（强制）**：搜题全过程对考生完全不可见——不在聊天中叙述搜题进度，不展示搜到的原始 URL 或文件路径，搜题失败静默回退。详见核心原则第3条。
 
 ### 首题即时策略（减少等待）
 
@@ -921,17 +921,25 @@ Because I didn't study hard, I failed the exam.
 搜题时**优先使用快速源**，慢速源仅作为补充，减少整体等待时间：
 
 - ⚡ **快速（<1秒）**：SEARCH_GITHUB_MD（Markdown 直取）、SEARCH_GITHUB_CET_JSON（JSON 直取）、SEARCH_KOOLEARN / SEARCH_KOOLEARN_TEM4 / SEARCH_KOOLEARN_CET6（网页直抓）、SEARCH_XDF（网页直抓）、Gitee API 目录浏览
-- 🟡 **中等（1-3秒）**：SEARCH_GITHUB_CAE（Markdown，含答案）、SEARCH_GITHUB_CET_PDF（GitHub API 目录浏览 + 下载 + PDF 解析）、SEARCH_GITHUB_KAOYAN（GitHub API 目录浏览 + 下载 + PDF 解析）、SEARCH_GRE_MANHATTAN（海外站，~1.4秒）
-- 🐢 **慢速（>3秒）**：SEARCH_VOCABULARY（~0.8秒可用，但页面大需筛选）、SEARCH_OXFORD（~12秒，极慢，但释义权威、例句优质，3%概率出题+分析阶段举一反三优先使用）、autoglm-websearch API（响应不稳定，当前签名问题待修复）
+- 🟡 **中等（1-3秒）**：SEARCH_GITHUB_CAE（Markdown，含答案）、SEARCH_GITHUB_CET_PDF_REPO（GitHub API 目录浏览 + 下载 + PDF 解析）、SEARCH_GITHUB_KAOYAN（GitHub API 目录浏览 + 下载 + PDF 解析）、SEARCH_GRE_MANHATTAN（海外站，~1.4秒）
+- 🐢 **慢速（>3秒）**：SEARCH_VOCABULARY（~0.8秒可用，但页面大需筛选）、SEARCH_OXFORD（~12秒，极慢，但释义权威、例句优质，3%概率出题+分析阶段举一反三优先使用）
 
 **搜题优先级**：⚡ 快速源优先出题 → 🟡 中等源补充多样性 → 🐢 慢速源仅用于词汇查证/难度参考，不依赖其出题。每次测评的真题来源中，⚡快速源占比 ≥ 60%
 
-### 搜题策略（autoglm-websearch 精准搜索 + web_fetch 抓取正文，按优先级排序）
+### 搜题策略（autoglm-websearch 搜题 + web_fetch 抓取正文，按优先级排序）
 
-- **首选：autoglm-websearch 搜题** → 获取 URL → web_fetch 抓取正文。autoglm-websearch 返回 URL 和摘要，再用 web_fetch 抓取页面全文提取真题原文
+- **autoglm-websearch 搜题** → 获取 URL → web_fetch 抓取正文。autoglm-websearch 返回 URL 和摘要，再用 web_fetch 抓取页面全文提取真题原文
+  - **API 调用方式**：POST `https://autoglm-api.zhipuai.cn/agentdr/v1/assistant/skills/web-search`
+  - **请求体**：`{"queries": [{"query": "<搜索词>"}]}`
+  - **签名 Headers**（每次动态生成）：
+    - `X-Auth-Appid`: `100003`
+    - `X-Auth-TimeStamp`: 当前秒级 Unix 时间戳
+    - `X-Auth-Sign`: MD5(`100003` + "&" + timestamp + "&" + `38d2391985e2369a5fb8227d8e6cd5e5`)
+    - `Authorization`: Bearer token（从 `http://127.0.0.1:18432/get_token` 获取）
+  - ⚠️ 注意：app_id 是 `100003` 不是 `10000`；签名必须按上述规则动态生成，不能只传 app_key
 - **autoglm-websearch 已验证可搜到的内容源**：SEARCH_KOOLEARN（新东方在线四级，选词填空/翻译/语法真题全文可抓取）、SEARCH_KOOLEARN_TEM4（专四真题+答案，具体年份页面需二次跳转）、SEARCH_KOOLEARN_CET6（六级真题+答案）、SEARCH_XDF（新东方网，阅读/翻译真题原文）
 - **GitHub Markdown 真题库（最友好格式，国内用 SEARCH_GH_PROXY 加速）**⭐：SEARCH_GITHUB_MD，含 CET-4/6 2023年真题，Markdown 格式直接使用，选项独立成行，无需 PDF 解析或格式校准。优先级高于 PDF 源。目录浏览：`SEARCH_GH_PROXY/https://api.github.com/repos/wamich/english-exem-md/contents/`，文件下载：`SEARCH_GH_PROXY/https://raw.githubusercontent.com/wamich/english-exem-md/main/{路径}`
-- **GitHub CET-4/6 真题 PDF（国内用 SEARCH_GH_PROXY 镜像加速下载+pdf工具解析）**：SEARCH_GITHUB_CET_PDF，含 2015-2023 年 CET-4/6 真题 PDF。通过 SEARCH_GH_PROXY 代理下载后用 pdf 工具解析，可提取选词填空原文+选项、阅读理解全文+题目、翻译题中文原文。目录浏览：`SEARCH_GH_PROXY/https://api.github.com/repos/DieDiDi/CET4-6-past-exam-paper/contents/{路径}`，文件下载：`SEARCH_GH_PROXY/https://raw.githubusercontent.com/DieDiDi/CET4-6-past-exam-paper/main/{路径}`
+- **GitHub CET-4/6 真题 PDF（国内用 SEARCH_GH_PROXY 镜像加速下载+pdf工具解析）**：SEARCH_GITHUB_CET_PDF_REPO，含 2015-2023 年 CET-4/6 真题 PDF。通过 SEARCH_GH_PROXY 代理下载后用 pdf 工具解析，可提取选词填空原文+选项、阅读理解全文+题目、翻译题中文原文。目录浏览：`SEARCH_GH_PROXY/https://api.github.com/repos/DieDiDi/CET4-6-past-exam-paper/contents/{路径}`，文件下载：`SEARCH_GH_PROXY/https://raw.githubusercontent.com/DieDiDi/CET4-6-past-exam-paper/main/{路径}`
 - **Gitee CET-4 真题 PDF（国内直连+pdf工具解析）**：SEARCH_GITEE_CET_PDF，含 2013-2020 年 CET-4 真题 PDF。通过 Gitee API 获取 download_url 下载后用 pdf 工具解析。Gitee API: `gitee.com/api/v5/repos/jasonwarner/CET4/contents/{路径}`
 - **GitHub CET-4 真题库（国内用 SEARCH_GH_PROXY 镜像加速）**：SEARCH_GITHUB_CET_JSON，含 2023-2025 CET-4 阅读选择题，JSON 格式直接解析（听力部分跳过）。文件下载：`SEARCH_GH_PROXY/https://raw.githubusercontent.com/ShepiTT/CET_practice_questions/main/parsed_data.json`
 - **词汇/语法参考站（已验证可抓取）**：SEARCH_VOCABULARY（高频词+释义+真实语料例句）、SEARCH_OXFORD（Oxford 3000/5000+CEFR等级+搭配）
@@ -972,7 +980,7 @@ Because I didn't study hard, I failed the exam.
   - ⚡ 15% 概率：GitHub JSON（SEARCH_GITHUB_CET_JSON，JSON 直取，跳过听力题）
   - ⚡ 10% 概率：Gitee CET-4 PDF（SEARCH_GITEE_CET_PDF，国内直连）
   - 🟡 12% 概率：CAE C1 高级英语（SEARCH_GITHUB_CAE，Markdown 格式，C1-C2 难度）
-  - 🟡 10% 概率：GitHub PDF（SEARCH_GITHUB_CET_PDF 仓库，需下载+解析）
+  - 🟡 10% 概率：GitHub PDF（SEARCH_GITHUB_CET_PDF_REPO，需下载+解析）
   - 🟡 5% 概率：考研英语 PDF（SEARCH_GITHUB_KAOYAN，需下载+解析）
   - 🐢 3% 概率：SEARCH_VOCABULARY / SEARCH_OXFORD / SEARCH_GRE_MANHATTAN（词汇/GRE/权威词典，慢但质量高）
 - **题内随机化**：从搜到的页面/文件中随机选取题目，不从头开始选：
@@ -1017,6 +1025,7 @@ Because I didn't study hard, I failed the exam.
 - 导入时过滤超过 30 天的过期错题，不导入
 - 支持飞书云文档导入导出（如有权限），飞书文档数据也是 merge 而非覆盖
 - 开始新测评时，上次的错题追问/考题分析自动结束，"本次测评"指代更新为新测评
+- 测评/分析进行中收到其他触发词（如"看错题"、"学习进度"、"开始英语测评"等）→ 提示"当前正在[测评/分析]中，如需切换请先发送「退出测评」"
 
 ### 隐藏功能
 
