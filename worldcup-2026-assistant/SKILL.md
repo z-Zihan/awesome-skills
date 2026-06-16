@@ -323,6 +323,7 @@ J组：
    - 双方近期比赛状态（近5-10场）
    - 核心球员伤病/停赛情况
    - 赛前赔率数据（作为市场预期参考）
+   - **单关/串关信息**：从 zgzcw.com 查询单关开售情况，标注在赔率参考中
    - 天气/场地等客观因素（如有影响）
 3. 综合分析输出预测
 
@@ -343,6 +344,7 @@ J组：
 💡 赔率参考（中国体彩竞彩）
 • 胜平负：1.50 / 4.35 / 6.85
 • 让球（法国-1）：2.10 / 3.40 / 3.20
+• 单关：✅可购 / ❌只能串关 / ❌胜平负未开售（只能买让球）
 ⚠️ 以上为中国体彩竞彩固定赔率，以购买时为准
 ```
 
@@ -404,6 +406,44 @@ J组：
 - **比分 / Bǐfēn** = 猜具体比分，赔率最高 / Correct score bet, highest odds
 - **总进球 / Zǒng Jìnqiú** = 猜比赛总进球数 / Total goals over/under
 
+### 单关与串关详解 / Single Match vs Parlay Details
+
+**什么是单关 / What is Dānguān**
+单关 = 只猜1场比赛，买了就走。简单直接，风险可控
+单关 = Bet on one match only. Simple, lower risk
+
+**什么是串关 / What is Chuànguān**
+串关 = 同时猜2场以上，全对才赢，赔率相乘。如2串1 = 猜2场全对，赔率=场1赔率×场2赔率
+串关 = Bet on 2+ matches, all must win, odds multiply. E.g. 2-match parlay: odds = match1 × match2
+
+**⚠️ 不是所有比赛都开单关 / Not All Matches Offer Single Bet**
+- 体彩中心决定哪些场开单关，不是自动全开
+- 体彩中心 decides which matches offer single bet, not all automatically available
+- **强弱悬殊场通常不开单关**：赔率太低（如1.10-1.22），买100才赚十几块，体彩不会开
+- Strong vs weak matches rarely offer single bet: odds too low, not worth offering
+- **豪门焦点战容易开单关**：关注度高、竞猜热度大
+- Marquee matches more likely to offer single bet: high attention, high betting interest
+- 有些场连胜平负玩法都不开售，只能买让球玩法
+- Some matches don't even offer win/draw/loss, only handicap betting
+
+**单关查询方式 / How to Check Single Bet Availability**
+1. **足彩网 zgzcw.com**（推荐，web_fetch 可抓取）
+   - URL: `https://cp.zgzcw.com/lottery/jchtplayvsForJsp.action?lotteryId=47&type=jcmini`
+   - 标注"单关" = 可以单独买，无标注 = 只能串关
+   - 胜平负显示"未开售" = 该玩法不可购，只能买让球
+   - ⚠️ 500.com 编码乱码无法使用，用 zgzcw.com 代替
+2. **中国体彩APP**（最权威，手机端）
+   - 进入竞彩足球 → 选比赛 → 看"单关"标签
+3. **autoglm-websearch** 搜索（辅助验证）
+   - 搜索词：`竞彩足球 X月X日 单关场次`
+4. **中彩网 lottery.gov.cn**（官方，但信息较少）
+
+**让球玩法说明 / Handicap Betting Explained**
+让球 = 假设强队开场就落后N球，再判胜负
+E.g. 法国-1：如果实际2-0 → 让球后1-0 → 法国让球胜；如果2-1 → 让球后1-1 → 让球平
+赔率格式：让球胜 / 让球平 / 让球负
+强弱差距越大，让球数越多（如伊拉克+2 vs 挪威）
+
 ### 执行流程 / Workflow
 
 1. 从本地 `schedule.json` 获取当日/次日赛程
@@ -451,9 +491,11 @@ J组：
 ### 体彩查询要点 / Key Points for Lottery Queries
 
 - **赔率 / Odds**：实时查询，体彩赔率会变化，以购买时为准
-- **单关信息 / Single Match Availability**：并非所有比赛都开单关，需确认
+- **单关信息 / Single Match Availability**：并非所有比赛都开单关，必须查询确认。查询优先级：zgzcw.com(web_fetch) > autoglm-websearch > 中国体彩APP
+- **胜平负未开售 / Win/Draw/Loss Not Available**：强弱悬殊场可能连胜平负都不开售，只能买让球玩法
 - **销售时间 / Sales Hours**：工作日和周末不同，注意截止时间
 - **让球数 / Handicap Lines**：根据双方实力差距设定，注意让球后赔率变化
+- **赔率来源 / Odds Source**：必须从中国体彩渠道获取（zgzcw.com等），不用国际盘口作为体彩赔率
 - **只推荐中国体彩合法渠道 / Legal Channel Only**：不提及任何境外博彩平台
 
 ## 数据源实测与优先级 / Data Sources & Priority
