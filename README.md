@@ -83,6 +83,12 @@
 
 **触发词**：开始英语测评 / 英语测试 / 测一下英语 / 快速测评 / 错题重测 / 看错题
 
+### 🏆 worldcup-2026-assistant — 2026美加墨世界杯助手
+
+2026 FIFA World Cup专属助手。四大核心功能：赛程查询（本地缓存+验证）、球队硬实力分析（历史数据+实时状态）、比赛预测（多维数据+置信度）、体彩选购指南（赔率+单关串关建议）。所有输出适配飞书消息格式，静态数据缓存至 `worldcup-data/`，动态数据实时查询。
+
+**触发词**：世界杯 / 世界杯赛程 / 世界杯预测 / 世界杯分析 / 世界杯赔率 / 世界杯体彩 / worldcup / 美加墨 / 体彩指南 / 球队排名 / 竞彩 / 足彩
+
 ### ✅ todo-list-promax — 个人待办事项系统
 
 永久不丢失的待办事项管理。自动从聊天中捕获待办（文字/图片/附件），智能解析时间与优先级，每日晚上 9 点主动推送未完成提醒。支持四级优先级（P0-P3）、多种自然语言触发、完成/删除/修改操作。
@@ -141,6 +147,8 @@ openclaw skills install skill-creator-ProMax
 openclaw skills install skill-review-pro
 openclaw skills install dev-mentor
 openclaw skills install rednote-creator
+openclaw skills install english-assessment
+openclaw skills install worldcup-2026-assistant
 openclaw skills install todo-list-promax
 openclaw skills update --all
 ```
@@ -292,6 +300,12 @@ Helps experienced developers learn unfamiliar domains by building a full project
 
 **Triggers**: learn backend / learn Rust / build project from scratch / teach me to code
 
+### 🏆 worldcup-2026-assistant — 2026 FIFA World Cup Assistant
+
+Dedicated assistant for the 2026 FIFA World Cup. Four core features: schedule query (local cache + verification), team strength analysis (historical data + live player status), match prediction (multi-dimensional data + confidence levels), sports lottery guide (odds + single/parlay suggestions). All output formatted for Feishu messages. Static data cached in `worldcup-data/`, dynamic data queried live.
+
+**Triggers**: 世界杯 / World Cup / worldcup / 美加墨 / 世界杯赛程 / 世界杯预测 / 世界杯分析 / 世界杯赔率 / 世界杯体彩 / 体彩指南 / 竞彩 / 足彩
+
 ### ✅ todo-list-promax — Personal Todo System
 
 Permanent, loss-proof todo management. Auto-captures todos from chat (text/image/attachment), parses time & priority, pushes unfinished reminders daily at 9 PM. Supports 4 priority levels (P0-P3), natural language triggers, and complete/delete/modify operations.
@@ -350,6 +364,8 @@ openclaw skills install skill-creator-ProMax
 openclaw skills install skill-review-pro
 openclaw skills install dev-mentor
 openclaw skills install rednote-creator
+openclaw skills install english-assessment
+openclaw skills install worldcup-2026-assistant
 openclaw skills install todo-list-promax
 openclaw skills update --all
 ```
