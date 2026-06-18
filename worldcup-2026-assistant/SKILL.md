@@ -534,6 +534,20 @@ MUST fetch live data from zgzcw.com before outputting any lottery guide or predi
 - **赔率来源 / Odds Source**：必须从中国体彩渠道获取（zgzcw.com等），不用国际盘口作为体彩赔率
 - **只推荐中国体彩合法渠道 / Legal Channel Only**：不提及任何境外博彩平台
 
+### ⚠️ 投注方案校验规则 / Bet Plan Validation Rules
+
+**输出体彩选购指南或用户告知投注方案后，必须校验方案是否合法可购！**
+After outputting lottery guide or when user mentions their bet plan, MUST validate the plan is legal/purchasable!
+
+**校验步骤 / Validation Steps：**
+1. 从 zgzcw.com 抓取的 `dg` 字段判断每场比赛是否开单关
+2. 检查用户方案中每注是否满足单关/串关要求：
+   - 胜平负/让球胜平负：`dg=0` 的场次**不能单独买（单关）**，必须至少 2 串 1
+   - 比分/总进球/半全场：天然支持单场投注，不受 `dg` 限制
+3. 如果用户方案中有不可单买的场次被当作单关 → **立即警告**：「⚠️ XX 这场不能单关，只能串关！请至少再选一场搭配」
+4. 如果用户方案是串关 → 确认所有场次都是同一玩法（胜平负串胜平负），或使用混合过关
+5. 输出推荐方案时，同样校验：确保推荐的每注都能实际出票
+
 ## 数据源实测与优先级 / Data Sources & Priority
 
 ### 可用数据源 / Available Data Sources
