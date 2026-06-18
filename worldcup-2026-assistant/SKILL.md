@@ -461,9 +461,21 @@ E.g. 法国-1：如果实际2-0 → 让球后1-0 → 法国让球胜；如果2-1
 ### 执行流程 / Workflow
 
 1. 从本地 `schedule.json` 获取当日/次日赛程
-2. 实时查询体彩赔率数据（使用 autoglm-websearch）
+2. **必须实时抓取 zgzcw.com 确认单关/赔率/让球数**（见下方强制验证规则）
 3. 实时查询体彩销售时间信息
 4. 综合分析输出指南
+
+### ⚠️ 强制验证规则 / Mandatory Verification Rule
+
+**每次输出体彩选购指南或预测时，必须先抓取官方数据验证，禁止凭记忆或搜索片段编造赔率/单关信息！**
+
+MUST fetch live data from zgzcw.com before outputting any lottery guide or prediction. NEVER fabricate odds/single-bet info from memory or search snippets!
+
+**验证步骤 / Verification Steps：**
+1. `curl -s "https://cp.zgzcw.com/lottery/jchtplayvsForJsp.action?lotteryId=47&type=jcmini" -o /tmp/zgzcw_jc.html`
+2. 解析 HTML 提取：`dg="1"`=单关可购 / `dg="0"`=只能串关 / `rq`=让球数 / 赔率数值
+3. 如果抓取失败，用 autoglm-websearch 搜索 `竞彩足球 X月X日 单关 赔率`，但必须标注「自搜索，未经验证」
+4. **赔率、单关、让球数必须与抓取结果一致，不得自行编造**
 
 ### 输出格式 / Output Format
 
