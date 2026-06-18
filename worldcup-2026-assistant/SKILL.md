@@ -399,12 +399,19 @@ J组：
 ### 体彩基础知识 / Sports Lottery Basics
 
 - **体彩 / Tǐcǎi** = 中国体育彩票（唯一合法足球竞猜渠道）/ China Sports Lottery (only legal channel for football betting)
-- **竞彩足球 / Jìngcǎi** = 体彩中的足球竞猜产品 / Football pools product within Tǐcǎi
-- **单关 / Dānguān** = 单独猜一场比赛的胜负/比分，风险低 / Bet on a single match, lower risk
-- **串关/过关 / Chuànguān** = 猜多场比赛，全对才赢，赔率累乘，收益高但难度大 / Parlay: all matches must win, odds multiply, high reward but hard
-- **让球 / Ràngqiú** = 强队让弱队球，平衡双方实力差距 / Handicap: stronger team gives goal advantage
-- **比分 / Bǐfēn** = 猜具体比分，赔率最高 / Correct score bet, highest odds
-- **总进球 / Zǒng Jìnqiú** = 猜比赛总进球数 / Total goals over/under
+- **竞彩足球 / Jìngcǎi** = 体彩中的足球竞猜产品，共5种玩法 / Football pools product within Tǐcǎi, 5 play types
+- **胜平负 / Shèngpíngfù** = 猜主队胜/平/负，最基础玩法 / Predict home win/draw/loss, most basic play
+- **让球胜平负 / Ràngqiú Shèngpíngfù** = 加上让球数的胜平负 / Handicap-adjusted win/draw/loss
+- **比分 / Bǐfēn** = 猜具体比分（仅90分钟+补时），31种选项，赔率最高 / Correct score bet, 31 options, highest odds
+- **总进球 / Zǒng Jìnqiú** = 猜比赛总进球数（0/1/2/3/4/5/6/7+球，共8个选项）/ Total goals (0-7+, 8 options)
+- **半全场胜平负 / Bànquánchǎng** = 猜上半场结果+全场结果的组合（9种：胜胜/胜平/胜负/平胜/平平/平负/负胜/负平/负负）/ Half-time + full-time result combination (9 options)
+- **单关 / Dānguān** = 单独买1场比赛 / Bet on a single match
+- **串关/过关 / Chuànguān** = 猜多场比赛，全对才赢，赔率累乘 / Parlay: all must win, odds multiply
+- **混合过关 / Hùnhé Guòguān** = 同一场比赛选不同玩法串联 / Mixed parlay across different play types
+
+**⏰ 关键规则 / Critical Rule**
+所有竞彩足球玩法（胜平负、让球、比分、总进球、半全场）一律**只算90分钟+伤停补时**，淘汰赛也一样！加时赛和点球均不计入。如需猜冠军/晋级方，需专门的"冠军竞猜"玩法
+ALL jingcai plays only count 90 min + stoppage time, including knockouts. Extra time and penalties excluded for ALL play types
 
 ### 单关与串关详解 / Single Match vs Parlay Details
 
@@ -416,15 +423,22 @@ J组：
 串关 = 同时猜2场以上，全对才赢，赔率相乘。如2串1 = 猜2场全对，赔率=场1赔率×场2赔率
 串关 = Bet on 2+ matches, all must win, odds multiply. E.g. 2-match parlay: odds = match1 × match2
 
-**⚠️ 不是所有比赛都开单关 / Not All Matches Offer Single Bet**
-- 体彩中心决定哪些场开单关，不是自动全开
-- 体彩中心 decides which matches offer single bet, not all automatically available
-- **强弱悬殊场通常不开单关**：赔率太低（如1.10-1.22），买100才赚十几块，体彩不会开
-- Strong vs weak matches rarely offer single bet: odds too low, not worth offering
+**⚠️ 单关规则（重要） / Single Bet Rules (Important)**
+**比分、总进球、半全场**：天然支持单场投注，可以单独买1场
+**胜平负、让球胜平负**：默认至少2串1，只有体彩中心指定的"单关场次"才能单独买
+- Correct score, total goals, half/full: single match bet always supported
+- Win/draw/loss, handicap: need at least 2-match parlay unless match is designated as "单关"
+
+体彩中心决定哪些场开胜平负单关，不是自动全开
+- **强弱悬殊场通常不开单关**：赔率太低（如1.10-1.22），买100才赚十几块
 - **豪门焦点战容易开单关**：关注度高、竞猜热度大
-- Marquee matches more likely to offer single bet: high attention, high betting interest
 - 有些场连胜平负玩法都不开售，只能买让球玩法
-- Some matches don't even offer win/draw/loss, only handicap betting
+
+**串关上限 / Parlay Limits**
+- 胜平负 / 让球胜平负：最多 8串1
+- 总进球：最多 6串1
+- 比分 / 半全场：传统过关 2串1、3串1；自由过关最多 4串1
+- 混合过关：最多 8串1（含比分/半全场时降至4串1）
 
 **单关查询方式 / How to Check Single Bet Availability**
 1. **足彩网 zgzcw.com**（推荐，web_fetch 可抓取）
@@ -478,9 +492,15 @@ E.g. 法国-1：如果实际2-0 → 让球后1-0 → 法国让球胜；如果2-1
    让球（德国-1）：2.05 / 3.50 / 3.10
    单关：✅ 可购
 
+🎯 比分推荐（以小博大，娱乐为主）
+• 法国 2-0 或 3-0（热门比分，赔率约 7-8 倍）
+• 德国 2-1（赔率约 10 倍，墨西哥有进球能力）
+• 💡 比分支持单场投注，也可多场串关（最多4串1），赔率叠加很可观
+
 🎰 串关建议 / Parlay Suggestions
 • 3串1：法国胜+巴西胜+德国胜 → 赔率约 3.86
 • 2串1稳健：法国胜+德国胜 → 赔率约 2.33
+• 比分2串1：法国2-0+德国2-1 → 赔率约 70+倍（小额娱乐）
 
 📌 今日看点 / Today's Highlights
 • 法国vs塞内加尔：实力差距最大，最稳选择
@@ -495,6 +515,10 @@ E.g. 法国-1：如果实际2-0 → 让球后1-0 → 法国让球胜；如果2-1
 - **胜平负未开售 / Win/Draw/Loss Not Available**：强弱悬殊场可能连胜平负都不开售，只能买让球玩法
 - **销售时间 / Sales Hours**：工作日和周末不同，注意截止时间
 - **让球数 / Handicap Lines**：根据双方实力差距设定，注意让球后赔率变化
+- **比分玩法 / Correct Score**：31种比分选项（主队胜13种、平5种、主队负13种，含"胜其他""平其他""负其他"）。**支持单场投注**。赔率最高但命中率低，属于"以小博大"娱乐型，推荐时占比要小，点到为止
+- **半全场胜平负 / Half-Full**：9种组合（上半场胜平负 × 全场胜平负），赔率仅次于比分，同样支持单场投注
+- **总进球 / Total Goals**：8个选项（0-7+球），支持单场投注
+- **⏰ 重要规则 / Important Rule**：所有竞彩足球标准玩法（胜平负、让球、比分、总进球）一律**只算90分钟+伤停补时**，淘汰赛也一样！加时赛和点球均不计入。如需预测冠军/晋级方，需专门的"冠军竞猜"玩法，不是普通胜平负
 - **赔率来源 / Odds Source**：必须从中国体彩渠道获取（zgzcw.com等），不用国际盘口作为体彩赔率
 - **只推荐中国体彩合法渠道 / Legal Channel Only**：不提及任何境外博彩平台
 
@@ -621,3 +645,108 @@ Groups A-L, 4 teams each, 48 teams total. Top 2 from each group + 8 best third-p
 
 具体分组数据在首次查询时实时获取并缓存至 `worldcup-data/groups.json`。
 Group data will be fetched on first query and cached to `worldcup-data/groups.json`.
+
+## 投注记录追踪 / Betting Ledger
+
+### 本地文件
+
+所有预测、推荐、体彩购买记录和结算结果，持久化记录在：
+
+```
+${workspace}/worldcup-data/betting-ledger.json
+```
+
+### 数据结构
+
+```json
+{
+  "meta": {
+    "lastUpdated": "2026-06-18T09:50:00+08:00",
+    "owner": "张子涵"
+  },
+  "entries": [
+    {
+      "date": "2026-06-17",
+      "round": "小组赛第1轮",
+      "predictions": [
+        {
+          "match": "英格兰 vs 克罗地亚",
+          "prediction": "英格兰胜",
+          "confidence": "中高",
+          "predictedScore": "2-1 或 1-0",
+          "actualScore": "4-2",
+          "result": "命中"
+        }
+      ],
+      "bets": [
+        {
+          "betId": 1,
+          "type": "单关",
+          "selection": "英格兰胜",
+          "odds": 1.53,
+          "stake": 200,
+          "potentialReturn": 306,
+          "actualReturn": 306,
+          "status": "已结算-中"
+        },
+        {
+          "betId": 2,
+          "type": "2串1",
+          "selection": "英格兰胜 + 哥伦比亚胜",
+          "odds": 1.90,
+          "stake": 150,
+          "potentialReturn": 285,
+          "actualReturn": null,
+          "status": "待结算"
+        },
+        {
+          "betId": 3,
+          "type": "单关",
+          "selection": "加纳vs巴拿马 平",
+          "odds": 3.40,
+          "stake": 50,
+          "potentialReturn": 170,
+          "actualReturn": 0,
+          "status": "已结算-未中"
+        }
+      ],
+      "dailySummary": {
+        "totalStake": 400,
+        "totalReturn": 306,
+        "netProfit": -94,
+        "pendingBets": 1,
+        "note": "英格兰串关等哥伦比亚"
+      }
+    }
+  ],
+  "lifetime": {
+    "totalStake": 400,
+    "totalReturn": 306,
+    "netProfit": -94,
+    "pendingStake": 150,
+    "winRate": "1/2 已结算"
+  }
+}
+```
+
+### 记录规则
+
+1. **每次输出预测/推荐时**：同步写入 `betting-ledger.json` 的 `predictions`
+2. **每次输出体彩选购指南时**：将推荐方案写入 `predictions`（标记为推荐，非实际购买）
+3. **用户确认购买后**：将实际购买方案写入 `bets`，包含金额、赔率、预期回报
+4. **比赛结束后**：更新 `actualScore` 和 `actualReturn`，计算结算结果
+5. **每日汇总**：更新 `dailySummary`（投入、收回、净盈亏、待结算）
+6. **全局统计**：更新 `lifetime`（累计投入、收回、净盈亏、胜率）
+
+### 结算状态
+
+- `待结算`：比赛未开始或未出结果
+- `已结算-中`：命中
+- `已结算-未中`：未命中
+- `已结算-退款`：比赛取消等特殊情况
+
+### 输出要求
+
+- 每次用户询问战绩/盈亏时，从 `betting-ledger.json` 读取并展示完整记录
+- 比赛结果出来后，**主动**更新结算状态并通知用户盈亏
+- 展示盈亏时必须包含本金计算：`净盈亏 = 总收回 - 总投入`，不要遗漏本金
