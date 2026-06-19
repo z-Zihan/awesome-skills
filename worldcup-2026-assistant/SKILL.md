@@ -567,6 +567,19 @@ After outputting lottery guide or when user mentions their bet plan, MUST valida
 6. **互斥检查**：同一场比赛的多注之间不能买互斥结果（如同场平 vs 同场胜，必有一个死）。新增方案时必须检查是否与已有方案在同一场上有互斥投注
 7. 输出推荐方案时，同样校验：确保推荐的每注都能实际出票，玩法真实可购，无互斥冲突
 
+### 📡 实时比分查询 / Live Score Query
+
+**用户问比赛结果时，不能只依赖 autoglm-websearch 搜索（搜索索引有延迟，刚结束的比赛可能搜不到）。必须直接抓取实时比分页面！**
+When user asks for match results, do NOT rely solely on web search (search index has delay). MUST fetch live score pages directly!
+
+**查询策略 / Query Strategy（按优先级）：**
+1. **ESPN 直接抓取**：`curl -s "https://www.espn.com/soccer/match/_/gameId/{id}" | grep -oE '"score":"[^"]*"'`
+   - 从 `"score":"X" 和 "score":"Y"` 获取主客队比分
+2. **FIFA 官网**：`curl -s "https://www.fifa.com/en/match-centre/match/17/..."`
+3. **81tiyu 比分直播**：`curl -s "https://www.81tiyu.com/TV/bf.aspx?id={id}"`
+4. **最后才用 autoglm-websearch**：搜索「X vs Y 比分 全场比赛结果」，但必须标注「搜索结果可能有延迟」
+5. **如果 autoglm-websearch 搜不到比分 → 立刻切换到直接抓取 ESPN/FIFA 页面，不准空手返回！**
+
 ## 数据源实测与优先级 / Data Sources & Priority
 
 ### 可用数据源 / Available Data Sources
