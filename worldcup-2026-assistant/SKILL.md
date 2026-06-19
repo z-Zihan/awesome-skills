@@ -478,6 +478,22 @@ MUST fetch live data from zgzcw.com before outputting any lottery guide or predi
 4. 如果抓取失败，用 autoglm-websearch 搜索 `竞彩足球 X月X日 单关 赔率`，但必须标注「自搜索，未经验证」
 5. **赔率、单关、让球数、玩法开售状态必须与抓取结果一致，不得自行编造**
 
+### 🔴 解析防错规则 / Parsing Anti-Error Rule
+
+**zgzcw.com 的 HTML 中，每场比赛行内包含多个玩法的赔率数据（胜平负、让球、比分、总进球、半全场），必须严格区分，禁止混用！**
+The HTML row for each match contains odds for MULTIPLE play types. Must separate them strictly, NEVER mix values from different play types!
+
+**常见错误 / Common Mistake：**
+- ❌ 把比分玩法（22.76 等高赔值）当作让球赔率 → 导致预测回报虚高
+- ❌ 把半全场数值混入胜平负
+
+**正确做法 / Correct Approach：**
+1. 每场比赛的前 3 个数值（A/B/C）是**胜平负**（主胜/平/客胜）
+2. 接着 3 个数值（D/E/F）是**让球胜平负**（让胜/让平/让负）
+3. 后续数值是比分/半全场/总进球，只在用户明确问这些玩法时才使用
+4. **数值校验**：让球赔率应合理（-2 让球胜通常 1.5~2.5，不可能出现 20+）。如发现异常高值，一定是取错了玩法列！
+5. **用户出票后以票面为准**：如果用户发了实际彩票照片，票面上的赔率 > 一切抓取数据。**立即以票面数据覆盖账本！**
+
 ### 输出格式 / Output Format
 
 ```
