@@ -574,11 +574,16 @@ When user asks for match results, do NOT rely solely on web search (search index
 
 **查询策略 / Query Strategy（按优先级）：**
 1. **ESPN 直接抓取**：`curl -s "https://www.espn.com/soccer/match/_/gameId/{id}" | grep -oE '"score":"[^"]*"'`
-   - 从 `"score":"X" 和 "score":"Y"` 获取主客队比分
+   - 从 `"score":"X" 和 "score":"Y"` 获取主客队比分。**抓到的比分就是当前实时比分，不要怀疑！**
 2. **FIFA 官网**：`curl -s "https://www.fifa.com/en/match-centre/match/17/..."`
 3. **81tiyu 比分直播**：`curl -s "https://www.81tiyu.com/TV/bf.aspx?id={id}"`
 4. **最后才用 autoglm-websearch**：搜索「X vs Y 比分 全场比赛结果」，但必须标注「搜索结果可能有延迟」
 5. **如果 autoglm-websearch 搜不到比分 → 立刻切换到直接抓取 ESPN/FIFA 页面，不准空手返回！**
+
+**比分展示规则 / Score Display Rule：**
+- **比赛进行中（未完场）**：必须明确标注「🔴 进行中」+ 当前实时比分 + 大致时间（如"下半场 65分钟"）
+- **比赛已结束（完场）**：标注「✅ 完场」+ 最终比分
+- **抓到比分就是对的**：ESPN/FIFA 直接抓取的比分就是实时数据。不要因为后续搜索没找到而怀疑、推翻、否定之前已经抓到的正确比分！第一次抓到就认，不用反复验证
 
 ## 数据源实测与优先级 / Data Sources & Priority
 
