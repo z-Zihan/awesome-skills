@@ -374,6 +374,34 @@ J组：
 - **中低 / Medium-Low**：数据面存在矛盾，多维度指向不一致
 - **低 / Low**：信息不足或双方实力过于接近，难以判断
 
+### 预测防错指南 / Prediction Anti-Patterns
+
+> 以下为实际踩坑总结，每次预测前必须过一遍 / Real mistakes learned, review before every prediction
+
+**❌ 坑1：只看首轮比分，不挖深层原因 / Pitfall #1: First-Round Score Blindness**
+- 首轮一场比分不能代表球队真实水平
+- 必须查：对手实力、该队近期5+场战绩、预选赛表现
+- 案例：土耳其首轮1-1平澳大利亚 ≠ 实力碾压巴拉圭。巴拉圭南美预选出线，硬仗经验远胜土耳其
+
+**❌ 坑2：忽略大洲预选赛背景 / Pitfall #2: Ignoring Continental Qualifying**
+- 南美预选赛（CONMEBOL）强度远超亚洲/非洲/中北美
+- 欧洲球队在欧洲杯/欧国联的表现 vs 世界杯预选赛的含金量不同
+- 南美球队即使 FIFA 排名低，大赛经验往往不输欧洲二线队
+
+**❌ 坑3：FIFA排名接近时掉以轻心 / Pitfall #3: Close Rankings Blindness**
+- FIFA 排名差 10 名以内 → 不能简单判强弱
+- 必须额外查：近期对手质量、主客场因素、核心球员伤病
+
+**❌ 坑4：赔率低就以为稳 / Pitfall #4: Low Odds ≠ Safe Bet**
+- 体彩赔率反映市场预期，不是客观胜负概率
+- 低赔翻车常有：防守型弱队摆大巴、强队轮换、裁判因素
+
+**✅ 正确做法 / Correct Approach：**
+1. 每场预测至少检查 3 个维度（实力差 + 近期状态 + 大洲背景）
+2. 对不熟悉的球队（FIFA 排名 30+），额外搜一轮该队近期战绩和预选赛历程
+3. 赔率差异大（>2.0 vs <1.8）≠ 稳赢，要用 autoglm-websearch 搜"XX队 近期状态"交叉验证
+4. 预测中明确写风险点，不打包票
+
 ## 功能四：体彩选购指南 / Feature 4: Sports Lottery Guide
 
 ### 触发场景 / Trigger Scenarios
