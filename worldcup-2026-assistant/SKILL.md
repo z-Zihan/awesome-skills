@@ -636,20 +636,31 @@ When user asks for match results, do NOT rely solely on web search (search index
 - **球队状态**：TheSportsDB API（近期战绩）→ autoglm-websearch（伤病/状态新闻）
 - **体彩规则**：新浪体育 → autoglm-websearch
 
-### autoglm-websearch 手动调用模板 / Manual curl Template
+### autoglm-websearch 调用方式 / How to Call autoglm-websearch
 
+**首选 / Primary**：直接运行修复后的脚本（自动适配正式/测试环境域名）
+```bash
+python3 ~/.openclaw-autoclaw/skills/autoglm-websearch/websearch.py "搜索关键词"
+```
+
+**手动 curl 模板 / Manual curl Template**（仅在脚本不可用时使用）：
 ```bash
 TOKEN=$(curl -s http://127.0.0.1:18432/get_token)
 TIMESTAMP=$(date +%s)
-SIGN=$(echo -n "100003&${TIMESTAMP}&38d2391985e2369a5fb8227d8e6cd5e5" | md5)
-curl -s -X POST "${AUTOGLM_DOMAIN:-https://autoglm-api.zhipuai.cn}/agentdr/v1/assistant/skills/web-search" \
+SIGN=$(python3 -c "
+import hashlib
+print(hashlib.md5(f'100003&${TIMESTAMP}&38d2391985e2369a5fb8227d8e6cd5e5'.encode()).hexdigest())
+")
+curl -s -X POST "https://autoglm-api.zhipuai.cn/agentdr/v1/assistant/skills/web-search" \
+  -H "Authorization: ${TOKEN}" \
   -H "Content-Type: application/json" \
-  -H "Authorization: $TOKEN" \
   -H "X-Auth-Appid: 100003" \
-  -H "X-Auth-TimeStamp: $TIMESTAMP" \
-  -H "X-Auth-Sign: $SIGN" \
-  -d '{"queries": [{"query": "搜索关键词"}]}'
+  -H "X-Auth-TimeStamp: ${TIMESTAMP}" \
+  -H "X-Auth-Sign: ${SIGN}" \
+  -d "{\"queries\":[{\"query\":\"搜索关键词\"}]}"
 ```
+
+> ⚠️ **禁止通过 Python heredoc + `os.environ` 传递 token**：JWT 含特殊字符，通过 shell 环境变量传给 Python 时会损坏导致 410000。正确做法：① 直接用 shell curl；② 或先 `echo "$TOKEN" > /tmp/token.txt` 再让 Python 从文件读取
 
 常用搜索词：
 - 搜索赛程：`2026世界杯 赛程 6月XX日`
