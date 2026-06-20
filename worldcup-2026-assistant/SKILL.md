@@ -551,6 +551,10 @@ The HTML row for each match contains odds for MULTIPLE play types. Must separate
 
 ### 体彩查询要点 / Key Points for Lottery Queries
 
+- **最权威来源 / Most Authoritative**：`https://m.sporttery.cn/mjc/jsq/zqspf/`（中国体彩官方胜平负计算器），需用 autoglm-browser-agent 打开（JS 渲染），curl 不可用
+- **备用来源 / Backup**：`https://cp.zgzcw.com/lottery/jchtplayvsForJsp.action?lotteryId=47&type=jcmini`（足彩网），curl + 浏览器 UA 可抓 HTML，解析 dg/让球/赔率
+- ⚠️ 体彩官方页面一次只显示 2-3 场，需滚动查看全部比赛
+
 - **赔率 / Odds**：实时查询，体彩赔率会变化，以购买时为准
 - **单关信息 / Single Match Availability**：并非所有比赛都开单关，必须查询确认。查询优先级：autoglm-websearch > zgzcw.com(web_fetch，如可用) > 中国体彩APP
 - **胜平负未开售 / Win/Draw/Loss Not Available**：强弱悬殊场可能连胜平负都不开售，只能买让球玩法
@@ -603,6 +607,14 @@ When user asks for match results, do NOT rely solely on web search (search index
 
 ### 可用数据源 / Available Sources
 
+**✅ sporttery.cn（官方体彩赔率，最权威）/ Official Tǐcǎi Odds**
+- URL：`https://m.sporttery.cn/mjc/jsq/zqspf/`（胜平负计算器）
+- 方式：**autoglm-browser-agent**（JS 渲染页面，curl 不可用）
+- 数据：官方赔率（胜平负/让球/比分/总进球/半全场/混合过关）、单关标记
+- 适用：体彩赔率的**最权威来源**，赔率以购买时官方页面为准
+- ⚠️ 浏览器一次只显示 2-3 场比赛，需滚动查看全部；页面每 30 秒自动刷新赔率
+- 用法：`autoglm run --task "打开 https://m.sporttery.cn/mjc/jsq/zqspf/ ，等待页面加载，截图"`
+
 **✅ ESPN API（实时比分首选）**
 - 方式：`curl -s "https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/scoreboard"`
 - 返回：JSON，含 `name`（队名）、`score`（比分）、`status`（比赛状态/时钟）
@@ -622,10 +634,11 @@ When user asks for match results, do NOT rely solely on web search (search index
 - 数据：完整赛程表，北京时间
 - 适用：赛程验证的交叉来源
 
-**⚠️ zgzcw.com（体彩赔率/单关，curl 不可用）**
-- `cp.zgzcw.com` 被 CloudWAF 拦截，curl 直接访问会返回「访问被拦截」
-- **替代方案**：优先用 autoglm-websearch 搜索 `竞彩足球 X月X日 单关 赔率`，或尝试 web_fetch
-- 如抓取成功，解析规则同下（dg/让球/赔率分离）
+**⚠️ zgzcw.com（体彩赔率/单关，备用）/ Backup Lottery Source**
+- URL：`https://cp.zgzcw.com/lottery/jchtplayvsForJsp.action?lotteryId=47&type=jcmini`
+- 方式：curl + 浏览器 UA 可抓取 HTML（有时被 CloudWAF 拦截）
+- 数据：胜平负/让球赔率、dg 单关标记、让球数
+- 适用：sporttery 不可用时的赔率备选；zgzcw 数据与官方一致
 
 **✅ TheSportsDB API（球队历史数据）**
 - 方式：`web_fetch https://www.thesportsdb.com/api/v1/json/3/<endpoint>`
@@ -660,7 +673,7 @@ When user asks for match results, do NOT rely solely on web search (search index
 
 - **实时比分**：ESPN API → autoglm-websearch → 81tiyu
 - **赛程**：autoglm-websearch → qiumiwu.com 交叉验证 → 缓存
-- **体彩赔率/单关**：autoglm-websearch 搜竞彩信息（主要，以国内为准）→ zgzcw.com web_fetch（如可用）
+- **体彩赔率/单关（最权威）**：sporttery.cn（autoglm-browser-agent）→ zgzcw.com（curl 备选）→ autoglm-websearch
 - **球队状态**：TheSportsDB API（近期战绩）→ autoglm-websearch（伤病/状态新闻）
 - **体彩规则**：新浪体育 → autoglm-websearch
 
