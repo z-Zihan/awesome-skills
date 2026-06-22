@@ -1,6 +1,6 @@
 ---
 name: worldcup-2026-assistant
-version: "1.0.0"
+version: "1.1.0"
 homepage: https://github.com/z-Zihan/awesome-skills
 description: >
   2026 美加墨世界杯专属助手。提供赛程查询、球队实力分析、比赛预测、体彩选购指南四大功能。
