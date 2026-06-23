@@ -1,6 +1,6 @@
 ---
 name: worldcup-2026-assistant
-version: "1.1.0"
+version: "1.2.0"
 homepage: https://github.com/z-Zihan/awesome-skills
 description: >
   2026 美加墨世界杯专属助手。提供赛程查询、球队实力分析、比赛预测、体彩选购指南四大功能。
@@ -342,12 +342,21 @@ J组：
 🔮 比赛预测：🇫🇷 法国 vs 🇸🇳 塞内加尔
 
 👉 法国胜（置信度：高）| 参考 2-0 或 3-1
+🎲 爆冷场景：塞内加尔 1-0（触发条件：法国红牌+姆巴佩伤退）
 
 📊 分析依据
-• 法国FIFA排名#2 vs 塞内加尔#17，硬实力碾压
-• 姆巴佩+登贝莱+奥利塞前场三叉戟，速度终结俱佳
-• 塞内加尔缺少马内（伤病），反击威胁大减
-• 历史交锋2次，法国全胜
+• 【硬实力】法国FIFA排名#2 vs 塞内加尔#17，阵容深度碾压。法国433攻击型 vs 塞内加尔4231防守反击
+• 【近期状态】法国近5场4胜1平，塞内加尔近5场3胜1平1负
+• 【历史交锋】2次交手法国全胜
+• 【核心球员】姆巴佩+登贝莱+奥利塞前场三叉戟；塞内加尔缺少马内（伤病）。法国可能轮换部分主力
+• 【出线形势】法国首轮获胜，本场取胜即锁定小组第一；塞内加尔必须取分保出线希望
+• 【赔率市场】胜平负 1.50/4.35/6.85，市场高度看好法国
+
+📊 期望值分析
+• 法国胜：AI概率 80% × 赔率 1.50 - 1 = +20.0% 🟢正常投入
+• 平局：AI概率 15% × 赔率 4.35 - 1 = -34.8% ❌
+• 塞内加尔胜：AI概率 5% × 赔率 6.85 - 1 = -65.8% ❌
+• 庄家抽水：11.7%
 
 💡 赔率参考（中国体彩竞彩）
 • 胜平负：1.50 / 4.35 / 6.85
@@ -362,29 +371,65 @@ J组：
 
 **1.** 03:00 🇫🇷 法国 vs 🇸🇳 塞内加尔
 👉 法国胜（高）| 参考 2-0
+🎲 爆冷：1-1（触发：法国轮换+塞内加尔铁桶阵）
+📊 期望值：+20.0% 🟢
 
 **2.** 06:00 🇮🇶 伊拉克 vs 🇳🇴 挪威
 👉 挪威胜（高）| 参考 0-2
+🎲 爆冷：1-1（触发：哈兰德被盯死+伊拉克反击偷球）
+📊 期望值：+15.2% 🟢
 
 **3.** 09:00 🇦🇷 阿根廷 vs 🇩🇿 阿尔及利亚
 👉 阿根廷胜（高）| 参考 2-0
+🎲 爆冷：0-1（触发：阿根廷防线失误+阿尔及利亚反击）
+📊 期望值：+8.5% 🟡
 
 **4.** 12:00 🇦🇹 奥地利 vs 🇯🇴 约旦
 👉 奥地利胜（中高）| 参考 2-0
+🎲 爆冷：1-2（触发：约旦亚洲杯亚军韧性+奥地利轻敌）
+📊 期望值：+3.1% ⚠️观望
 
 📌 简评
 • 4场均为强弱对决，爆冷概率低
-• 最稳：阿根廷、法国
-• 留意：奥地利让球盘口风险，约旦亚洲杯亚军有韧性
+• 最稳：法国（期望+20%）、挪威（期望+15%）
+• 留意：奥地利期望仅+3%，不建议单买
 ```
 
 ### 预测维度 / Prediction Dimensions
 
-1. **硬实力差 / Strength Gap**（权重 30%）：FIFA排名 + 阵容深度对比
-2. **近期状态 / Recent Form**（权重 25%）：双方近5-10场表现
-3. **历史交锋 / Head-to-Head**（权重 15%）：过往对战记录
-4. **核心球员状态 / Key Player Status**（权重 20%）：关键球员伤病/停赛/状态
-5. **赔率市场 / Odds Market**（权重 10%）：中国体彩竞彩赔率反映的市场预期。淘汰赛阶段可将本维度权重提升至20%，相应调低历史交锋
+1. **硬实力差 / Strength Gap**（权重 35%）：FIFA排名 + 阵容深度对比。参考两队过往常规阵容、本场首发名单，点评人员配置与实力差距、球风习惯 / FIFA ranking + squad depth, reference past lineups and starting XI, analyze personnel gap and playing styles
+2. **近期状态 / Recent Form**（权重 20%）：双方近5-10场表现。结合近期世预赛/洲际赛事的赛场表现、竞技状态、战术风格 / Last 5-10 matches, including qualifier/continental tournament form and tactical style
+3. **历史交锋 / Head-to-Head**（权重 5%）：过往对战记录 / Past meeting records
+4. **核心球员状态 / Key Player Status**（权重 20%）：关键球员伤病/停赛/状态。分析是否存在轮换练兵、保留主力、战术试探等情况 / Key player injuries/suspensions/form. Analyze potential rotation, resting key players, tactical probing
+5. **赔率市场 / Odds Market**（权重 5%）：中国体彩竞彩赔率反映的市场预期。淘汰赛阶段可将本维度权重提升至10%，相应调低历史交锋 / Market expectation reflected in Chinese sports lottery odds
+6. **🆕 出线形势与战意 / Group Standings & Motivation**（权重 10%）：依据小组赛积分规则，逐一拆解：取胜、战平、落败分别对球队后续赛程、小组排名及出线形势的连锁影响。判断球队战意——已锁定出线可能轮换、背水一战战意拉满、战术试探等 / Analyze group standings implications: how win/draw/loss affects subsequent schedule, group ranking, and advancement. Judge team motivation — rotation if already qualified, all-out if must-win
+7. **🆕 爆冷场景分析 / Upset Scenario Analysis**（权重 5%）：强制给出爆冷比分及触发条件。什么情况下弱队能赢？强队可能在什么环节翻车？爆冷触发因素：红牌、伤病、天气、裁判、战术相克等 / Mandatory upset score prediction with trigger conditions. What could cause an upset? Red cards, injuries, weather, tactical mismatch, etc.
+
+**淘汰赛阶段调整 / Knockout Stage Adjustment：**
+- 大赛基因（Big-Tournament DNA）权重提升至25%
+- 出线形势维度替换为「淘汰赛晋级压力」分析
+- 赔率市场权重提升至10%
+
+### AI 概率估计 / AI Probability Estimation
+
+预测时需给出每个选项（胜/平/负）的 AI 估计概率，用于期望值计算：
+- 置信度「高」→ 胜方概率 70%+，对手 <10%
+- 置信度「中高」→ 胜方概率 55-70%
+- 置信度「中」→ 胜方概率 40-55%，平局概率提升至 25-30%
+- 置信度「中低」→ 胜方概率 30-40%
+- 置信度「低」→ 各项概率接近，不建议投注
+- 三项概率之和必须 = 100%（不是赔率反抽水的 112%，而是去抽水后的真实估计）
+- 概率估计依据来自上述5个预测维度的综合研判
+
+### 期望值过滤 / Expected Value Filter
+
+预测完成后，必须计算每个选项的期望值作为最终下注过滤：
+- **期望 = (AI概率 × 赔率) - 1**
+- 期望 < 0 → 标注 ❌，建议不买
+- 期望 0-5% → 标注 ⚠️，观望
+- 期望 > 5% → 标注 🟡，可轻仓
+- 期望 > 15% → 标注 🟢，正常投入
+- 详见 `LOTTERY-GUIDE.md` 的「期望值分析」章节
 
 ### 置信度等级 / Confidence Levels
 
