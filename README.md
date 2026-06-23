@@ -89,7 +89,11 @@
 
 **触发词**：世界杯 / 世界杯赛程 / 世界杯预测 / 世界杯分析 / 世界杯赔率 / 世界杯体彩 / worldcup / 美加墨 / 体彩指南 / 球队排名 / 竞彩 / 足彩
 
-### ✅ todo-list-promax — 个人待办事项系统
+### 🏠 renovation-143m — 143㎡专属装修助手
+
+基于固定户型（三室两厅两卫一厨一阳台改善型住宅）的长期装修决策助手。覆盖验房、风格研究、空间设计、收纳规划、水电灯光、家电材料、预算规划、避坑、AI生图模拟全流程。内置完整户型数据（13个空间尺寸估算+朝向分析）、25条避坑检查清单、小众实用设计库。所有分析绑定本户型，不提供泛通用建议。风格研究强制联网搜索，AI生图提示词必须包含户型约束。
+
+**触发词**：143装修 / 专属装修助手 / 装修规划 / 验房 / 装修风格 / 收纳设计 / 水电规划 / 灯光规划 / 家电规划 / 材料选择 / 预算规划 / 装修避坑 / AI效果图
 
 永久不丢失的待办事项管理。自动从聊天中捕获待办（文字/图片/附件），智能解析时间与优先级，每日晚上 9 点主动推送未完成提醒。支持四级优先级（P0-P3）、多种自然语言触发、完成/删除/修改操作。
 
@@ -150,6 +154,7 @@ openclaw skills install rednote-creator
 openclaw skills install english-assessment
 openclaw skills install worldcup-2026-assistant
 openclaw skills install todo-list-promax
+openclaw skills install renovation-143m
 openclaw skills update --all
 ```
 
@@ -306,7 +311,7 @@ Dedicated assistant for the 2026 FIFA World Cup. Four core features: schedule qu
 
 **Triggers**: 世界杯 / World Cup / worldcup / 美加墨 / 世界杯赛程 / 世界杯预测 / 世界杯分析 / 世界杯赔率 / 世界杯体彩 / 体彩指南 / 竞彩 / 足彩
 
-### ✅ todo-list-promax — Personal Todo System
+### ✅ todo-list-promax — 个人待办事项系统
 
 Permanent, loss-proof todo management. Auto-captures todos from chat (text/image/attachment), parses time & priority, pushes unfinished reminders daily at 9 PM. Supports 4 priority levels (P0-P3), natural language triggers, and complete/delete/modify operations.
 
@@ -367,6 +372,7 @@ openclaw skills install rednote-creator
 openclaw skills install english-assessment
 openclaw skills install worldcup-2026-assistant
 openclaw skills install todo-list-promax
+openclaw skills install renovation-143m
 openclaw skills update --all
 ```
 
