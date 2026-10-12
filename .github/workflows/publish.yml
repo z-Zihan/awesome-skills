@@ -40,7 +40,7 @@ jobs:
           else
             # Branch push: only publish skills with changed SKILL.md
             if git rev-parse HEAD~1 >/dev/null 2>&1; then
-              CHANGED_FILES=$(git diff --name-only HEAD~1 HEAD -- '**/SKILL.md')
+              CHANGED_FILES=$(git diff --name-only --diff-filter=d HEAD~1 HEAD -- '**/SKILL.md')
             else
               # First commit or shallow clone fallback: check all SKILL.md
               CHANGED_FILES=$(git ls-files '**/SKILL.md')

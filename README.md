@@ -83,12 +83,6 @@
 
 **触发词**：开始英语测评 / 英语测试 / 测一下英语 / 快速测评 / 错题重测 / 看错题
 
-### 🏆 worldcup-2026-assistant — 2026美加墨世界杯助手
-
-2026 FIFA World Cup专属助手。四大核心功能：赛程查询（本地缓存+验证）、球队硬实力分析（历史数据+实时状态）、比赛预测（多维数据+置信度）、体彩选购指南（赔率+单关串关建议）。所有输出适配飞书消息格式，静态数据缓存至 `worldcup-data/`，动态数据实时查询。
-
-**触发词**：世界杯 / 世界杯赛程 / 世界杯预测 / 世界杯分析 / 世界杯赔率 / 世界杯体彩 / worldcup / 美加墨 / 体彩指南 / 球队排名 / 竞彩 / 足彩
-
 ### 🏠 renovation-143m — 143㎡专属装修助手
 
 基于固定户型（三室两厅两卫一厨一阳台改善型住宅）的长期装修决策助手。覆盖验房、风格研究、空间设计、收纳规划、水电灯光、家电材料、预算规划、避坑、AI生图模拟全流程。内置完整户型数据（13个空间尺寸估算+朝向分析）、25条避坑检查清单、小众实用设计库。所有分析绑定本户型，不提供泛通用建议。风格研究强制联网搜索，AI生图提示词必须包含户型约束。
@@ -152,7 +146,6 @@ openclaw skills install skill-review-pro
 openclaw skills install dev-mentor
 openclaw skills install rednote-creator
 openclaw skills install english-assessment
-openclaw skills install worldcup-2026-assistant
 openclaw skills install todo-list-promax
 openclaw skills install renovation-143m
 openclaw skills update --all
@@ -305,12 +298,6 @@ Helps experienced developers learn unfamiliar domains by building a full project
 
 **Triggers**: learn backend / learn Rust / build project from scratch / teach me to code
 
-### 🏆 worldcup-2026-assistant — 2026 FIFA World Cup Assistant
-
-Dedicated assistant for the 2026 FIFA World Cup. Four core features: schedule query (local cache + verification), team strength analysis (historical data + live player status), match prediction (multi-dimensional data + confidence levels), sports lottery guide (odds + single/parlay suggestions). All output formatted for Feishu messages. Static data cached in `worldcup-data/`, dynamic data queried live.
-
-**Triggers**: 世界杯 / World Cup / worldcup / 美加墨 / 世界杯赛程 / 世界杯预测 / 世界杯分析 / 世界杯赔率 / 世界杯体彩 / 体彩指南 / 竞彩 / 足彩
-
 ### ✅ todo-list-promax — 个人待办事项系统
 
 Permanent, loss-proof todo management. Auto-captures todos from chat (text/image/attachment), parses time & priority, pushes unfinished reminders daily at 9 PM. Supports 4 priority levels (P0-P3), natural language triggers, and complete/delete/modify operations.
@@ -370,7 +357,6 @@ openclaw skills install skill-review-pro
 openclaw skills install dev-mentor
 openclaw skills install rednote-creator
 openclaw skills install english-assessment
-openclaw skills install worldcup-2026-assistant
 openclaw skills install todo-list-promax
 openclaw skills install renovation-143m
 openclaw skills update --all
