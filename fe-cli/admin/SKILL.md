@@ -43,7 +43,7 @@ bun add antd @ant-design/icons @ant-design/v5-patch-for-react-19 react-router-do
 
 **React (shadcn/ui):**
 ```
-bun add react-router-dom dayjs lucide-react && npx shadcn@latest init
+bun add react-router-dom dayjs lucide-react && bun add -d shadcn && bunx shadcn init
 ```
 
 **Vue (Element Plus):**
@@ -53,7 +53,7 @@ bun add element-plus @element-plus/icons-vue vue-router dayjs
 
 **Vue (shadcn-vue):**
 ```
-bun add vue-router dayjs lucide-vue-next && npx shadcn-vue@latest init
+bun add vue-router dayjs lucide-vue-next && bun add -d shadcn-vue && bunx shadcn-vue init
 ```
 
 Plus extras based on selections (zustand, pinia, i18n, charts, etc.)
@@ -283,7 +283,7 @@ export default function FormPage() {
 import { useRoutes } from 'react-router-dom';
 import { BrowserRouter } from 'react-router-dom';
 import { ConfigProvider } from 'antd';
-import zhCN from 'antd/locale/zh_CN';
+import zhCN from 'antd/locale/zh_CN'; // Locale 可配置：默认 zh_CN；非中文项目请替换为对应 locale（如 en_US）
 import AppProvider from '@/components/AppProvider';
 import { routes } from '@/config/routes';
 

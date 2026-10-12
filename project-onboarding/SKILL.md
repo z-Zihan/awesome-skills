@@ -1,6 +1,6 @@
 ---
 name: project-onboarding
-version: "2.0.1"
+version: "2.0.2"
 homepage: https://github.com/z-Zihan/awesome-skills
 description: >
   帮助有经验的开发者快速接手陌生项目，支持前端 Web、后端服务、
@@ -9,6 +9,7 @@ description: >
   触发词：接手项目, 项目上手, 快速上手, 新人接手, 项目入门, onboarding,
   如何开发, 怎么启动项目, 项目怎么跑, 开发流程, onboarding guide,
   how to onboard, project handover, developer quick start.
+  激活条件：需结合"具体项目"语境（用户提供了项目路径或明确指向某个代码仓库）；仅出现单个泛词（如"如何开发""开发流程"）时不触发。
   NOT for: generating long architecture reports, code analysis without dev context,
   beginner programming tutorials, onboarding for interns.
 ---
@@ -129,6 +130,13 @@ description: >
 ## 执行工具指引
 
 本 Skill 的每个分析步骤都应配合具体工具执行，而非凭空"编"输出：
+
+### 路径安全规则（强制）
+
+- **路径校验**：`{project}` 必须是用户明确提供且确认的本机项目目录；使用前解析为绝对路径（realpath）并确认目录存在，拒绝包含 `;` `|` `$` 反引号等 shell 元字符的路径
+- **只读原则**：分析过程只执行只读命令（read / ls / find / head / cat 等）；禁止写入、删除、安装依赖、执行项目脚本或发起网络请求（用户明确要求除外）
+- **安全引用**：命令中的路径必须整体加引号（如 `find "$PROJECT" ...`），不把未校验的用户输入直接拼进命令
+- **范围限定**：不跟随符号链接越出项目目录；不读取项目目录之外的文件（如 `~/.ssh`、凭据文件）
 
 ### 项目类型识别 — 执行动作
 
@@ -634,6 +642,7 @@ description: >
 
 如果用户只说了"帮我搞一下"或类似模糊请求，不要猜测或胡乱执行：
 1. 至少需要以下信息之一：**项目路径 / Git 仓库地址 / 已打开的工作目录**
+   - 优先请用户在本地打开项目目录；提供 Git 仓库地址时，仅在用户明确要求下克隆到**临时目录**做只读分析（克隆前确认来源可信，完成后清理），不做其他网络操作
 2. 询问："请问要分析哪个项目？请提供项目路径或仓库地址。"
 3. 如果用户提供了路径但项目为空或无法访问：明确告知并请求确认
 
@@ -750,5 +759,6 @@ Frontend Web · Backend Service · Desktop Client (Electron/Tauri) · Mini Progr
 - **Unclear request** → "Do you mean X or Y? Please confirm"
 
 ### Constraints
+- Path safety: `{project}` must be a user-provided local path (validated, read-only analysis commands only, no network access, no paths outside the project)
 - NOT for: beginners, interns, basic concept explanations, pure code analysis, lengthy architecture reports
 - MUST: focus on dev efficiency, stage-based output, engineering practices, multi-round progressive exploration

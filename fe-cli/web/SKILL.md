@@ -45,8 +45,8 @@ Then `cd <project-name>` and install additional dependencies based on selections
 | Selection | Packages |
 |---|---|
 | Tailwind CSS | `tailwindcss @tailwindcss/vite` |
-| shadcn/ui (React) | `npx shadcn@latest init` → adds components on demand. Requires Tailwind CSS. Include `lucide-react` |
-| shadcn-vue (Vue) | `npx shadcn-vue@latest init` → adds components on demand. Requires Tailwind CSS. Include `lucide-vue-next` |
+| shadcn/ui (React) | `bun add -d shadcn && bunx shadcn init`（固定版本到 devDependencies）→ adds components on demand. Requires Tailwind CSS. Include `lucide-react` |
+| shadcn-vue (Vue) | `bun add -d shadcn-vue && bunx shadcn-vue init`（固定版本）→ adds components on demand. Requires Tailwind CSS. Include `lucide-vue-next` |
 | Ant Design | `antd @ant-design/icons @ant-design/v5-patch-for-react-19` |
 | Element Plus | `element-plus @element-plus/icons-vue` |
 | MUI | `@mui/material @emotion/react @emotion/styled @mui/icons-material` |

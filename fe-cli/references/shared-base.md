@@ -810,7 +810,7 @@ export const logger = new Logger();
 
 ## src/services/log-export.ts — Log Export & Submit
 
-Utility for exporting logs as files or submitting them to a configurable endpoint.
+Utility for exporting logs as files. Log submission is disabled by default and only runs against a user-configured trusted endpoint with redaction applied.
 
 ```typescript
 import { logger } from './logger';
@@ -865,7 +865,9 @@ export function exportLogsAsFile(format: ExportFormat = 'text', filename?: strin
 /**
  * Submit logs to a remote endpoint.
  *
- * ⚠️ PLACEHOLDER — destination and format TBD.
+ * ⚠️ PLACEHOLDER — destination and format TBD. DISABLED BY DEFAULT.
+ * Only enable after the user explicitly configures a trusted endpoint;
+ * redact credentials, secrets and personal data before any submission.
  * Possible targets:
  *   - Internal log aggregation service
  *   - Feishu webhook / bot message
