@@ -340,7 +340,7 @@ src/
 import { createApp } from 'vue';
 import { createPinia } from 'pinia';
 import ElementPlus from 'element-plus';
-import zhCn from 'element-plus/es/locale/lang/zh-cn';
+import zhCn from 'element-plus/es/locale/lang/zh-cn'; // Locale 可配置：默认 zh-cn；非中文项目请替换为对应语言（如 en）
 import 'element-plus/dist/index.css';
 import App from './App.vue';
 import router from '@/config/routes';

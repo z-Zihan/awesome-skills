@@ -1,6 +1,6 @@
 ---
 name: todo-list-promax
-version: "2.2.1"
+version: "2.2.2"
 description: >
   个人待办事项永久存储、智能分类与定时提醒系统。
   自动从聊天消息中捕获待办（文字/图片/附件），解析时间与优先级，每日晚上9点推送未完成提醒。
@@ -14,7 +14,7 @@ description: >
 
 ## 语言规则
 
-**检测用户使用的语言，全程使用同一语言输出。** 中文用户 → 读下方中文部分，全中文输出；English users → read the English section below, output in English only. 技术术语（JSON、ID 等）保留原文即可。
+**默认跟随用户使用的语言输出**；用户可随时指定其他语言（如"用英文回复"），以用户指定为准。中文用户 → 读下方中文部分；English users → read the English section below. 技术术语（JSON、ID 等）保留原文即可。
 
 ---
 
@@ -244,7 +244,7 @@ description: >
 - `completed_at`: 完成时间 ISO 8601，完成时填入
 - `deleted_at`: 删除时间 ISO 8601，删除时填入（用于附件 7 天清理判断）
 - `attachments`: `[{path, type}]` 附件列表
-- `source_message`: 原始消息内容（完整保留，永不修改，用于溯源与恢复）；仅在用户本人直接查询时按需展示，不在提醒推送或群聊/共享场景展示
+- `source_message`: 原始消息内容（完整保留，永不修改，用于溯源与恢复）；展示范围：用户本人的直接查询中可展示摘要级原文；提醒推送、群聊及共享场景一律不展示
 - `last_reminder_at`: 上次提醒时间 ISO 8601（用于降级补推）
 
 ## 数据与隐私

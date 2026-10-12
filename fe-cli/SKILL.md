@@ -1,6 +1,6 @@
 ---
 name: fe-cli
-version: "3.1.2"
+version: "3.1.3"
 homepage: https://github.com/z-Zihan/awesome-skills
 description: >
   前端项目脚手架 CLI。支持 React/Vue/Next.js/Nuxt.js/Astro/React Native + shadcn/Ant Design/MUI/Tailwind
@@ -139,7 +139,7 @@ project-name/
 │   ├── services/
 │   │   ├── request.ts           # fetch 请求封装（含拦截器）
 │   │   ├── logger.ts            # 结构化日志（分级、轮转、持久化）
-│   │   ├── log-export.ts        # 日志导出（下载 .log/.json）+ 上报（待定）
+│   │   ├── log-export.ts        # 日志导出（本地下载 .log/.json）
 │   │   └── api/
 │   │       └── index.ts         # API 接口定义
 │   ├── styles/
@@ -222,7 +222,7 @@ This file is for AI agents to quickly understand the project.
 - **响应式断点**：Mobile < 768px < Tablet < 1024px < Desktop
 - **网络库**：原生 fetch 封装（不用 axios），见 references/shared-base.md
 - **环境文件**：始终生成 `.env`、`.env.development`、`.env.test`、`.env.production`
-- **日志**：始终生成 `services/logger.ts` + `services/log-export.ts`。使用 `Logger.child("Module")` 模式。最大存储 5MB 自动清理。仅开发模式控制台输出。日志上报**默认关闭**（端点占位符，待定）；启用前必须配置可信端点并对日志脱敏（移除 token/密钥/个人信息）。
+- **日志**：始终生成 `services/logger.ts` + `services/log-export.ts`。使用 `Logger.child("Module")` 模式。最大存储 5MB 自动清理。仅开发模式控制台输出。日志仅本地导出（下载文件）；模板不包含远程日志上报能力。
 - **生成器版本固定**：shadcn / shadcn-vue 等脚手架 CLI 先安装为项目依赖（`bun add -d shadcn`）再用 `bunx shadcn init` 调用；禁止用 `npx xxx@latest` 直接执行未固定版本的远程代码
 - **Node 版本**：目标 Node 18+
 - **部署**：默认推荐 Vercel 部署（零配置），在项目生成后提供 `vercel` 初始化命令
@@ -297,7 +297,7 @@ This file is for AI agents to quickly understand the project.
 
 **fe-cli** is a unified entry point for scaffolding frontend projects. It detects the project type from user input and routes to one of 9 sub-skills: **web** (SPA), **admin** (dashboard/CRUD), **h5** (mobile), **electron** (desktop), **tauri** (lightweight desktop), **ssr** (Next.js/Nuxt), **miniapp** (WeChat Mini Program), **rn** (React Native), or **astro** (Astro/Gatsby/VitePress static site). Each sub-skill handles type-specific questions, file generation, and setup.
 
-**Key rules:** Default package manager is **bun** (fallback: pnpm); default CSS preprocessor is **Sass (SCSS)**; path alias `@/` → `src/`; native **fetch** wrapper (no axios); always generate `.env` / `.env.development` / `.env.test` / `.env.production`; always generate `services/logger.ts` + `services/log-export.ts`; target Node 18+; Vite handles TS transpilation (separate `typecheck` script), except Electron/Tauri main process needs `tsc -p tsconfig.electron.json`; default deployment: **Vercel**; chart libs: **Recharts** (lightweight) / **ECharts** (heavy); new UI libs: **shadcn/ui + Lucide** (React), **shadcn-vue + Vue Bits** (Vue), **Chakra UI**, **React Bits**; scaffold generators (shadcn/shadcn-vue) must be installed as pinned devDependencies (e.g. `bun add -d shadcn`) and run via `bunx`, never unpinned `npx @latest`; log submission is disabled by default and requires a user-configured trusted endpoint with redaction.
+**Key rules:** Default package manager is **bun** (fallback: pnpm); default CSS preprocessor is **Sass (SCSS)**; path alias `@/` → `src/`; native **fetch** wrapper (no axios); always generate `.env` / `.env.development` / `.env.test` / `.env.production`; always generate `services/logger.ts` + `services/log-export.ts`; target Node 18+; Vite handles TS transpilation (separate `typecheck` script), except Electron/Tauri main process needs `tsc -p tsconfig.electron.json`; default deployment: **Vercel**; chart libs: **Recharts** (lightweight) / **ECharts** (heavy); new UI libs: **shadcn/ui + Lucide** (React), **shadcn-vue + Vue Bits** (Vue), **Chakra UI**, **React Bits**; scaffold generators (shadcn/shadcn-vue) must be installed as pinned devDependencies (e.g. `bun add -d shadcn`) and run via `bunx`, never unpinned `npx @latest`; log export is local-only (no remote log submission capability).
 
 After type-specific files, generate the **shared common layer** (request utils, global styles, multi-env config, utilities, type declarations). Finally, generate `.ai/PROJECT.md` for AI-readability. Supports **existing project audit** against the same standards.
 

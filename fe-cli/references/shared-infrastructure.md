@@ -1204,7 +1204,7 @@ src/
 ├── services/
 │   ├── request.ts            # Fetch wrapper
 │   ├── logger.ts             # Structured logger
-│   ├── log-export.ts         # Log export & submit
+│   ├── log-export.ts         # Log export (local download)
 │   └── api/index.ts          # API endpoints
 ├── styles/
 │   ├── global.scss           # CSS variables + global styles

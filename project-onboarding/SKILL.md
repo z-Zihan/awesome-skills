@@ -1,6 +1,6 @@
 ---
 name: project-onboarding
-version: "2.0.2"
+version: "2.0.3"
 homepage: https://github.com/z-Zihan/awesome-skills
 description: >
   帮助有经验的开发者快速接手陌生项目，支持前端 Web、后端服务、
@@ -72,8 +72,9 @@ description: >
 
 ## 语言策略
 
-- 默认输出中文，同时提供英文版本
-- 中文优先
+- 跟随用户语言：用户用什么语言提问，就用什么语言输出（与文首「语言规则」保持一致）
+- 用户可随时指定输出语言（如"用英文输出"），以指定为准
+- 无法判断用户语言时，默认使用中文；检测到英文提问时用英文
 
 ## 核心原则
 
@@ -730,8 +731,7 @@ description: >
 
 # English Version
 
-> **This skill is written in Chinese.** For full details, please read the Chinese section above.
-> You can ask AI to translate the Chinese section if needed.
+> **Bilingual skill** — full spec is in Chinese above; this English reference covers the essentials, and the AI fully supports English interaction (see Language Rule at top).
 
 ## Summary
 
