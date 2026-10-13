@@ -1,6 +1,6 @@
 ---
 name: fe-cli
-version: "3.1.3"
+version: "3.1.4"
 homepage: https://github.com/z-Zihan/awesome-skills
 description: >
   前端项目脚手架 CLI。支持 React/Vue/Next.js/Nuxt.js/Astro/React Native + shadcn/Ant Design/MUI/Tailwind
@@ -10,7 +10,7 @@ description: >
   触发：用户要求创建新前端项目、初始化项目、搭建脚手架，
   或提到"新建前端项目"、"初始化项目"、"脚手架"、"创建 React/Vue 项目"。
   也可用于检查/审查已有前端项目的规范性。
-  激活条件：仅在用户明确要求创建/初始化项目或按本规范审查项目时激活；单纯的前端问题咨询不触发。
+  激活条件：仅在用户明确要求创建/初始化项目或按本规范审查项目时激活；单纯的前端问题咨询不触发。默认生成中文界面模板（面向中文项目），需要其他语言界面时告知 AI 即可。
 ---
 
 # fe-cli — 前端项目脚手架
@@ -223,7 +223,7 @@ This file is for AI agents to quickly understand the project.
 - **网络库**：原生 fetch 封装（不用 axios），见 references/shared-base.md
 - **环境文件**：始终生成 `.env`、`.env.development`、`.env.test`、`.env.production`
 - **日志**：始终生成 `services/logger.ts` + `services/log-export.ts`。使用 `Logger.child("Module")` 模式。最大存储 5MB 自动清理。仅开发模式控制台输出。日志仅本地导出（下载文件）；模板不包含远程日志上报能力。
-- **生成器版本固定**：shadcn / shadcn-vue 等脚手架 CLI 先安装为项目依赖（`bun add -d shadcn`）再用 `bunx shadcn init` 调用；禁止用 `npx xxx@latest` 直接执行未固定版本的远程代码
+- **生成器版本固定**：shadcn / shadcn-vue 等脚手架 CLI 先安装为项目依赖（`bun add -d shadcn`）再用 `bunx shadcn init` 调用；禁止执行不带版本号或 `@latest` 的远程包命令（依赖版本以 lockfile 为准）
 - **Node 版本**：目标 Node 18+
 - **部署**：默认推荐 Vercel 部署（零配置），在项目生成后提供 `vercel` 初始化命令
 - **图表库**：轻量场景推荐 Recharts，重场景用 ECharts

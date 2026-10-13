@@ -1,6 +1,6 @@
 ---
 name: project-onboarding
-version: "2.0.3"
+version: "2.0.4"
 homepage: https://github.com/z-Zihan/awesome-skills
 description: >
   帮助有经验的开发者快速接手陌生项目，支持前端 Web、后端服务、
@@ -74,7 +74,7 @@ description: >
 
 - 跟随用户语言：用户用什么语言提问，就用什么语言输出（与文首「语言规则」保持一致）
 - 用户可随时指定输出语言（如"用英文输出"），以指定为准
-- 无法判断用户语言时，默认使用中文；检测到英文提问时用英文
+- 无法判断用户语言时，默认使用中文（用户可指定任意默认语言）；检测到英文提问时用英文
 
 ## 核心原则
 
@@ -642,8 +642,9 @@ description: >
 ### 信息不足时
 
 如果用户只说了"帮我搞一下"或类似模糊请求，不要猜测或胡乱执行：
-1. 至少需要以下信息之一：**项目路径 / Git 仓库地址 / 已打开的工作目录**
-   - 优先请用户在本地打开项目目录；提供 Git 仓库地址时，仅在用户明确要求下克隆到**临时目录**做只读分析（克隆前确认来源可信，完成后清理），不做其他网络操作
+1. 至少需要以下信息之一：**项目路径 / 已打开的工作目录**（Git 仓库地址仅作为显式例外，见下）
+   - 默认流程完全离线：只分析用户本机已有的项目目录，不联网
+   - **Git 仓库地址（例外流程，需用户明确要求）**：仅在用户主动提供仓库地址并确认要克隆时，才克隆到**临时目录**做只读分析（克隆前确认来源可信，完成后清理），不做其他网络操作；用户未明确要求时不得联网
 2. 询问："请问要分析哪个项目？请提供项目路径或仓库地址。"
 3. 如果用户提供了路径但项目为空或无法访问：明确告知并请求确认
 
@@ -759,6 +760,6 @@ Frontend Web · Backend Service · Desktop Client (Electron/Tauri) · Mini Progr
 - **Unclear request** → "Do you mean X or Y? Please confirm"
 
 ### Constraints
-- Path safety: `{project}` must be a user-provided local path (validated, read-only analysis commands only, no network access, no paths outside the project)
+- Path safety: `{project}` must be a user-provided local path (validated; read-only analysis commands only; no paths outside the project). The skill is offline by default: network access happens only in the explicitly-optional Git-URL flow (user-requested clone into a temp directory, as specified in the Chinese spec)
 - NOT for: beginners, interns, basic concept explanations, pure code analysis, lengthy architecture reports
 - MUST: focus on dev efficiency, stage-based output, engineering practices, multi-round progressive exploration
