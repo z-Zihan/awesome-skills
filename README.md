@@ -77,7 +77,19 @@ Helps experienced developers learn unfamiliar domains by building a full project
 
 **Triggers**: learn backend / learn Rust / build project from scratch / teach me to code
 
-### ✅ todo-list-promax — 个人待办事项系统
+### 📝 english-assessment — Interactive English Proficiency Assessment
+
+Companion-style English proficiency assessment at college level (CEFR B1-C2). Randomly generated test papers (default 25-40 questions or quick 21, 7-10 question types drawn from a pool of 12, 100 points total) covering vocabulary translation, grammar fill-in, multiple choice, error correction, reading comprehension, Chinese-to-English translation, and more. Adaptive difficulty based on history: persistent strengths get harder, weak areas get more questions. Questions are answered one by one with silent grading, then a score and weakness analysis. Supports a wrong-answer bank (local storage, auto-cleanup), wrong-answer retest, explanations, full-paper deep analysis, progress tracking, and data import/export.
+
+**Triggers**: 开始英语测评 / 英语测试 / 测一下英语 / start English assessment / quick assessment / wrong-answer retest / show wrong answers
+
+### 🏠 renovation-143m — 143㎡ Dedicated Renovation Assistant
+
+Long-term renovation decision assistant bound to one fixed floor plan: a ~143㎡ upgrade home with 3 bedrooms, 2 living areas, 2 bathrooms, 1 kitchen, and 1 balcony. Covers the full pipeline: inspection, style research, space design, storage planning, plumbing/electrical and lighting, appliances and materials, budgeting, pitfall avoidance, and AI-generated renderings. Built-in floor plan data (size estimates and orientation analysis for 13 spaces), a 25-item regret checklist, and a library of niche practical design ideas. Every analysis is tied to this specific layout; no generic advice. Style research requires live web search, and AI rendering prompts must include layout constraints.
+
+**Triggers**: 143装修 / 装修规划 / 验房 / renovation planning / home inspection / renovation style / storage design / lighting plan / renovation budget / AI rendering
+
+### ✅ todo-list-promax — Personal Todo System
 
 Permanent, loss-proof todo management. Auto-captures todos from chat (text/image/attachment), parses time & priority, pushes unfinished reminders daily at 9 PM. Supports 4 priority levels (P0-P3), natural language triggers, and complete/delete/modify operations.
 
@@ -286,15 +298,17 @@ skill-creator-ProMax (generate)
 
 ### 📝 english-assessment — 交互式英语水平测评
 
-大学英语水平（CEFR B1-C1）交互式快速测评。支持三种模式：默认测评（20-40题）、快速测评（约18题）、错题重测（10题）。12种题型覆盖词汇翻译、语法填空、选择题、句子改错、阅读理解、中译英翻译等。内容覆盖各专业领域。全程静默判分，完成后输出得分与弱项分析。支持错题集（本地持久化、自动清理）、错题重测、查看错题讲解。
+陪伴式大学英语水平（CEFR B1-C2）交互式测评。支持三种模式：默认测评（25-40题）、快速测评（约21题）、错题重测（10题）。每卷从12种题型中随机选7-10种，覆盖词汇翻译、语法填空、选择题、句子改错、阅读理解、中译英翻译等，总分100分。基于历史数据自适应难度：持续强项提难度，薄弱项多出题。内容覆盖各专业领域。全程静默判分，完成后输出得分与弱项分析。支持错题集（本地持久化、自动清理）、错题重测、查看错题讲解、全部考题深度解析、学习进度追踪、数据导入导出。
 
-**触发词**：开始英语测评 / 英语测试 / 测一下英语 / 快速测评 / 错题重测 / 看错题
+**触发词**：开始英语测评 / 英语测试 / 测一下英语 / 快速测评 / 错题重测 / 看错题 / 学习进度 / 导出数据
 
 ### 🏠 renovation-143m — 143㎡专属装修助手
 
 基于固定户型（三室两厅两卫一厨一阳台改善型住宅）的长期装修决策助手。覆盖验房、风格研究、空间设计、收纳规划、水电灯光、家电材料、预算规划、避坑、AI生图模拟全流程。内置完整户型数据（13个空间尺寸估算+朝向分析）、25条避坑检查清单、小众实用设计库。所有分析绑定本户型，不提供泛通用建议。风格研究强制联网搜索，AI生图提示词必须包含户型约束。
 
 **触发词**：143装修 / 专属装修助手 / 装修规划 / 验房 / 装修风格 / 收纳设计 / 水电规划 / 灯光规划 / 家电规划 / 材料选择 / 预算规划 / 装修避坑 / AI效果图
+
+### ✅ todo-list-promax — 个人待办事项系统
 
 永久不丢失的待办事项管理。自动从聊天中捕获待办（文字/图片/附件），智能解析时间与优先级，每日晚上 9 点主动推送未完成提醒。支持四级优先级（P0-P3）、多种自然语言触发、完成/删除/修改操作。
 
