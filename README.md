@@ -1,6 +1,225 @@
 # 🧰 Awesome Skills
 
-[中文](#中文) | [English](#english)
+[English](#english) | [中文](#中文)
+
+---
+
+<a id="english"></a>
+
+## English
+
+A universal AI Agent skill library. Each skill is a single `SKILL.md` file — load on demand, zero config.
+
+Compatible with any AI Agent that reads local Markdown as system instructions (OpenClaw, Claude Code, Codex, Cursor, Cline, etc.).
+
+### Skills
+
+### 🤖 code-review-ProMax — Advanced Code Review + Direct Fix
+
+Multi-dimensional code review: requirement completion, regression risk, edge cases, upstream/downstream impact. Outputs structured report with fix instructions. When user says "直接修复"/"fix", auto-switches to fix mode (`fix/` sub-skill) to apply fixes one by one.
+
+**Triggers**: review this code / check my changes / any issues / 直接修复 / fix
+
+### 🏗️ fe-cli — Frontend Scaffolding
+
+One-command project scaffolding with 6 templates:
+
+| Sub-skill | Type | Triggers |
+|---|---|---|
+| `web` | Web SPA | website, SPA |
+| `admin` | Dashboard | admin, dashboard |
+| `h5` | Mobile H5 | mobile, H5 |
+| `electron` | Desktop | Electron, desktop app |
+| `ssr` | Server-side | SSR, Next.js |
+| `miniapp` | Mini Program | WeChat miniapp |
+
+**Stack**: pnpm / Sass / native fetch / Vite + TypeScript
+
+### 📸 screenshot-to-prompt — Screenshot to Implementation Prompt
+
+Input: page screenshot. Output: structured page analysis + an implementation prompt ready for any coding agent. Not a code generator — a screenshot translator.
+
+**Triggers**: analyze this page / generate implementation prompt / screenshot to prompt
+
+### 📋 project-doc-analyst — Project Documentation Generator
+
+Deep-read the entire codebase and generate engineering semantic asset documentation for both humans and AI. Staged by priority: P0 (project overview + technical architecture) → P1 (design rationale + product analysis + code examples), with optional docs and deep dives.
+
+**Triggers**: analyze project / generate docs / project documentation / code analysis / architecture analysis / architecture diagram
+
+### 🚀 project-onboarding — Project Onboarding Guide
+
+Help experienced developers quickly onboard onto unfamiliar projects. Three-stage output: quick overview (10-min project map) → deep dive → targeted dev assistance. Covers dev workflow, engineering standards, API integration, component system, environment/deployment, team collaboration. Supports frontend web, backend services, desktop apps (Electron/Tauri), mini programs, and mobile apps.
+
+**Triggers**: onboard / project handover / quick start / how to develop / how to run
+
+### 🎯 skill-creator-ProMax — Full-cycle Skill Creator
+
+Full-cycle Skill creator from idea to file. Helps users design, iterate, and generate production-ready Agent Prompts through multi-turn conversation, then outputs multi-platform Skill files (OpenClaw, Claude Code, Cursor, Cline, etc.). Four stages: positioning → complete Prompt → iteration → file generation.
+
+**Triggers**: create skill / design skill / new skill / skill prompt / agent prompt / system prompt
+
+### 🔍 skill-review-pro — Expert Skill Reviewer
+
+Modular Skill QA system. Evaluates Skills through static analysis + behavioral testing + scoring. Supports 5 modes: full review, direct fix (lightweight review → fix report), opinion validation (verify user-provided fix suggestions), fix execution, and stability benchmark. Uses Policy Inheritance architecture to match review strategies by Skill type (engineering/cognition/workflow).
+
+**Triggers**: review skill / evaluate skill / improve skill / validate fix suggestions / skill score / skill quality check
+
+### 📕 rednote-creator — Xiaohongshu Content Creation Pipeline
+
+Topic planning, copywriting, title generation, multi-image cover generation, publishing strategy, and one-click publish. Covers 6 hot niches (beauty & skincare, fashion & OOTD, fitness & weight loss, food & restaurants, travel guides, home & organization) with built-in viral patterns, title formulas, cover strategies, and posting rhythms. AI-speak blacklist ensures human-like writing. Supports autoglm-generate-image for covers + autoglm-browser-agent for one-click publishing.
+
+**Triggers**: 发小红书 / 写小红书 / rednote / 小红书笔记 / 小红书文案 / post to xiaohongshu / xiaohongshu post / rednote post
+
+### 🧭 dev-mentor — Cross-Domain Learning Companion
+
+Helps experienced developers learn unfamiliar domains by building a full project from zero to production via continuous conversation. First batch: backend (TypeScript/Go/Python), databases, server deployment (Docker/Nginx/HTTPS/CI-CD), Rust systems programming. Auto-detects existing skills, uses analogies from known domains, explains technical terms on first use.
+
+**Triggers**: learn backend / learn Rust / build project from scratch / teach me to code
+
+### 📝 english-assessment — Interactive English Proficiency Assessment
+
+Companion-style English proficiency assessment at college level (CEFR B1-C2). Randomly generated test papers (default 25-40 questions or quick 21, 7-10 question types drawn from a pool of 12, 100 points total) covering vocabulary translation, grammar fill-in, multiple choice, error correction, reading comprehension, Chinese-to-English translation, and more. Adaptive difficulty based on history: persistent strengths get harder, weak areas get more questions. Questions are answered one by one with silent grading, then a score and weakness analysis. Supports a wrong-answer bank (local storage, auto-cleanup), wrong-answer retest, explanations, full-paper deep analysis, progress tracking, and data import/export.
+
+**Triggers**: 开始英语测评 / 英语测试 / 测一下英语 / start English assessment / quick assessment / wrong-answer retest / show wrong answers
+
+### 🏠 renovation-143m — 143㎡ Dedicated Renovation Assistant
+
+Long-term renovation decision assistant bound to one fixed floor plan: a ~143㎡ upgrade home with 3 bedrooms, 2 living areas, 2 bathrooms, 1 kitchen, and 1 balcony. Covers the full pipeline: inspection, style research, space design, storage planning, plumbing/electrical and lighting, appliances and materials, budgeting, pitfall avoidance, and AI-generated renderings. Built-in floor plan data (size estimates and orientation analysis for 13 spaces), a 25-item regret checklist, and a library of niche practical design ideas. Every analysis is tied to this specific layout; no generic advice. Style research requires live web search, and AI rendering prompts must include layout constraints.
+
+**Triggers**: 143装修 / 装修规划 / 验房 / renovation planning / home inspection / renovation style / storage design / lighting plan / renovation budget / AI rendering
+
+### ✅ todo-list-promax — Personal Todo System
+
+Permanent, loss-proof todo management. Auto-captures todos from chat (text/image/attachment), parses time & priority, pushes unfinished reminders daily at 9 PM. Supports 4 priority levels (P0-P3), natural language triggers, and complete/delete/modify operations.
+
+**Triggers**: TODO: / 帮我记录一下 / remind me / 别忘了 / TODOLIST / what's left today / anything pending / show todos
+
+### Installation
+
+**Git Clone:**
+
+```bash
+git clone https://github.com/z-Zihan/awesome-skills.git
+```
+
+**SKILL.md Format:**
+
+```yaml
+---
+name: skill-name          # Unique identifier, kebab-case
+version: "1.0.0"         # SemVer, increment manually when modifying
+homepage: https://...     # Repo URL (optional)
+description: >            # Triggers + description + NOT for boundary
+  ...
+---
+
+# Skill Title
+
+Prompt body...
+```
+
+- `name` — Unique identifier, also used as ClawHub slug
+- `version` — Semantic version (SemVer), increment manually when modifying skill content, to compare local vs ClawHub versions
+- `description` — Contains trigger words and NOT for boundary, key field for skill matching
+
+Place `SKILL.md` in your Agent's skill directory:
+
+| Agent | Install Path | Format |
+|---|---|---|
+| OpenClaw | `~/.openclaw-autoclaw/skills/<name>/` | ✅ Native |
+| Claude Code | `~/.claude/skills/<name>/` | ✅ Native |
+| Codex | `~/.codex/skills/<name>/` | ✅ Native |
+| Cursor | `.cursor/rules/<name>.md` | ✅ Native |
+| Cline | `.clinerules` | ✅ Native |
+
+> 💡 All five platforms share the same SKILL.md format (YAML frontmatter + markdown prompt) — zero conversion needed.
+
+**ClawHub (OpenClaw users):**
+
+```bash
+openclaw skills install code-review-ProMax
+openclaw skills install fe-cli
+openclaw skills install screenshot-to-prompt
+openclaw skills install project-doc-analyst
+openclaw skills install project-onboarding
+openclaw skills install skill-creator-ProMax
+openclaw skills install skill-review-pro
+openclaw skills install dev-mentor
+openclaw skills install rednote-creator
+openclaw skills install english-assessment
+openclaw skills install todo-list-promax
+openclaw skills install renovation-143m
+openclaw skills update --all
+```
+
+**Manual install (Claude Code / Codex):**
+
+```bash
+# Claude Code
+ln -s ~/path/to/awesome-skills/todo-list-promax ~/.claude/skills/todo-list-promax
+
+# Codex
+ln -s ~/path/to/awesome-skills/todo-list-promax ~/.codex/skills/todo-list-promax
+```
+
+Restart your Agent after installing.
+
+### Architecture
+
+This is not a loose collection of Skills — it's a layered design system with clear responsibility boundaries:
+
+```
+skill-creator-ProMax (generate)
+        ↓
+  skill-review-pro (evaluate & verify)
+        ↓ (fails)
+  fix loop (built into review-pro)
+        ↓ (passes)
+  ready to publish
+```
+
+| Skill | Responsibility | NOT for |
+|-------|---------------|---------|
+| **skill-creator-ProMax** | Architecture design + multi-platform file generation + review guidance | Testing / Scoring / Fixing |
+| **skill-review-pro** | Static review + behavioral testing (adversarial/boundary/ambiguity) + scoring + fixing | Generation / Design |
+| **code-review-ProMax** | Code change risk review + direct fix mode | Skill quality evaluation |
+
+**Principles**: No boundary crossing between Skills. Modular on-demand loading. Stage-driven workflow with explicit pause/rollback. Fix loop with regression verification.
+
+### Versioning
+
+**版本号来源**：SKILL.md frontmatter 的 `version` 字段是唯一版本来源，CI 不生成版本号。
+
+**更新流程**：
+1. 修改 SKILL.md 内容
+2. 手动 bump `version` 字段
+3. push main → CI 自动校验版本号（必须大于 ClawHub 最新版）→ 发布
+
+**版本号规则**：
+
+| 改动类型 | 版本变化 | 示例 |
+|---------|---------|------|
+| 小修（修 bug、补细节） | patch +1 | 2.0.0 → 2.0.1 |
+| 加功能、改流程 | minor +1 | 2.0.1 → 2.1.0 |
+| 大重构、不兼容变更 | major +1 | 2.1.0 → 3.0.0 |
+
+**忘了 bump 怎么办？** CI 会拦截并报错，提示版本号未增长，补上再推即可。
+
+**全量发布**（所有 skill 重发一遍）：推 tag 触发，如 `git tag v2.0.0 && git push origin v2.0.0`
+
+### Contributing
+
+1. Create a folder + `SKILL.md` with YAML frontmatter
+2. Push to `main` — auto-published via GitHub Actions
+
+**SKILL.md Writing Standards**：
+
+- **Bilingual required**: All content must include both Chinese and English
+- **Frontmatter description**: Chinese only (ClawHub card displays Chinese first)
+- **Headings**: Chinese first, English after, separated by `/`, e.g. `## 标题 / English Title`
+- **Body content**: Chinese first, English follows
+- **Self-check after edits**: All headings and paragraphs are bilingual, new sections have English translations, description remains Chinese only
 
 ---
 
@@ -79,15 +298,17 @@
 
 ### 📝 english-assessment — 交互式英语水平测评
 
-大学英语水平（CEFR B1-C1）交互式快速测评。支持三种模式：默认测评（20-40题）、快速测评（约18题）、错题重测（10题）。12种题型覆盖词汇翻译、语法填空、选择题、句子改错、阅读理解、中译英翻译等。内容覆盖各专业领域。全程静默判分，完成后输出得分与弱项分析。支持错题集（本地持久化、自动清理）、错题重测、查看错题讲解。
+陪伴式大学英语水平（CEFR B1-C2）交互式测评。支持三种模式：默认测评（25-40题）、快速测评（约21题）、错题重测（10题）。每卷从12种题型中随机选7-10种，覆盖词汇翻译、语法填空、选择题、句子改错、阅读理解、中译英翻译等，总分100分。基于历史数据自适应难度：持续强项提难度，薄弱项多出题。内容覆盖各专业领域。全程静默判分，完成后输出得分与弱项分析。支持错题集（本地持久化、自动清理）、错题重测、查看错题讲解、全部考题深度解析、学习进度追踪、数据导入导出。
 
-**触发词**：开始英语测评 / 英语测试 / 测一下英语 / 快速测评 / 错题重测 / 看错题
+**触发词**：开始英语测评 / 英语测试 / 测一下英语 / 快速测评 / 错题重测 / 看错题 / 学习进度 / 导出数据
 
 ### 🏠 renovation-143m — 143㎡专属装修助手
 
 基于固定户型（三室两厅两卫一厨一阳台改善型住宅）的长期装修决策助手。覆盖验房、风格研究、空间设计、收纳规划、水电灯光、家电材料、预算规划、避坑、AI生图模拟全流程。内置完整户型数据（13个空间尺寸估算+朝向分析）、25条避坑检查清单、小众实用设计库。所有分析绑定本户型，不提供泛通用建议。风格研究强制联网搜索，AI生图提示词必须包含户型约束。
 
 **触发词**：143装修 / 专属装修助手 / 装修规划 / 验房 / 装修风格 / 收纳设计 / 水电规划 / 灯光规划 / 家电规划 / 材料选择 / 预算规划 / 装修避坑 / AI效果图
+
+### ✅ todo-list-promax — 个人待办事项系统
 
 永久不丢失的待办事项管理。自动从聊天中捕获待办（文字/图片/附件），智能解析时间与优先级，每日晚上 9 点主动推送未完成提醒。支持四级优先级（P0-P3）、多种自然语言触发、完成/删除/修改操作。
 
@@ -222,210 +443,3 @@ skill-creator-ProMax（生成）
 - **标题**：中文在前，英文在后，用 `/` 分隔，如 `## 标题 / English Title`
 - **正文**：中文在先，英文跟在后面
 - **每次修改后自查**：所有标题和段落都有双语、新增章节补了英文、description 保持纯中文
-
----
-
-<a id="english"></a>
-
-## English
-
-A universal AI Agent skill library. Each skill is a single `SKILL.md` file — load on demand, zero config.
-
-Compatible with any AI Agent that reads local Markdown as system instructions (OpenClaw, Claude Code, Codex, Cursor, Cline, etc.).
-
-### Skills
-
-### 🤖 code-review-ProMax — Advanced Code Review + Direct Fix
-
-Multi-dimensional code review: requirement completion, regression risk, edge cases, upstream/downstream impact. Outputs structured report with fix instructions. When user says "直接修复"/"fix", auto-switches to fix mode (`fix/` sub-skill) to apply fixes one by one.
-
-**Triggers**: review this code / check my changes / any issues / 直接修复 / fix
-
-### 🏗️ fe-cli — Frontend Scaffolding
-
-One-command project scaffolding with 6 templates:
-
-| Sub-skill | Type | Triggers |
-|---|---|---|
-| `web` | Web SPA | website, SPA |
-| `admin` | Dashboard | admin, dashboard |
-| `h5` | Mobile H5 | mobile, H5 |
-| `electron` | Desktop | Electron, desktop app |
-| `ssr` | Server-side | SSR, Next.js |
-| `miniapp` | Mini Program | WeChat miniapp |
-
-**Stack**: pnpm / Sass / native fetch / Vite + TypeScript
-
-### 📸 screenshot-to-prompt — Screenshot to Implementation Prompt
-
-Input: page screenshot. Output: structured page analysis + an implementation prompt ready for any coding agent. Not a code generator — a screenshot translator.
-
-**Triggers**: analyze this page / generate implementation prompt / screenshot to prompt
-
-### 📋 project-doc-analyst — Project Documentation Generator
-
-Deep-read the entire codebase and generate engineering semantic asset documentation for both humans and AI. Staged by priority: P0 (project overview + technical architecture) → P1 (design rationale + product analysis + code examples), with optional docs and deep dives.
-
-**Triggers**: analyze project / generate docs / project documentation / code analysis / architecture analysis / architecture diagram
-
-### 🚀 project-onboarding — Project Onboarding Guide
-
-Help experienced developers quickly onboard onto unfamiliar projects. Three-stage output: quick overview (10-min project map) → deep dive → targeted dev assistance. Covers dev workflow, engineering standards, API integration, component system, environment/deployment, team collaboration. Supports frontend web, backend services, desktop apps (Electron/Tauri), mini programs, and mobile apps.
-
-**Triggers**: onboard / project handover / quick start / how to develop / how to run
-
-### 🎯 skill-creator-ProMax — Full-cycle Skill Creator
-
-Full-cycle Skill creator from idea to file. Helps users design, iterate, and generate production-ready Agent Prompts through multi-turn conversation, then outputs multi-platform Skill files (OpenClaw, Claude Code, Cursor, Cline, etc.). Four stages: positioning → complete Prompt → iteration → file generation.
-
-**Triggers**: create skill / design skill / new skill / skill prompt / agent prompt / system prompt
-
-### 🔍 skill-review-pro — Expert Skill Reviewer
-
-Modular Skill QA system. Evaluates Skills through static analysis + behavioral testing + scoring. Supports 5 modes: full review, direct fix (lightweight review → fix report), opinion validation (verify user-provided fix suggestions), fix execution, and stability benchmark. Uses Policy Inheritance architecture to match review strategies by Skill type (engineering/cognition/workflow).
-
-**Triggers**: review skill / evaluate skill / improve skill / validate fix suggestions / skill score / skill quality check
-
-### 📕 rednote-creator — Xiaohongshu Content Creation Pipeline
-
-Topic planning, copywriting, title generation, multi-image cover generation, publishing strategy, and one-click publish. Covers 6 hot niches (beauty & skincare, fashion & OOTD, fitness & weight loss, food & restaurants, travel guides, home & organization) with built-in viral patterns, title formulas, cover strategies, and posting rhythms. AI-speak blacklist ensures human-like writing. Supports autoglm-generate-image for covers + autoglm-browser-agent for one-click publishing.
-
-**Triggers**: 发小红书 / 写小红书 / rednote / 小红书笔记 / 小红书文案 / post to xiaohongshu / xiaohongshu post / rednote post
-
-### 🧭 dev-mentor — Cross-Domain Learning Companion
-
-Helps experienced developers learn unfamiliar domains by building a full project from zero to production via continuous conversation. First batch: backend (TypeScript/Go/Python), databases, server deployment (Docker/Nginx/HTTPS/CI-CD), Rust systems programming. Auto-detects existing skills, uses analogies from known domains, explains technical terms on first use.
-
-**Triggers**: learn backend / learn Rust / build project from scratch / teach me to code
-
-### ✅ todo-list-promax — 个人待办事项系统
-
-Permanent, loss-proof todo management. Auto-captures todos from chat (text/image/attachment), parses time & priority, pushes unfinished reminders daily at 9 PM. Supports 4 priority levels (P0-P3), natural language triggers, and complete/delete/modify operations.
-
-**Triggers**: TODO: / 帮我记录一下 / remind me / 别忘了 / TODOLIST / what's left today / anything pending / show todos
-
-### Installation
-
-**Git Clone:**
-
-```bash
-git clone https://github.com/z-Zihan/awesome-skills.git
-```
-
-**SKILL.md Format:**
-
-```yaml
----
-name: skill-name          # Unique identifier, kebab-case
-version: "1.0.0"         # SemVer, increment manually when modifying
-homepage: https://...     # Repo URL (optional)
-description: >            # Triggers + description + NOT for boundary
-  ...
----
-
-# Skill Title
-
-Prompt body...
-```
-
-- `name` — Unique identifier, also used as ClawHub slug
-- `version` — Semantic version (SemVer), increment manually when modifying skill content, to compare local vs ClawHub versions
-- `description` — Contains trigger words and NOT for boundary, key field for skill matching
-
-Place `SKILL.md` in your Agent's skill directory:
-
-| Agent | Install Path | Format |
-|---|---|---|
-| OpenClaw | `~/.openclaw-autoclaw/skills/<name>/` | ✅ Native |
-| Claude Code | `~/.claude/skills/<name>/` | ✅ Native |
-| Codex | `~/.codex/skills/<name>/` | ✅ Native |
-| Cursor | `.cursor/rules/<name>.md` | ✅ Native |
-| Cline | `.clinerules` | ✅ Native |
-
-> 💡 All five platforms share the same SKILL.md format (YAML frontmatter + markdown prompt) — zero conversion needed.
-
-**ClawHub (OpenClaw users):**
-
-```bash
-openclaw skills install code-review-ProMax
-openclaw skills install fe-cli
-openclaw skills install screenshot-to-prompt
-openclaw skills install project-doc-analyst
-openclaw skills install project-onboarding
-openclaw skills install skill-creator-ProMax
-openclaw skills install skill-review-pro
-openclaw skills install dev-mentor
-openclaw skills install rednote-creator
-openclaw skills install english-assessment
-openclaw skills install todo-list-promax
-openclaw skills install renovation-143m
-openclaw skills update --all
-```
-
-**Manual install (Claude Code / Codex):**
-
-```bash
-# Claude Code
-ln -s ~/path/to/awesome-skills/todo-list-promax ~/.claude/skills/todo-list-promax
-
-# Codex
-ln -s ~/path/to/awesome-skills/todo-list-promax ~/.codex/skills/todo-list-promax
-```
-
-Restart your Agent after installing.
-
-### Architecture
-
-This is not a loose collection of Skills — it's a layered design system with clear responsibility boundaries:
-
-```
-skill-creator-ProMax (generate)
-        ↓
-  skill-review-pro (evaluate & verify)
-        ↓ (fails)
-  fix loop (built into review-pro)
-        ↓ (passes)
-  ready to publish
-```
-
-| Skill | Responsibility | NOT for |
-|-------|---------------|---------|
-| **skill-creator-ProMax** | Architecture design + multi-platform file generation + review guidance | Testing / Scoring / Fixing |
-| **skill-review-pro** | Static review + behavioral testing (adversarial/boundary/ambiguity) + scoring + fixing | Generation / Design |
-| **code-review-ProMax** | Code change risk review + direct fix mode | Skill quality evaluation |
-
-**Principles**: No boundary crossing between Skills. Modular on-demand loading. Stage-driven workflow with explicit pause/rollback. Fix loop with regression verification.
-
-### Versioning
-
-**版本号来源**：SKILL.md frontmatter 的 `version` 字段是唯一版本来源，CI 不生成版本号。
-
-**更新流程**：
-1. 修改 SKILL.md 内容
-2. 手动 bump `version` 字段
-3. push main → CI 自动校验版本号（必须大于 ClawHub 最新版）→ 发布
-
-**版本号规则**：
-
-| 改动类型 | 版本变化 | 示例 |
-|---------|---------|------|
-| 小修（修 bug、补细节） | patch +1 | 2.0.0 → 2.0.1 |
-| 加功能、改流程 | minor +1 | 2.0.1 → 2.1.0 |
-| 大重构、不兼容变更 | major +1 | 2.1.0 → 3.0.0 |
-
-**忘了 bump 怎么办？** CI 会拦截并报错，提示版本号未增长，补上再推即可。
-
-**全量发布**（所有 skill 重发一遍）：推 tag 触发，如 `git tag v2.0.0 && git push origin v2.0.0`
-
-### Contributing
-
-1. Create a folder + `SKILL.md` with YAML frontmatter
-2. Push to `main` — auto-published via GitHub Actions
-
-**SKILL.md Writing Standards**：
-
-- **Bilingual required**: All content must include both Chinese and English
-- **Frontmatter description**: Chinese only (ClawHub card displays Chinese first)
-- **Headings**: Chinese first, English after, separated by `/`, e.g. `## 标题 / English Title`
-- **Body content**: Chinese first, English follows
-- **Self-check after edits**: All headings and paragraphs are bilingual, new sections have English translations, description remains Chinese only
