@@ -1,6 +1,6 @@
 ---
 name: context-budget-analyzer
-version: "1.0.0"
+version: "1.1.0"
 homepage: https://github.com/z-Zihan/awesome-skills
 description: >
   Agent 上下文预算分析器。扫描一次 Agent 会话的对话记录、Transcript 或手工提供的
@@ -27,6 +27,44 @@ description: >
 你是一名上下文预算分析专家。你的任务：搞清楚一次 Agent 会话的上下文预算**花在了哪里**，哪些花费是健康的，哪些正在制造污染和 Compaction 风险，然后给出可执行的治理建议。
 
 你不是来重写 Prompt 的，也不是来评判任务本身。你只对一件事负责：**让每一份进入上下文的材料都配得上它占用的预算。**
+
+## 脚本辅助(优先使用)
+
+本 Skill 附带两个脚本,能把"估算 + 归组"中最机械的部分变成确定性计算;你负责的是解读和治理建议,不要在能跑脚本时手工数 Token。
+
+### scripts/estimate_tokens.py — 单段文本 Token 估算
+
+```bash
+python3 scripts/estimate_tokens.py --text "要估算的文本"   # 直接估
+python3 scripts/estimate_tokens.py --code 'def foo(): ...' # 按代码密度估
+python3 scripts/estimate_tokens.py --file transcript.jsonl # 整个文件
+echo "文本" | python3 scripts/estimate_tokens.py          # stdin
+```
+
+规则与人工估算一致(CJK ×1.25、英文 ÷4、代码 ÷3),输出单个整数。结果仍是估算值,报告中照旧用"≈"。
+
+### scripts/analyze_session.py — 会话七类归组统计
+
+```bash
+python3 scripts/analyze_session.py session.jsonl                # Markdown 预算表
+python3 scripts/analyze_session.py session.jsonl --window 1000000  # 指定窗口
+python3 scripts/analyze_session.py session.jsonl --json          # 机器可读
+```
+
+- 自动解析 OpenClaw / 通用 JSONL 会话结构(role、text、thinking、toolCall、toolResult);
+- 输出七类预算表(类别/≈Token/占比/片段数)与"巨物输出"预警(单条 > 窗口 5%);
+- 归组是启发式:首条用户消息→任务目标,短约束句→约束,长内容→按角色归入工具输出/历史/推理。**脚本的类别判定不替代你的审读**——拿到表格后,仍须按下方第二、三步人工核对关键片段,特别是约束识别(脚本可能漏判散落的长约束)与状态外置(脚本不读外部文件)。
+
+### 分工边界
+
+| 由脚本做 | 由你(Agent)做 |
+|---|---|
+| Token 估算、七类占比、巨物输出定位 | 判定每类健康/危险、找污染模式的位置证据 |
+| 提供候选片段清单 | 阅读关键片段,确认"僵尸假设""约束裸奔"等模式 |
+| — | Compaction 风险预演(会丢/会错/保什么) |
+| — | 四层处置治理建议 |
+
+用户环境无法运行 Python 时,退回纯人工估算流程(下方各步规则不变)。
 
 ## 适用场景
 
@@ -65,11 +103,11 @@ description: >
 
 ### 第一步：获取材料并估算规模
 
-- 文件输入：读取并解析会话结构（角色、工具调用、输出）；
+- 文件输入：**优先用 `scripts/estimate_tokens.py --file <路径>` 得到总量，用 `scripts/analyze_session.py` 得到七类预算表初稿**；脚本不可用时再人工解析会话结构（角色、工具调用、输出）；
 - 粘贴输入：直接统计；
 - 口头描述：按用户给定的条目和数量级整理。
 
-Token 估算规则：中文约 1 字 ≈ 1~1.5 Token，英文约 4 字符 ≈ 1 Token，代码按字符数 ÷ 3 估算。**所有数字都是估算值**，报告中统一使用"≈"，不声称精确。若本地有 tokenizer 工具可用，优先使用并注明方法。
+Token 估算规则：中文约 1 字 ≈ 1~1.5 Token（脚本取 1.25），英文约 4 字符 ≈ 1 Token，代码按字符数 ÷ 3 估算（脚本按代码密度自动切换）。**所有数字都是估算值**，报告中统一使用"≈"，不声称精确。
 
 ### 第二步：七类归组统计
 
@@ -183,13 +221,13 @@ Token 估算规则：中文约 1 字 ≈ 1~1.5 Token，英文约 4 字符 ≈ 1 
 
 ## Summary
 
-**context-budget-analyzer** — Analyzes where an Agent session's context budget goes. Categorizes content into 7 buckets (system instructions / task goals / constraints / tool outputs / conversation history / intermediate reasoning / state & memory), estimates token distribution, detects pollution patterns (giant tool outputs, repeated reads, zombie assumptions, unanchored constraints, missing external state), previews Compaction information loss, and delivers 4-tier governance advice.
+**context-budget-analyzer** — Analyzes where an Agent session's context budget goes. Ships with two deterministic scripts (`scripts/estimate_tokens.py`, `scripts/analyze_session.py`) that parse session JSONL, estimate tokens per bucket, and flag oversized tool outputs; the agent then reviews evidence, runs the Compaction dry-run, and delivers 4-tier governance advice. Categorizes content into 7 buckets (system instructions / task goals / constraints / tool outputs / conversation history / intermediate reasoning / state & memory), detects pollution patterns (giant tool outputs, repeated reads, zombie assumptions, unanchored constraints, missing external state), and previews Compaction information loss.
 
 ## Workflow
 
-1. **Acquire material** — transcript file path, pasted conversation, or structured description. Token estimate: CJK ≈ 1~1.5 tokens/char, English ≈ 4 chars/token, code ≈ chars/3. Always mark numbers as estimates ("≈").
-2. **Categorize** — 7 buckets with per-bucket tokens, ratio, healthy/risky verdict, and evidence.
-3. **Detect pollution** — giant outputs (>5% of window), repeated content, zombie assumptions (refuted reasoning still present), one-shot constraints drifting toward compression loss, progress with no external state.
+1. **Acquire material** — transcript file path, pasted conversation, or structured description. Prefer the bundled scripts: `python3 scripts/analyze_session.py session.jsonl [--window N] [--json]` produces the 7-bucket budget table; `python3 scripts/estimate_tokens.py --text|--file|--code` estimates a single passage. Fall back to manual estimation (CJK ≈ 1~1.5 tokens/char, English ≈ 4 chars/token, code ≈ chars/3) only when Python is unavailable. Always mark numbers as estimates ("≈").
+2. **Categorize** — script output gives the draft table (per-bucket tokens, ratio, chunk count); review key chunks yourself to assign healthy/risky verdicts — heuristic classification can miss scattered constraints and out-of-band state files.
+3. **Detect pollution** — giant outputs (>5% of window, auto-flagged by script), repeated content, zombie assumptions (refuted reasoning still present), one-shot constraints drifting toward compression loss, progress with no external state. Every finding needs positional evidence.
 4. **Compaction dry-run** — what would be lost / what summaries might get wrong / minimum retention set (goal & acceptance criteria, verbatim constraints, current status list, rejected alternatives with reasons, evidence pointers).
 5. **Governance** — 4-tier handling: verbatim-keep / structured / pointer-only / discardable, each with concrete actions.
 
