@@ -1,6 +1,6 @@
 ---
 name: context-budget-analyzer
-version: "1.1.0"
+version: "1.2.0"
 homepage: https://github.com/z-Zihan/awesome-skills
 description: >
   Agent 上下文预算分析器。扫描一次 Agent 会话的对话记录、Transcript 或手工提供的
@@ -10,7 +10,8 @@ description: >
   （原文保留 / 结构化 / 留指针 / 可丢弃）。
   触发词：分析上下文，上下文预算，Token 都花在哪了，上下文为什么这么长，
   压缩会丢什么，context budget，analyze context，context usage，
-  token breakdown，compaction risk，会话太长了，上下文污染。
+  token breakdown，compaction risk，会话太长了，上下文污染，
+  上下文增长，usage 轨迹，context growth，compaction 检测。
   NOT for: 模型参数量估算、API 计费账单分析、Prompt 写作优化。
 ---
 
@@ -66,6 +67,16 @@ python3 scripts/analyze_session.py session.jsonl --json          # 机器可读
 
 用户环境无法运行 Python 时,退回纯人工估算流程(下方各步规则不变)。
 
+### scripts/analyze_usage.py — Claude Code 真实上下文轨迹(实测值)
+
+```bash
+python3 scripts/analyze_usage.py ~/.claude/projects/<项目路径编码>/<sessionId>.jsonl [--window 200000]
+```
+
+Claude Code 会话(`~/.claude/projects/` 下的 JSONL)每条 assistant 记录自带官方计量字段 `message.usage`。该脚本沿会话顺序提取 `input + cache_read + cache_creation`,还原**真实上下文输入轨迹**:首末/峰值/均值、窗口占用百分比,并检测骤降 ≥20% 的疑似 Compaction 点。输出是真实计量值,不是估算。
+
+注意:重复 usage 已按变化点去重,数据点少于 assistant 行数属正常;非 Claude Code 文件会明确报错并提示改用 `analyze_session.py`。它回答"上下文实际涨到多大、哪里发生了压缩";七类内容归组仍用 `analyze_session.py`。
+
 ## 适用场景
 
 - Agent 会话越跑越慢、越跑越贵，想知道 Token 都消耗在哪；
@@ -104,6 +115,7 @@ python3 scripts/analyze_session.py session.jsonl --json          # 机器可读
 ### 第一步：获取材料并估算规模
 
 - 文件输入：**优先用 `scripts/estimate_tokens.py --file <路径>` 得到总量，用 `scripts/analyze_session.py` 得到七类预算表初稿**；脚本不可用时再人工解析会话结构（角色、工具调用、输出）；
+- Claude Code 会话（`~/.claude/projects/` 下的 JSONL）：**先跑 `scripts/analyze_usage.py`** 拿真实上下文轨迹与压缩骤降点，再跑 `analyze_session.py` 做七类归组——前者回答"涨到多大、哪里压缩"，后者回答"都花在哪了"；
 - 粘贴输入：直接统计；
 - 口头描述：按用户给定的条目和数量级整理。
 
@@ -225,7 +237,7 @@ Token 估算规则：中文约 1 字 ≈ 1~1.5 Token（脚本取 1.25），英�
 
 ## Workflow
 
-1. **Acquire material** — transcript file path, pasted conversation, or structured description. Prefer the bundled scripts: `python3 scripts/analyze_session.py session.jsonl [--window N] [--json]` produces the 7-bucket budget table; `python3 scripts/estimate_tokens.py --text|--file|--code` estimates a single passage. Fall back to manual estimation (CJK ≈ 1~1.5 tokens/char, English ≈ 4 chars/token, code ≈ chars/3) only when Python is unavailable. Always mark numbers as estimates ("≈").
+1. **Acquire material** — transcript file path, pasted conversation, or structured description. Prefer the bundled scripts: `python3 scripts/analyze_session.py session.jsonl [--window N] [--json]` produces the 7-bucket budget table; `python3 scripts/estimate_tokens.py --text|--file|--code` estimates a single passage; for Claude Code sessions (`~/.claude/projects/**/*.jsonl`), `python3 scripts/analyze_usage.py <session.jsonl> [--window N]` reconstructs the REAL context trajectory from official `message.usage` fields (first/last/peak, window %, and suspected-compaction drops ≥20%) — measured values, not estimates. Fall back to manual estimation (CJK ≈ 1~1.5 tokens/char, English ≈ 4 chars/token, code ≈ chars/3) only when Python is unavailable. Always mark numbers as estimates ("≈").
 2. **Categorize** — script output gives the draft table (per-bucket tokens, ratio, chunk count); review key chunks yourself to assign healthy/risky verdicts — heuristic classification can miss scattered constraints and out-of-band state files.
 3. **Detect pollution** — giant outputs (>5% of window, auto-flagged by script), repeated content, zombie assumptions (refuted reasoning still present), one-shot constraints drifting toward compression loss, progress with no external state. Every finding needs positional evidence.
 4. **Compaction dry-run** — what would be lost / what summaries might get wrong / minimum retention set (goal & acceptance criteria, verbatim constraints, current status list, rejected alternatives with reasons, evidence pointers).
