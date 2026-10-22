@@ -73,7 +73,7 @@ Topic planning, copywriting, title generation, multi-image cover generation, pub
 
 ### 🧮 context-budget-analyzer — Agent Context Budget Analyzer
 
-Analyzes where an Agent session's context budget actually goes. Categorizes session content into 7 buckets (system instructions / task goals / constraints / tool outputs / history / intermediate reasoning / state), estimates token distribution (bundled scripts: `estimate_tokens.py` + `analyze_session.py` for deterministic parsing of OpenClaw/JSONL transcripts), detects pollution patterns (giant tool outputs, repeated reads, zombie assumptions, unanchored constraints, missing external state), previews what auto-compaction would lose, and delivers 4-tier governance advice (verbatim-keep / structured / pointer-only / discardable).
+Analyzes where an Agent session's context budget actually goes. Categorizes session content into 7 buckets (system instructions / task goals / constraints / tool outputs / history / intermediate reasoning / state), estimates token distribution (bundled scripts: `estimate_tokens.py` + `analyze_session.py` for deterministic parsing of OpenClaw/JSONL transcripts; `analyze_usage.py` reconstructs the real context trajectory from Claude Code `message.usage` fields and flags suspected-compaction drops), detects pollution patterns (giant tool outputs, repeated reads, zombie assumptions, unanchored constraints, missing external state), previews what auto-compaction would lose, and delivers 4-tier governance advice (verbatim-keep / structured / pointer-only / discardable).
 
 **Triggers**: analyze context / context budget / where did my tokens go / compaction risk / 会话太长了 / 上下文污染
 
@@ -299,7 +299,7 @@ skill-creator-ProMax (generate)
 
 ### 🧮 context-budget-analyzer — Agent 上下文预算分析器
 
-分析一次 Agent 会话的上下文预算花在了哪里：按七类归组（系统指令/任务目标/约束/工具输出/对话历史/中间推理/状态记忆）估算 Token 分布，识别五类污染模式（巨型工具输出、重复读取、僵尸假设、约束裸奔、无状态裸奔），预演自动压缩会丢什么，并给出四层处置治理建议（原文保留/结构化/留指针/可丢弃）。v1.1 起附带确定性脚本（`estimate_tokens.py` 估算 + `analyze_session.py` 解析 OpenClaw/JSONL 会话并输出七类预算表），脚本不可用时自动退回人工估算。
+分析一次 Agent 会话的上下文预算花在了哪里：按七类归组（系统指令/任务目标/约束/工具输出/对话历史/中间推理/状态记忆）估算 Token 分布，识别五类污染模式（巨型工具输出、重复读取、僵尸假设、约束裸奔、无状态裸奔），预演自动压缩会丢什么，并给出四层处置治理建议（原文保留/结构化/留指针/可丢弃）。v1.1 起附带确定性脚本（`estimate_tokens.py` 估算 + `analyze_session.py` 解析 OpenClaw/JSONL 会话并输出七类预算表），v1.2 新增 `analyze_usage.py`：直接读取 Claude Code 会话的官方 usage 计量字段，还原真实上下文增长轨迹并检测疑似压缩骤降点；脚本不可用时自动退回人工估算。
 
 **触发词**：分析上下文 / 上下文预算 / Token 都花在哪了 / 压缩会丢什么 / 会话太长了 / 上下文污染
 
