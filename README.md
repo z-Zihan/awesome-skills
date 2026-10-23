@@ -73,9 +73,9 @@ Topic planning, copywriting, title generation, multi-image cover generation, pub
 
 ### 🧮 context-budget-analyzer — Agent Context Budget Analyzer
 
-Analyzes where an Agent session's context budget actually goes. Categorizes session content into 7 buckets (system instructions / task goals / constraints / tool outputs / history / intermediate reasoning / state), estimates token distribution (bundled scripts: `estimate_tokens.py` + `analyze_session.py` for deterministic parsing of OpenClaw/JSONL transcripts; `analyze_usage.py` reconstructs the real context trajectory from Claude Code `message.usage` fields and flags suspected-compaction drops), detects pollution patterns (giant tool outputs, repeated reads, zombie assumptions, unanchored constraints, missing external state), previews what auto-compaction would lose, and delivers 4-tier governance advice (verbatim-keep / structured / pointer-only / discardable).
+Analyzes where an Agent session's context budget actually goes. Categorizes session content into 7 buckets (system instructions / task goals / constraints / tool outputs / history / intermediate reasoning / state), estimates token distribution (bundled scripts: `estimate_tokens.py` + `analyze_session.py` for deterministic parsing of OpenClaw/JSONL transcripts; `analyze_usage.py` reconstructs the real context trajectory from Claude Code `message.usage` fields and flags suspected-compaction drops; `audit_constraints.py` grades constraint visibility (lost / at-risk / visible) with usage-drop correlation — a deterministic Governance-Decay screen), detects pollution patterns (giant tool outputs, repeated reads, zombie assumptions, unanchored constraints, missing external state, governance decay), previews what auto-compaction would lose, and delivers 4-tier governance advice (verbatim-keep / structured / pointer-only / discardable).
 
-**Triggers**: analyze context / context budget / where did my tokens go / compaction risk / 会话太长了 / 上下文污染
+**Triggers**: analyze context / context budget / where did my tokens go / compaction risk / constraint audit / 会话太长了 / 上下文污染 / 约束丢失
 
 ### 🧭 dev-mentor — Cross-Domain Learning Companion
 
