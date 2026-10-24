@@ -10,13 +10,19 @@
   - 系统角色约束 → 低危(多数 Harness 压缩时保留 system 消息;
     但注意:仅当约束确实经由 system 通道注入时成立)
   - 有 usage 骤降点时(Claude Code 会话):
-      最后一次出现在首个骤降点之前且之后再未出现 → 高危:已随压缩丢失
+      最后一次出现在首个骤降点之前且之后再未出现:
+        → 先对照压缩摘要行(isCompactSummary / type=summary):
+          摘要中再现(实体全命中或中文 4-gram 覆盖 ≥60%) → 低危:大概率存活,
+            但已经摘要改写,建议抽查保真
+          摘要中无再现(或无摘要行可对照) → 高危:已随压缩丢失
       出现在骤降点之后但不在最近区 → 中危:面临下一次压缩
       最近区(消息末 15%)内有出现 → 低危:当前可见
   - 无 usage 时(OpenClaw/通用 JSONL,仅位置分析):
       单次出现且不在最近区 → 高危:单一副本,位置靠前
       多次出现但全部不在最近区(长会话) → 中危:全部副本已被"晾旧"
       最近区有出现 → 低危
+  - 摘要行本身只作对照材料:不作约束来源、不参与位置统计,
+    避免摘要复述被误当作「约束仍在对话中」
 
 统计口径:
   - 只扫描 system/user/assistant 的文本段(约束是治理内容,不来自工具输出);
@@ -47,6 +53,61 @@ CONSTRAINT_PATTERNS = [
 MAX_QUOTE_LEN = 600
 MIN_CONSTRAINT_LEN = 4
 RECENT_ZONE = 0.15   # 消息末 15% 视为"最近区"
+
+
+_PUNCT_RE = re.compile(r"[\s,.;:!?、。,;:!?·…—\"'`()<>《》\[\]{}|]+")
+_ENTITY_RE = re.compile(r"[A-Za-z0-9_./\\-]{3,}")
+
+
+def _norm_text(s: str) -> str:
+    """去空白与常见标点、小写化,用于摘要再现的 n-gram 对照。"""
+    return _PUNCT_RE.sub("", s).lower()
+
+
+def _constraint_in_summary(quote: str, summary_raw: str, summary_norm: str):
+    """判断约束语句是否在压缩摘要中再现。返回 (kept, 判定依据说明)。
+    有英文/路径/数字实体(≥3 字符)时以实体命中为准(全命中=再现);
+    纯中文语句用 4-gram 覆盖率 ≥60% 判定。确定性规则,不做语义理解。"""
+    ents = _ENTITY_RE.findall(quote)
+    if ents:
+        low = summary_raw.lower()
+        missing = [e for e in ents if e.lower() not in low]
+        if not missing:
+            shown = ", ".join(ents[:3]) + ("等" if len(ents) > 3 else "")
+            return True, f"实体命中:{shown}"
+        if len(missing) < len(ents):
+            return False, f"实体部分命中(缺:{', '.join(missing[:3])})"
+        return False, None
+    nq = _norm_text(quote)
+    if len(nq) < 8:
+        return False, None
+    grams = [nq[i:i + 4] for i in range(len(nq) - 3)]
+    if not grams:
+        return False, None
+    hit = sum(1 for g in grams if g in summary_norm)
+    if hit / len(grams) >= 0.6:
+        return True, f"n-gram 覆盖 {hit}/{len(grams)}"
+    return False, None
+
+
+def _extract_compact_text(obj: dict):
+    """识别压缩摘要行,返回摘要文本或 None。
+    已知形态:Claude Code 顶层 isCompactSummary=true 的 user 行(content 为 str 或
+    content[].text);CC 老版 type=summary 行(summary 字段)。其他平台返回 None。"""
+    if obj.get("isCompactSummary") is True:
+        msg = obj.get("message")
+        content = msg.get("content") if isinstance(msg, dict) else obj.get("content")
+        if isinstance(content, str):
+            return content
+        if isinstance(content, list):
+            parts = [pp.get("text", "") for pp in content
+                     if isinstance(pp, dict) and pp.get("type") == "text"]
+            if parts:
+                return "\n".join(parts)
+    if obj.get("type") == "summary" and isinstance(obj.get("summary"), str):
+        return obj["summary"]
+    return None
+
 
 
 def _tok(text: str) -> int:
@@ -90,16 +151,18 @@ def _iter_texts(content):
 
 def _split_constraint_sentences(text: str):
     """把段落按句切分,返回含约束特征的句子。
-    切分后把过短碎片(如「红线:」)并回前句,避免标题词被单独当作约束。"""
+    切分后把过短碎片(如「红线:」)并回前句,避免标题词被单独当作约束。
+    换行本身视为句子边界(不往行尾补句号,避免引用出现「。。」瑕疵)。"""
     out = []
-    for sent in re.split(r"(?<=[。!?;.!?])", text.replace("\n", "。\n")):
-        s = sent.strip()
-        if not s:
-            continue
-        if len(s) < MIN_CONSTRAINT_LEN and out:
-            out[-1] = out[-1] + s     # 碎片并回前句,保持原文完整
-            continue
-        out.append(s)
+    for line_txt in (text.splitlines() or [text]):
+        for sent in re.split(r"(?<=[。!?;.!?])", line_txt):
+            s = sent.strip()
+            if not s:
+                continue
+            if len(s) < MIN_CONSTRAINT_LEN and out:
+                out[-1] = out[-1] + s     # 碎片并回前句,保持原文完整
+                continue
+            out.append(s)
     return [s for s in out
             if MIN_CONSTRAINT_LEN <= len(s.rstrip("。.::、,，;；!！?？ \n")) <= MAX_QUOTE_LEN
             and any(re.search(p, s) for p in CONSTRAINT_PATTERNS)]
@@ -124,6 +187,7 @@ def analyze(path: Path):
     unparsed = 0
     roles_seen = set()
     usage_trace = []      # (lineno, total_in)
+    summaries = []        # 压缩摘要行:[{line, chars, text}]
 
     with open(path, encoding="utf-8", errors="replace") as f:
         for lineno, line in enumerate(f, 1):
@@ -139,6 +203,10 @@ def analyze(path: Path):
             if u is not None:
                 if not usage_trace or usage_trace[-1][1] != u:
                     usage_trace.append((lineno, u))
+            ct = _extract_compact_text(obj)
+            if ct:
+                summaries.append({"line": lineno, "chars": len(ct), "text": ct})
+                continue   # 摘要行是压缩对照材料,不作为约束来源参与判级
             msg = obj.get("message") if isinstance(obj.get("message"), dict) else obj
             role = msg.get("role") or obj.get("role") or ""
             if obj.get("type") == "toolResult" or role in ("tool", "toolResult"):
@@ -219,9 +287,25 @@ def analyze(path: Path):
 
         if has_usage and first_drop_line:
             if c["last_line"] < first_drop_line:
-                c["verdict"] = "high"
-                c["reason"] = (f"最后一次出现(第 {c['last_line']} 行)早于首个压缩骤降点"
-                               f"(第 {first_drop_line} 行),且之后再未出现 → 已随摘要重写丢失")
+                prior = [s for s in summaries if s["line"] < first_drop_line]
+                kept, how = (False, None)
+                s_line = s_chars = None
+                if prior:
+                    s_line, s_chars = prior[-1]["line"], prior[-1]["chars"]
+                    kept, how = _constraint_in_summary(
+                        c["occurrences"][0]["quote"], prior[-1]["text"], _norm_text(prior[-1]["text"]))
+                if kept:
+                    c["verdict"] = "low"
+                    c["saved_by_summary"] = {"line": s_line, "how": how}
+                    c["reason"] = (f"原文出现在压缩前(第 {c['last_line']} 行),但压缩摘要"
+                                   f"(第 {s_line} 行,{s_chars} 字)中再现({how})→ 大概率存活;"
+                                   f"已经摘要改写,建议抽查保真")
+                else:
+                    c["verdict"] = "high"
+                    where = (f";压缩摘要(第 {s_line} 行,{s_chars} 字)中无再现" if prior
+                             else ";会话中未找到压缩摘要行,无法对照")
+                    c["reason"] = (f"最后一次出现(第 {c['last_line']} 行)早于首个压缩骤降点"
+                                   f"(第 {first_drop_line} 行),且之后再未出现{where} → 已随摘要重写丢失")
             elif not in_recent:
                 c["verdict"] = "mid"
                 c["reason"] = f"骤降后出现过,但已退出最近区(最后位置 {c['last_pos_pct']}%)→ 面临下一次压缩"
@@ -246,6 +330,8 @@ def analyze(path: Path):
         "mode": "usage-correlated" if (has_usage and first_drop_line) else ("usage-no-drop" if has_usage else "position-only"),
         "text_messages": n_text_msgs,
         "usage_drops": drops,
+        "compact_summaries": [{"line": s["line"], "chars": s["chars"],
+                               "preview": s["text"][:80].replace("\n", " ")} for s in summaries],
         "constraints": constraints,
         "summary": {
             "total": len(constraints),
@@ -307,6 +393,7 @@ def to_markdown(r: dict) -> str:
     lines.append("")
     lines.append("> 判定基于位置与可见性启发式 +(如有)usage 骤降点关联;约束是否仍有效、语义权重如何,"
                  "请结合 SKILL.md 人工复核。Token 为估算值。规则与依据见脚本 docstring(arXiv:2606.22528)。")
+    lines.append(_render_summary_section(r))
     return "\n".join(lines)
 
 
@@ -323,5 +410,32 @@ def main():
     print(json.dumps(result, ensure_ascii=False, indent=2) if args.json else to_markdown(result))
 
 
+
+
+def _render_summary_section(r: dict) -> str:
+    """「压缩摘要对照」小节:直答这轮压缩丢掉了什么、保住了什么。"""
+    ss = r.get("compact_summaries") or []
+    if not ss:
+        return ""
+    lines = ["", "## 压缩摘要对照", "",
+             f"会话含 {len(ss)} 处压缩摘要行:" +
+             ", ".join(f"第 {s['line']} 行({s['chars']} 字)" for s in ss) + "。"]
+    saved = [c for c in r.get("constraints", []) if c.get("saved_by_summary")]
+    lost = [c for c in r.get("constraints", []) if c["verdict"] == "high"]
+    if saved:
+        lines.append("")
+        lines.append("**摘要中再现(大概率存活)**:")
+        for c in saved:
+            how = c["saved_by_summary"]["how"]
+            lines.append(f"- 「{c['occurrences'][0]['quote'][:60]}」({how})")
+    if lost:
+        lines.append("")
+        lines.append("**摘要中无再现(确认丢失,需重新注入)**:")
+        for c in lost:
+            lines.append(f"- 「{c['occurrences'][0]['quote'][:60]}」")
+    lines.append("")
+    lines.append("> 摘要再现判定是确定性对照(实体命中或 4-gram 覆盖 ≥60%),不等于语义保真;"
+                 "被改写的约束建议抽查原文完整性。")
+    return "\n".join(lines)
 if __name__ == "__main__":
     main()
