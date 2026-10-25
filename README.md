@@ -22,7 +22,7 @@ Multi-dimensional code review: requirement completion, regression risk, edge cas
 
 ### 🏗️ fe-cli — Frontend Scaffolding
 
-One-command project scaffolding with 6 templates:
+One-command project scaffolding with 9 templates:
 
 | Sub-skill | Type | Triggers |
 |---|---|---|
@@ -30,10 +30,13 @@ One-command project scaffolding with 6 templates:
 | `admin` | Dashboard | admin, dashboard |
 | `h5` | Mobile H5 | mobile, H5 |
 | `electron` | Desktop | Electron, desktop app |
-| `ssr` | Server-side | SSR, Next.js |
+| `tauri` | Lightweight desktop | Tauri, Rust desktop |
+| `ssr` | Server-side | SSR, Next.js, Nuxt |
 | `miniapp` | Mini Program | WeChat miniapp |
+| `rn` | React Native | React Native, native app |
+| `astro` | Static site | Astro, Gatsby, VitePress |
 
-**Stack**: pnpm / Sass / native fetch / Vite + TypeScript
+**Stack**: bun (fallback pnpm) / Sass / native fetch / Vite + TypeScript, shadcn-style UI kits
 
 ### 📸 screenshot-to-prompt — Screenshot to Implementation Prompt
 
@@ -248,7 +251,7 @@ skill-creator-ProMax (generate)
 
 ### 🏗️ fe-cli — 前端项目脚手架
 
-一键创建规范化前端项目。支持 6 种类型：
+一键创建规范化前端项目。支持 9 种类型：
 
 | 子 Skill | 类型 | 触发词 |
 |---|---|---|
@@ -256,10 +259,13 @@ skill-creator-ProMax (generate)
 | `admin` | 后台管理 | 后台、Admin |
 | `h5` | 移动端 H5 | H5、移动端 |
 | `electron` | 桌面应用 | Electron、桌面 |
-| `ssr` | 服务端渲染 | SSR、Next.js |
+| `tauri` | 轻量桌面 | Tauri、Rust 桌面 |
+| `ssr` | 服务端渲染 | SSR、Next.js、Nuxt |
 | `miniapp` | 小程序 | 微信小程序 |
+| `rn` | React Native | RN、原生移动 |
+| `astro` | 静态建站 | Astro、Gatsby、VitePress |
 
-**技术栈**：pnpm / Sass / native fetch / Vite + TypeScript
+**技术栈**：bun（备选 pnpm）/ Sass / native fetch / Vite + TypeScript，shadcn 系 UI 组件库
 
 ### 📸 screenshot-to-prompt — 截图转实现 Prompt
 
