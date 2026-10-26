@@ -1,6 +1,6 @@
 ---
 name: context-budget-analyzer
-version: "1.4.0"
+version: "1.5.0"
 homepage: https://github.com/z-Zihan/awesome-skills
 description: >
   Agent 上下文预算分析器。扫描一次 Agent 会话的对话记录、Transcript 或手工提供的
@@ -14,7 +14,8 @@ description: >
   token breakdown,compaction risk,会话太长了,上下文污染,
   上下文增长,usage 轨迹,context growth,compaction 检测,
   约束丢失,约束审计,constraint audit,governance decay,
-  压缩丢掉了什么,压缩摘要对照,compaction diff。
+  压缩丢掉了什么,压缩摘要对照,compaction diff,
+  OpenClaw trajectory,轨迹分析,run-based。
   NOT for: 模型参数量估算、API 计费账单分析、Prompt 写作优化。
 ---
 
@@ -71,15 +72,19 @@ python3 scripts/analyze_session.py session.jsonl --json          # 机器可读
 
 用户环境无法运行 Python 时,退回纯人工估算流程(下方各步规则不变)。
 
-### scripts/analyze_usage.py - Claude Code 真实上下文轨迹(实测值)
+### scripts/analyze_usage.py - 真实上下文轨迹(实测值,CC / OpenClaw 双格式)
 
 ```bash
-python3 scripts/analyze_usage.py ~/.claude/projects/<项目路径编码>/<sessionId>.jsonl [--window 200000]
+python3 scripts/analyze_usage.py ~/.claude/projects/<项目路径编码>/<sessionId>.jsonl [--window 200000]   # Claude Code
+python3 scripts/analyze_usage.py <agent-dir>/sessions/<sessionId>.trajectory.jsonl [--window 200000]    # OpenClaw
 ```
 
-Claude Code 会话(`~/.claude/projects/` 下的 JSONL)每条 assistant 记录自带官方计量字段 `message.usage`。该脚本沿会话顺序提取 `input + cache_read + cache_creation`,还原**真实上下文输入轨迹**:首末/峰值/均值、窗口占用百分比,并检测骤降 ≥20% 的疑似 Compaction 点。输出是真实计量值,不是估算。
+脚本自动识别两种格式并按各自语义分析,输出真实计量值,不是估算:
 
-注意:重复 usage 已按变化点去重,数据点少于 assistant 行数属正常;非 Claude Code 文件会明确报错并提示改用 `analyze_session.py`。它回答"上下文实际涨到多大、哪里发生了压缩";七类内容归组仍用 `analyze_session.py`。
+- **Claude Code(continuous 语义)**:每条 assistant 记录的 `message.usage`(input + cache_read + cache_creation)是连续上下文的真实输入。沿会话顺序还原轨迹:首末/峰值/均值、窗口占用百分比,并检测骤降 ≥20% 的疑似 Compaction 点。
+- **OpenClaw trajectory(run-based 语义)**:`model.completed.data.usage`(input + cacheRead + cacheWrite,camelCase 键名)按轮(run)记录。**轮间数值下降是"上下文重编译/新任务开始",不是 compaction**,脚本因此不做跨 run 骤降检测,防止把正常重编译误报成压缩。同时统计 `context.compiled` 事件(systemPrompt 截断次数与原始长度、单轮消息数/图片数)与 compaction 超时。
+
+两种格式都会在报告里标注自己的语义;格式识别只认前 30 行的 `traceSchema` 字段形态,CC 会话正文里回现 "openclaw-trajectory" 字样不会误路由。重复 usage 已按变化点去重。回答"上下文实际涨到多大、(CC)哪里发生了压缩";七类内容归组仍用 `analyze_session.py`。
 
 ### scripts/audit_constraints.py - 约束丢失审计(治理衰减初筛)
 
@@ -138,7 +143,7 @@ v1.4 起报告自带**「压缩摘要对照」小节**:解析 `isCompactSummary`
 ### 第一步:获取材料并估算规模
 
 - 文件输入:**优先用 `scripts/estimate_tokens.py --file <路径>` 得到总量,用 `scripts/analyze_session.py` 得到七类预算表初稿**;脚本不可用时再人工解析会话结构(角色、工具调用、输出);
-- Claude Code 会话(`~/.claude/projects/` 下的 JSONL):**先跑 `scripts/analyze_usage.py`** 拿真实上下文轨迹与压缩骤降点,再跑 `analyze_session.py` 做七类归组--前者回答"涨到多大、哪里压缩",后者回答"都花在哪了";
+- Claude Code 会话(`~/.claude/projects/` 下的 JSONL)或 OpenClaw trajectory(`*.trajectory.jsonl`):**先跑 `scripts/analyze_usage.py`** 拿真实上下文轨迹(自动识别格式;CC 额外给压缩骤降点,OpenClaw 给 run-based 波动与 systemPrompt 截断统计),再跑 `analyze_session.py` 做七类归组--前者回答"涨到多大、(CC)哪里压缩",后者回答"都花在哪了";
 - **症状涉及"忘了约束/违规/越跑越偏"时,加跑 `scripts/audit_constraints.py`**:得到约束清单与三档判级,再对高危/中危条目逐一人工确认语义有效性;
 - 粘贴输入:直接统计;
 - 口头描述:按用户给定的条目和数量级整理。
