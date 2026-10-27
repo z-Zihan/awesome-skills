@@ -66,7 +66,9 @@ Full-cycle Skill creator from idea to file. Helps users design, iterate, and gen
 
 Modular Skill QA system. Evaluates Skills through static analysis + behavioral testing + scoring. Supports 5 modes: full review, direct fix (lightweight review → fix report), opinion validation (verify user-provided fix suggestions), fix execution, and stability benchmark. Uses Policy Inheritance architecture to match review strategies by Skill type (engineering/cognition/workflow).
 
-**Triggers**: review skill / evaluate skill / improve skill / validate fix suggestions / skill score / skill quality check
+Bundled `scripts/skill_audit.py` runs a deterministic repo-wide audit (frontmatter integrity, relative-path references, trigger conflicts, README coverage) — run it before a full review to locate targets fast; it never replaces scoring.
+
+**Triggers**: review skill / evaluate skill / improve skill / validate fix suggestions / skill score / skill quality check / repo audit
 
 ### 📕 rednote-creator — Xiaohongshu Content Creation Pipeline
 
@@ -295,7 +297,9 @@ skill-creator-ProMax (generate)
 
 模块化 Skill 评审 QA 系统。通过静态审查 + 行为测试 + 评分，对 Skill 进行专业评审。支持 5 种模式：完整评审、直接修复（轻量审查→修复报告）、意见验证（验证用户修复意见有效性）、修复执行、稳定性 Benchmark。基于 Policy Inheritance 架构，按 Skill 类型（engineering/cognition/workflow）匹配评审策略。
 
-**触发词**：评审 skill / 测评 skill / 改进 skill / 验证修复意见 / skill 评分 / skill 质量检查
+附带 `scripts/skill_audit.py` 全库体检脚本（frontmatter 完整性 / 相对路径引用 / 触发词冲突 / README 收录四项确定性检查），完整评审前可先跑一遍快速定位问题；体检结果不替代评分。
+
+**触发词**：评审 skill / 测评 skill / 改进 skill / 验证修复意见 / skill 评分 / skill 质量检查 / 全库体检
 
 ### 📕 rednote-creator — 小红书内容创作全流程
 
