@@ -20,6 +20,23 @@ import sys
 from pathlib import Path
 
 
+def _content_chars(content) -> int:
+    """确定性字符计量: str 直接取长; list 取 text 部件长度,其余部件 JSON 序列化; 其他类型 JSON 序列化。"""
+    if content is None:
+        return 0
+    if isinstance(content, str):
+        return len(content)
+    if isinstance(content, list):
+        total = 0
+        for part in content:
+            if isinstance(part, dict) and isinstance(part.get("text"), str):
+                total += len(part["text"])
+            else:
+                total += len(json.dumps(part, ensure_ascii=False))
+        return total
+    return len(json.dumps(content, ensure_ascii=False))
+
+
 def _extract_cc_usage(obj: dict):
     """CC: assistant 行 message.usage{input_tokens,...} -> (total_in, output)"""
     if obj.get("type") != "assistant":
@@ -50,6 +67,7 @@ def analyze_openclaw(path: Path, window: int, lines):
     """OpenClaw trajectory: run-based usage + context.compiled 统计"""
     trace = []              # (lineno, context_in, output)
     compiled = []           # (lineno, sys_chars, sys_original_chars, n_messages, images)
+    last_composition = None  # 末轮(含消息的)context.compiled 构成快照
     completed = 0
     compaction_timeouts = 0
     unparsed = 0
@@ -79,14 +97,50 @@ def analyze_openclaw(path: Path, window: int, lines):
         elif t == "context.compiled":
             d = obj.get("data") or {}
             sp = d.get("systemPrompt")
+            messages = d.get("messages") or []
             if isinstance(sp, dict):
                 compiled.append((
                     lineno,
                     sp.get("truncated"), sp.get("originalChars"),
-                    len(d.get("messages") or []), d.get("imagesCount") or 0,
+                    len(messages), d.get("imagesCount") or 0,
                 ))
             elif isinstance(sp, str):
-                compiled.append((lineno, False, len(sp), len(d.get("messages") or []), d.get("imagesCount") or 0))
+                compiled.append((lineno, False, len(sp), len(messages), d.get("imagesCount") or 0))
+            # 构成快照: 只保留最后一个带消息的编译事件(最接近会话最终状态)
+            if messages:
+                roles = {}
+                sized = []
+                for m in messages:
+                    if not isinstance(m, dict):
+                        continue
+                    role = m.get("role") or "unknown"
+                    n = _content_chars(m.get("content"))
+                    cell = roles.setdefault(role, {"count": 0, "chars": 0})
+                    cell["count"] += 1
+                    cell["chars"] += n
+                    sized.append((n, role))
+                sized.sort(key=lambda x: x[0], reverse=True)
+                tools = d.get("tools") or []
+                tools_chars = sum(len(json.dumps(t, ensure_ascii=False)) for t in tools if t is not None)
+                if isinstance(sp, dict):
+                    sp_trunc, sp_chars = bool(sp.get("truncated")), (sp.get("originalChars") or 0)
+                elif isinstance(sp, str):
+                    sp_trunc, sp_chars = False, len(sp)
+                else:
+                    sp_trunc, sp_chars = False, 0
+                msgs_total = sum(c["chars"] for c in roles.values())
+                last_composition = {
+                    "lineno": lineno,
+                    "system_prompt_chars": sp_chars,
+                    "system_prompt_truncated_in_trajectory": sp_trunc,
+                    "tools_count": len(tools),
+                    "tools_chars": tools_chars,
+                    "messages_count": len(messages),
+                    "messages_chars": msgs_total,
+                    "messages_by_role": roles,
+                    "grand_total_chars": sp_chars + tools_chars + msgs_total,
+                    "top_messages": [{"role": r, "chars": n} for n, r in sized[:3]],
+                }
 
     if not trace:
         return {
@@ -100,7 +154,7 @@ def analyze_openclaw(path: Path, window: int, lines):
     sys_trunc = [c for c in compiled if c[1]]
     peak = max(values)
     last_in = values[-1]
-    return {
+    result = {
         "file": str(path),
         "format": "openclaw-trajectory",
         "window": window,
@@ -122,6 +176,9 @@ def analyze_openclaw(path: Path, window: int, lines):
         "compaction_timeouts": compaction_timeouts,
         "unparsed_lines": unparsed,
     }
+    if last_composition:
+        result["composition"] = last_composition
+    return result
 
 
 def analyze_cc(path: Path, window: int, lines):
@@ -229,6 +286,29 @@ def to_markdown(r: dict) -> str:
                  f"单轮最多 {r['messages_per_run_max']} 条消息 / {r['images_per_run_max']} 张图片)"]
         if r.get("compaction_timeouts"):
             lines.append(f"- ⚠️ 检测到 {r['compaction_timeouts']} 次 compaction 超时(timedOutDuringCompaction)")
+        comp = r.get("composition")
+        if comp:
+            gt = comp["grand_total_chars"] or 1
+
+            def pct(n):
+                return round(n / gt * 100, 1)
+
+            sp_note = "(轨迹存储截断,按 originalChars 计)" if comp["system_prompt_truncated_in_trajectory"] else ""
+            lines.append(
+                f"- 单轮上下文构成(第 {comp['lineno']} 行编译事件,字符口径): "
+                f"系统提示 {comp['system_prompt_chars']:,} 字符({pct(comp['system_prompt_chars'])}%){sp_note} · "
+                f"工具 schema {comp['tools_count']} 个 {comp['tools_chars']:,} 字符({pct(comp['tools_chars'])}%) · "
+                f"对话消息 {comp['messages_count']} 条 {comp['messages_chars']:,} 字符({pct(comp['messages_chars'])}%)"
+            )
+            tops = " / ".join(f"{m['role']} {m['chars']:,}" for m in comp.get("top_messages", []))
+            if tops:
+                lines.append(f"  - 占字符最多的消息: {tops}(定位后可判断该轮被什么内容吃掉)")
+            role_line = " · ".join(
+                f"{role} {c['count']}条/{c['chars']:,}字符" for role, c in comp.get("messages_by_role", {}).items()
+            )
+            if role_line:
+                lines.append(f"  - 按角色: {role_line}")
+            lines.append("  - 注意: 构成为字符计量而非 token;若 trajectory 存储截断了超大字段,实际值只会更大。")
         lines += ["",
                   "**run-based 语义提醒**:OpenClaw trajectory 按轮(run)记录,每轮编译自己的上下文,"
                   "轮间数值下降是「上下文重编译/新任务」,不是 CC 那样的 compaction 骤降;"
