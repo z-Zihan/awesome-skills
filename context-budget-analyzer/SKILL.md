@@ -1,6 +1,6 @@
 ---
 name: context-budget-analyzer
-version: "1.5.0"
+version: "1.6.0"
 homepage: https://github.com/z-Zihan/awesome-skills
 description: >
   Agent 上下文预算分析器。扫描一次 Agent 会话的对话记录、Transcript 或手工提供的
@@ -82,7 +82,7 @@ python3 scripts/analyze_usage.py <agent-dir>/sessions/<sessionId>.trajectory.jso
 脚本自动识别两种格式并按各自语义分析,输出真实计量值,不是估算:
 
 - **Claude Code(continuous 语义)**:每条 assistant 记录的 `message.usage`(input + cache_read + cache_creation)是连续上下文的真实输入。沿会话顺序还原轨迹:首末/峰值/均值、窗口占用百分比,并检测骤降 ≥20% 的疑似 Compaction 点。
-- **OpenClaw trajectory(run-based 语义)**:`model.completed.data.usage`(input + cacheRead + cacheWrite,camelCase 键名)按轮(run)记录。**轮间数值下降是"上下文重编译/新任务开始",不是 compaction**,脚本因此不做跨 run 骤降检测,防止把正常重编译误报成压缩。同时统计 `context.compiled` 事件(systemPrompt 截断次数与原始长度、单轮消息数/图片数)与 compaction 超时。
+- **OpenClaw trajectory(run-based 语义)**:`model.completed.data.usage`(input + cacheRead + cacheWrite,camelCase 键名)按轮(run)记录。**轮间数值下降是"上下文重编译/新任务开始",不是 compaction**,脚本因此不做跨 run 骤降检测,防止把正常重编译误报成压缩。同时统计 `context.compiled` 事件(systemPrompt 截断次数与原始长度、单轮消息数/图片数)与 compaction 超时;并输出**末轮上下文构成**(v1.6): 最后一个带消息的编译事件里,系统提示 / 工具 schema / 对话消息三块的字符数与占比、按角色分布(user/assistant/toolResult)和占字符最多的前三条消息,直答"这一轮上下文被什么吃掉"。构成为字符计量而非 token;若 trajectory 存储截断了超大字段(systemPrompt.truncated=true),按 originalChars 计并如实标注,实际值只会更大。
 
 两种格式都会在报告里标注自己的语义;格式识别只认前 30 行的 `traceSchema` 字段形态,CC 会话正文里回现 "openclaw-trajectory" 字样不会误路由。重复 usage 已按变化点去重。回答"上下文实际涨到多大、(CC)哪里发生了压缩";七类内容归组仍用 `analyze_session.py`。
 
