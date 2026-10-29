@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
-"""v1.5: analyze_usage.py 支持 OpenClaw trajectory 格式。
+"""v1.7: analyze_usage.py 末轮构成新增工具 schema 利用率(加载未用/前缀聚合,区分「清工具输出」与「精简工具集」两类治理)。
+
+v1.5: analyze_usage.py 支持 OpenClaw trajectory 格式。
 
 设计依据(2026-10-27 实测本机 6 个 agents × 数百会话):
 - OpenClaw trajectory 文件(*.trajectory.jsonl)每轮 run 产生 model.completed 事件,
@@ -129,12 +131,36 @@ def analyze_openclaw(path: Path, window: int, lines):
                 else:
                     sp_trunc, sp_chars = False, 0
                 msgs_total = sum(c["chars"] for c in roles.values())
+                # 工具 schema 利用率:编译进上下文的 tools 与实际调用过的工具名对比。
+                # 调用证据取 toolResult 消息的 toolName 字段(有结果必有调用,比匹配
+                # assistant 文本里的名字可靠);schema 字符按工具名前缀聚合,辅助判断
+                # 「精简工具集」能省多少(如某类未用工具占 schema 大头)。
+                tool_names = [t.get("name") for t in tools if isinstance(t, dict) and t.get("name")]
+                used_names = {m.get("toolName") for m in messages if isinstance(m, dict) and m.get("role") == "toolResult" and m.get("toolName")}
+                unused = [n for n in tool_names if n not in used_names]
+                unused_chars = 0
+                unused_by_prefix = {}
+                for t in tools:
+                    if isinstance(t, dict) and t.get("name") in set(unused):
+                        n = len(json.dumps(t, ensure_ascii=False))
+                        unused_chars += n
+                        prefix = t["name"].split("_")[0] if "_" in t["name"] else t["name"]
+                        cell = unused_by_prefix.setdefault(prefix, {"count": 0, "chars": 0})
+                        cell["count"] += 1
+                        cell["chars"] += n
                 last_composition = {
                     "lineno": lineno,
                     "system_prompt_chars": sp_chars,
                     "system_prompt_truncated_in_trajectory": sp_trunc,
                     "tools_count": len(tools),
                     "tools_chars": tools_chars,
+                    "tools_loaded_unused_count": len(unused),
+                    "tools_loaded_unused_pct": round(len(unused) / len(tools) * 100, 1) if tools else None,
+                    "tools_unused_chars": unused_chars,
+                    "tools_unused_chars_pct": round(unused_chars / tools_chars * 100, 1) if tools_chars else None,
+                    "tools_unused_by_prefix": dict(sorted(
+                        unused_by_prefix.items(), key=lambda kv: kv[1]["chars"], reverse=True)),
+                    "tools_used": sorted(used_names),
                     "messages_count": len(messages),
                     "messages_chars": msgs_total,
                     "messages_by_role": roles,
@@ -308,6 +334,18 @@ def to_markdown(r: dict) -> str:
             )
             if role_line:
                 lines.append(f"  - 按角色: {role_line}")
+            if comp.get("tools_count"):
+                used_str = ", ".join(comp.get("tools_used") or []) or "无"
+                lines.append(
+                    f"  - 工具 schema 利用率: 编译进上下文 {comp['tools_count']} 个工具,"
+                    f"实际调用 {len(comp.get('tools_used') or [])} 个({used_str});"
+                    f"{comp.get('tools_loaded_unused_count')} 个加载未用"
+                    f"({comp.get('tools_loaded_unused_pct')}%),占 schema 字符 {comp.get('tools_unused_chars_pct')}%"
+                )
+                top_prefix = list((comp.get("tools_unused_by_prefix") or {}).items())[:3]
+                if top_prefix:
+                    detail = " / ".join(f"{p} {c['count']}个 {c['chars']:,}字符" for p, c in top_prefix)
+                    lines.append(f"    未用 schema 集中在: {detail}(工具输出占比高 → 先清理大输出;加载未用占比高 → 先精简工具集)")
             lines.append("  - 注意: 构成为字符计量而非 token;若 trajectory 存储截断了超大字段,实际值只会更大。")
         lines += ["",
                   "**run-based 语义提醒**:OpenClaw trajectory 按轮(run)记录,每轮编译自己的上下文,"

@@ -1,6 +1,6 @@
 ---
 name: context-budget-analyzer
-version: "1.6.0"
+version: "1.7.0"
 homepage: https://github.com/z-Zihan/awesome-skills
 description: >
   Agent 上下文预算分析器。扫描一次 Agent 会话的对话记录、Transcript 或手工提供的
@@ -12,7 +12,8 @@ description: >
   触发词:分析上下文,上下文预算,Token 都花在哪了,上下文为什么这么长,
   压缩会丢什么,context budget,analyze context,context usage,
   token breakdown,compaction risk,会话太长了,上下文污染,
-  上下文增长,usage 轨迹,context growth,compaction 检测,
+  上下文增长,usage 轨迹,context growth,compaction 检测,工具 schema 利用率,
+  tool schema utilization,加载未用的工具,
   约束丢失,约束审计,constraint audit,governance decay,
   压缩丢掉了什么,压缩摘要对照,compaction diff,
   OpenClaw trajectory,轨迹分析,run-based。
@@ -82,9 +83,9 @@ python3 scripts/analyze_usage.py <agent-dir>/sessions/<sessionId>.trajectory.jso
 脚本自动识别两种格式并按各自语义分析,输出真实计量值,不是估算:
 
 - **Claude Code(continuous 语义)**:每条 assistant 记录的 `message.usage`(input + cache_read + cache_creation)是连续上下文的真实输入。沿会话顺序还原轨迹:首末/峰值/均值、窗口占用百分比,并检测骤降 ≥20% 的疑似 Compaction 点。
-- **OpenClaw trajectory(run-based 语义)**:`model.completed.data.usage`(input + cacheRead + cacheWrite,camelCase 键名)按轮(run)记录。**轮间数值下降是"上下文重编译/新任务开始",不是 compaction**,脚本因此不做跨 run 骤降检测,防止把正常重编译误报成压缩。同时统计 `context.compiled` 事件(systemPrompt 截断次数与原始长度、单轮消息数/图片数)与 compaction 超时;并输出**末轮上下文构成**(v1.6): 最后一个带消息的编译事件里,系统提示 / 工具 schema / 对话消息三块的字符数与占比、按角色分布(user/assistant/toolResult)和占字符最多的前三条消息,直答"这一轮上下文被什么吃掉"。构成为字符计量而非 token;若 trajectory 存储截断了超大字段(systemPrompt.truncated=true),按 originalChars 计并如实标注,实际值只会更大。
+- **OpenClaw trajectory(run-based 语义)**:`model.completed.data.usage`(input + cacheRead + cacheWrite,camelCase 键名)按轮(run)记录。**轮间数值下降是"上下文重编译/新任务开始",不是 compaction**,脚本因此不做跨 run 骤降检测,防止把正常重编译误报成压缩。同时统计 `context.compiled` 事件(systemPrompt 截断次数与原始长度、单轮消息数/图片数)与 compaction 超时;并输出**末轮上下文构成**(v1.6): 最后一个带消息的编译事件里,系统提示 / 工具 schema / 对话消息三块的字符数与占比、按角色分布(user/assistant/toolResult)和占字符最多的前三条消息,直答"这一轮上下文被什么吃掉";并给出工具 schema 利用率(v1.7): 编译进上下文的工具里有多少实际被调用,加载未用的占多少 schema 字符、集中在哪些前缀,用于区分"先清理工具输出"还是"先精简工具集"。构成为字符计量而非 token;若 trajectory 存储截断了超大字段(systemPrompt.truncated=true),按 originalChars 计并如实标注,实际值只会更大。
 
-两种格式都会在报告里标注自己的语义;格式识别只认前 30 行的 `traceSchema` 字段形态,CC 会话正文里回现 "openclaw-trajectory" 字样不会误路由。重复 usage 已按变化点去重。回答"上下文实际涨到多大、(CC)哪里发生了压缩";七类内容归组仍用 `analyze_session.py`。
+末轮构成里还包含**工具 schema 利用率**(v1.7,仅 OpenClaw trajectory): 对比编译进上下文的 tools 列表与 toolResult 消息里的实际调用证据(toolResult 有结果必有调用,比匹配 assistant 文本可靠),输出"加载未用"的工具数量、占比及其占 schema 字符的比例,并按工具名前缀(如 feishu_*、sessions_*)聚合,定位精简空间。判读规则:**工具输出占字符大头 → 先治理大输出(截断/落盘/分页);加载未用的 schema 占大头 → 先精简工具集(按需启用插件/分组加载)**。两种格式都会在报告里标注自己的语义;格式识别只认前 30 行的 `traceSchema` 字段形态,CC 会话正文里回现 "openclaw-trajectory" 字样不会误路由。重复 usage 已按变化点去重。回答"上下文实际涨到多大、(CC)哪里发生了压缩、这一轮被什么吃掉、工具集要不要精简";七类内容归组仍用 `analyze_session.py`。
 
 ### scripts/audit_constraints.py - 约束丢失审计(治理衰减初筛)
 
