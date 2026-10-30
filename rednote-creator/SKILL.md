@@ -1,6 +1,6 @@
 ---
 name: rednote-creator
-version: "1.0.4"
+version: "1.0.5"
 homepage: https://github.com/z-Zihan/awesome-skills
 description: >
   小红书内容创作全流程 skill。覆盖选题策划、文案写作、标题生成、多图封面生成、发布策略和一键发布。

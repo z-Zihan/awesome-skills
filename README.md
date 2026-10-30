@@ -72,7 +72,7 @@ Bundled `scripts/skill_audit.py` runs a deterministic repo-wide audit (frontmatt
 
 ### 📕 rednote-creator — Xiaohongshu Content Creation Pipeline
 
-Topic planning, copywriting, title generation, multi-image cover generation, publishing strategy, and one-click publish. Covers 6 hot niches (beauty & skincare, fashion & OOTD, fitness & weight loss, food & restaurants, travel guides, home & organization) with built-in viral patterns, title formulas, cover strategies, and posting rhythms. AI-speak blacklist ensures human-like writing. Supports autoglm-generate-image for covers + autoglm-browser-agent for one-click publishing.
+Topic planning, copywriting, title generation, multi-image cover generation, publishing strategy, and one-click publish. Covers 6 hot niches (beauty & skincare, fashion & OOTD, fitness & weight loss, food & restaurants, travel guides, home & organization) with built-in viral patterns, title formulas, cover strategies, and posting rhythms. AI-speak blacklist ensures human-like writing. Supports autoglm-generate-image-seedream for covers + autoglm-browser-agent for one-click publishing.
 
 **Triggers**: 发小红书 / 写小红书 / rednote / 小红书笔记 / 小红书文案 / post to xiaohongshu / xiaohongshu post / rednote post
 
@@ -303,7 +303,7 @@ skill-creator-ProMax (generate)
 
 ### 📕 rednote-creator — 小红书内容创作全流程
 
-选题策划、文案写作、标题生成、多图封面生成、发布策略和一键发布。覆盖6大热门赛道（美妆护肤、穿搭时尚、减脂健身、美食探店、旅行攻略、家居收纳），内置赛道爆款规律、标题公式、封面策略和发布节奏。AI味黑名单确保文案说人话。支持 autoglm-generate-image 生图 + autoglm-browser-agent 一键发布。
+选题策划、文案写作、标题生成、多图封面生成、发布策略和一键发布。覆盖6大热门赛道（美妆护肤、穿搭时尚、减脂健身、美食探店、旅行攻略、家居收纳），内置赛道爆款规律、标题公式、封面策略和发布节奏。AI味黑名单确保文案说人话。支持 autoglm-generate-image-seedream 生图 + autoglm-browser-agent 一键发布。
 
 **触发词**：发小红书 / 写小红书 / 小红书笔记 / rednote / 小红书文案 / 发笔记 / 发种草 / 发攻略
 
