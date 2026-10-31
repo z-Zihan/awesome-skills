@@ -64,11 +64,11 @@ Full-cycle Skill creator from idea to file. Helps users design, iterate, and gen
 
 ### 🔍 skill-review-pro — Expert Skill Reviewer
 
-Modular Skill QA system. Evaluates Skills through static analysis + behavioral testing + scoring. Supports 5 modes: full review, direct fix (lightweight review → fix report), opinion validation (verify user-provided fix suggestions), fix execution, and stability benchmark. Uses Policy Inheritance architecture to match review strategies by Skill type (engineering/cognition/workflow).
+Modular Skill QA system. Evaluates Skills through static analysis + behavioral testing + scoring. Supports 6 modes: full review, direct fix (lightweight review → fix report), opinion validation (verify user-provided fix suggestions), fix execution, stability benchmark, and publish check (verify ClawHub publishes: version/content/sha against `clawhub inspect`). Uses Policy Inheritance architecture to match review strategies by Skill type (engineering/cognition/workflow).
 
-Bundled `scripts/skill_audit.py` runs a deterministic repo-wide audit (frontmatter integrity, relative-path references, trigger conflicts, README coverage) — run it before a full review to locate targets fast; it never replaces scoring.
+Bundled `scripts/skill_audit.py` runs a deterministic repo-wide audit (frontmatter integrity, relative-path references, trigger conflicts, README coverage) — run it before a full review to locate targets fast; it never replaces scoring. Bundled `scripts/publish_check.py` verifies ClawHub publishes (local version == remote latest, remote content byte-identical to SKILL.md, changelog commit sha match).
 
-**Triggers**: review skill / evaluate skill / improve skill / validate fix suggestions / skill score / skill quality check / repo audit
+**Triggers**: review skill / evaluate skill / improve skill / validate fix suggestions / skill score / skill quality check / repo audit / publish check
 
 ### 📕 rednote-creator — Xiaohongshu Content Creation Pipeline
 
@@ -295,11 +295,11 @@ skill-creator-ProMax (generate)
 
 ### 🔍 skill-review-pro — Skill 质量评审专家
 
-模块化 Skill 评审 QA 系统。通过静态审查 + 行为测试 + 评分，对 Skill 进行专业评审。支持 5 种模式：完整评审、直接修复（轻量审查→修复报告）、意见验证（验证用户修复意见有效性）、修复执行、稳定性 Benchmark。基于 Policy Inheritance 架构，按 Skill 类型（engineering/cognition/workflow）匹配评审策略。
+模块化 Skill 评审 QA 系统。通过静态审查 + 行为测试 + 评分，对 Skill 进行专业评审。支持 6 种模式：完整评审、直接修复（轻量审查→修复报告）、意见验证（验证用户修复意见有效性）、修复执行、稳定性 Benchmark、发布核验（对照 `clawhub inspect` 核验 ClawHub 发布结果：版本/内容/sha 三项一致）。基于 Policy Inheritance 架构，按 Skill 类型（engineering/cognition/workflow）匹配评审策略。
 
-附带 `scripts/skill_audit.py` 全库体检脚本（frontmatter 完整性 / 相对路径引用 / 触发词冲突 / README 收录四项确定性检查），完整评审前可先跑一遍快速定位问题；体检结果不替代评分。
+附带 `scripts/skill_audit.py` 全库体检脚本（frontmatter 完整性 / 相对路径引用 / 触发词冲突 / README 收录四项确定性检查），完整评审前可先跑一遍快速定位问题；体检结果不替代评分。附带 `scripts/publish_check.py` 发布核验脚本（本地版本=线上最新、线上内容与 SKILL.md 逐字节一致、changelog commit sha 匹配三项确定性比对）。
 
-**触发词**：评审 skill / 测评 skill / 改进 skill / 验证修复意见 / skill 评分 / skill 质量检查 / 全库体检
+**触发词**：评审 skill / 测评 skill / 改进 skill / 验证修复意见 / skill 评分 / skill 质量检查 / 全库体检 / 发布核验
 
 ### 📕 rednote-creator — 小红书内容创作全流程
 
