@@ -1,6 +1,6 @@
 ---
 name: skill-review-pro
-version: "2.1.0"
+version: "2.2.0"
 homepage: https://github.com/z-Zihan/awesome-skills
 description: >
   AI Skill 质量评审系统。通过静态审查对 Skill 进行评分（100分制），
@@ -8,8 +8,9 @@ description: >
   AI Skill QA System. Evaluates Skills via static analysis,
   with 100-point scoring, modular architecture with type-aware policies.
   触发词：评审 skill, 测评 skill, skill 评分, skill 质量检查, 审查 skill,
-  改进 skill, 完善技能, 验证修复意见, 稳定性测试, 全库体检, benchmark,
-  review skill, evaluate skill, improve skill, validate fix, skill quality, repo audit.
+  改进 skill, 完善技能, 验证修复意见, 稳定性测试, 全库体检, benchmark, 发布核验,
+  发布确认, review skill, evaluate skill, improve skill, validate fix, skill quality,
+  repo audit, publish check, verify publish.
 ---
 
 # skill-review-pro — AI Skill QA System
@@ -82,7 +83,8 @@ skill-review-pro/
 │       └── reviewer.md
 ├── fix/SKILL.md                ← 修复执行器
 └── scripts/
-    └── skill_audit.py          ← 全库体检脚本(确定性机械检查)
+    ├── skill_audit.py          ← 全库体检脚本(确定性机械检查)
+    └── publish_check.py        ← ClawHub 发布核验脚本(版本/内容/sha 三项比对)
 ```
 
 ### 模块引用规则
@@ -92,6 +94,7 @@ skill-review-pro/
 - **policies/<domain>/** — 按类型加载域专属策略
 - **fix** — 修复阶段时读取（仅用户主动触发）
 - **scripts/skill_audit.py** — 全库体检时运行，输出仅作审查输入
+- **scripts/publish_check.py** — 发布核验时运行，输出仅作核验结论；需要网络与 clawhub CLI，不可用时如实报告「无法核验」，不猜测发布状态
 
 读取模块时，读取对应 `SKILL.md` 的完整内容作为当前阶段的补充指令。
 
@@ -342,6 +345,21 @@ R XX→XX | E XX→XX | UX XX→XX | M XX→XX
 4. 汇总输出区间表和波动判断（±3=稳定，±4-6=轻微波动，>6=波动较大）
 5. 固定提醒：`⚠️ 同一 session 连续评分存在锚定效应，跨 session 波动预计 ±3–4 分。`
 
+### 发布核验模式（用户说「发布核验」/「发布确认」/「verify publish」时触发）
+
+**背景**：本仓库的 publish CI 用「本地版本 > ClawHub 最新版本」判断是否需要发布，且发布循环逐个执行——一个 skill 失败会中断并吞掉后续 skill 的发布。因此「CI 重跑变绿」不等于「所有预期发布的 skill 都发布成功」，合并后必须逐个核验。
+
+**流程**：
+1. 对每个预期发布的 skill 目录运行：`python3 skill-review-pro/scripts/publish_check.py check <skill目录> [--expect-sha <合并 commit sha>]`
+2. 脚本依次核验：本地 frontmatter 版本 = 线上 `latestVersion.version`；线上 `skill.description` 与本地 SKILL.md **逐字节一致**；changelog 内嵌 commit sha 与期望合并 sha 匹配
+3. 结论判读：
+   - ✅ PASS → 发布确认完成
+   - ❌ 「本地 > 线上」→ 本次改动从未发布：检查该 commit 是否真的改了版本号（改 SKILL.md 必须 bump version，否则 CI 校验直接失败）
+   - ❌ 「内容不一致」且发布时间已超过 15 分钟 → 发布了旧内容或半成品：bump 一个新版本号重新触发发布
+   - ⏳ WARN(delay)（发布后 15 分钟内内容短暂不一致）→ 安全扫描/索引延迟，等几分钟重跑，不要误判为发布失败
+   - 速率限制报错 → ClawHub 对 inspect 有频控（提示 reset in Ns），等待后重试
+4. 最终判据是 inspect 内容一致，不是 CI 绿灯或 tags 字段（ClawHub 存在孤儿版本、tag 标签滞后等异常）
+
 ---
 
 ## 支持的 Skill 格式
@@ -365,6 +383,7 @@ R XX→XX | E XX→XX | UX XX→XX | M XX→XX
 - ❌ **跳过对抗检查** — 不执行 reliability.md 的对抗检查清单
 - ❌ **改变意图** — 修复时改变 Skill 的原有意图或功能，只应修复质量缺陷
 - ❌ **体检脚本误读** — 把 `skill_audit.py` 的输出当作评审结论。脚本只覆盖机械项，误报也可能存在（如边界声明被当作触发词）；脚本报告的每条问题都须经人工确认后再写进评分
+- ❌ **把 CI 绿灯当发布成功** — publish CI 的发布循环会因单个 skill 失败而吞掉后续发布；合并后用 `scripts/publish_check.py` 逐个核验，最终判据是线上内容与本地逐字节一致
 
 ## 运行环境适配
 
@@ -443,7 +462,8 @@ skill-review-pro/
 │       └── reviewer.md
 ├── fix/SKILL.md                ← Fix executor
 └── scripts/
-    └── skill_audit.py          ← Repo-wide audit script (deterministic mechanical checks)
+    ├── skill_audit.py          ← Repo-wide audit script (deterministic mechanical checks)
+    └── publish_check.py        ← ClawHub publish verification (version/content/sha)
 ```
 
 ### Module Reference Rules
@@ -453,6 +473,7 @@ skill-review-pro/
 - **policies/<domain>/** — Load domain-specific policy by type
 - **fix** — Read during fix phase (only when user actively triggers)
 - **scripts/skill_audit.py** — Run for repo-wide audit; its output is review input only
+- **scripts/publish_check.py** — Run for publish verification; requires network access and the clawhub CLI. When unavailable, report "cannot verify" honestly instead of guessing publish status
 
 When reading modules, read the full content of the corresponding `SKILL.md` as supplementary instructions for the current phase.
 
@@ -621,6 +642,21 @@ Judgment conclusion for each suggestion:
 4. Summary output with range table and fluctuation judgment (±3=stable, ±4-6=slight fluctuation, >6=significant fluctuation)
 5. Fixed reminder: `⚠️ Consecutive scoring in the same session has anchoring effects. Cross-session fluctuation is expected at ±3-4 points.`
 
+### Publish Check Mode (triggered by "publish check" / "verify publish")
+
+**Background**: this repo's publish CI decides "needs publishing" by requiring the local version to be greater than the ClawHub latest, and its publish loop runs skills one by one — one failure aborts and swallows the publish of every later skill. So "CI green after retry" does NOT mean "every skill that should have published did publish". Verify each skill after merging.
+
+**Workflow**:
+1. For each expected-to-publish skill directory, run: `python3 skill-review-pro/scripts/publish_check.py check <skill-dir> [--expect-sha <merge commit sha>]`
+2. The script verifies: local frontmatter version == remote `latestVersion.version`; remote `skill.description` is **byte-identical** to the local SKILL.md; the commit sha embedded in the changelog matches the expected merge sha
+3. Reading the verdict:
+   - ✅ PASS → publish confirmed
+   - ❌ "local > remote" → this change never published: check whether the commit actually bumped the version (editing SKILL.md without bumping `version` fails the CI gate outright)
+   - ❌ "content mismatch" more than 15 minutes after publish → stale/partial content went live: bump to a new version and re-trigger publishing
+   - ⏳ WARN(delay) (mismatch within 15 minutes of publish) → security-scan/indexing lag; wait a few minutes and re-run, do not misread it as a failed publish
+   - Rate-limit error → ClawHub throttles inspect ("reset in Ns"); wait and retry
+4. The final criterion is inspect content identity, not a green CI run or the tags field (ClawHub has orphaned versions and lagging tag labels)
+
 ---
 
 ## Supported Skill Formats
@@ -644,6 +680,7 @@ Judgment conclusion for each suggestion:
 - ❌ **Skipping adversarial checks** — Not executing the adversarial checklist in reliability.md
 - ❌ **Intent alteration** — Changing the Skill's original intent or functionality during fixes; only quality defects should be fixed
 - ❌ **Trusting the audit script blindly** — Treating `skill_audit.py` output as the review verdict. The script covers mechanical checks only and can produce false positives (e.g., boundary statements misread as triggers); confirm each reported issue manually before it affects scoring
+- ❌ **Treating a green CI run as a successful publish** — The publish loop aborts on the first failing skill and swallows later ones; after merging, verify each skill with `scripts/publish_check.py`. The final criterion is remote content matching local, byte for byte
 
 ## Environment Adaptation
 
