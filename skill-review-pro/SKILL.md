@@ -1,6 +1,6 @@
 ---
 name: skill-review-pro
-version: "2.2.0"
+version: "2.2.1"
 homepage: https://github.com/z-Zihan/awesome-skills
 description: >
   AI Skill 质量评审系统。通过静态审查对 Skill 进行评分（100分制），
@@ -358,7 +358,8 @@ R XX→XX | E XX→XX | UX XX→XX | M XX→XX
    - ❌ 「内容不一致」且发布时间已超过 15 分钟 → 发布了旧内容或半成品：bump 一个新版本号重新触发发布
    - ⏳ WARN(delay)（发布后 15 分钟内内容短暂不一致）→ 安全扫描/索引延迟，等几分钟重跑，不要误判为发布失败
    - 速率限制报错 → ClawHub 对 inspect 有频控（提示 reset in Ns），等待后重试
-   - CI 校验通过但 publish 步骤报 "Too many writes in a short period of time" → ClawHub 对**发布写入**也有频控（2026-11-01 实测连续两次触发：首次在推送后约 4 分钟，重试在推送后约 2 分钟仍被拒，间隔需拉长到 20 分钟以上）；CI 显示 failure 时先看 publish 步骤日志区分「校验拒绝」与「写入限流」——后者等几分钟后用真实 SKILL.md 改动重新触发即可，不要 bump 版本
+   - CI 校验通过但 publish 步骤报 "Too many writes in a short period of time" → ClawHub 对**发布写入**也有频控（2026-11-01 实测连续两次触发：首次在推送后约 4 分钟，重试在推送后约 2 分钟仍被拒，间隔需拉长到 20 分钟以上）
+   - 同一版本号重试 5 次（间隔最长 65 分钟）仍全部限流 → 疑似该版本行已被首次半成品写坏（限流报错掩盖了部分写入），继续重试无效；正确恢复是 bump 到全新版本号绕开，而不是继续 hammer 同一版本（2026-11-01：2.2.0 六次未发，bump 2.2.1 后首发成功）；CI 显示 failure 时先看 publish 步骤日志区分「校验拒绝」与「写入限流」——后者等几分钟后用真实 SKILL.md 改动重新触发即可，不要 bump 版本
 4. 最终判据是 inspect 内容一致，不是 CI 绿灯或 tags 字段（ClawHub 存在孤儿版本、tag 标签滞后等异常）
 
 ---
@@ -656,7 +657,8 @@ Judgment conclusion for each suggestion:
    - ❌ "content mismatch" more than 15 minutes after publish → stale/partial content went live: bump to a new version and re-trigger publishing
    - ⏳ WARN(delay) (mismatch within 15 minutes of publish) → security-scan/indexing lag; wait a few minutes and re-run, do not misread it as a failed publish
    - Rate-limit error → ClawHub throttles inspect ("reset in Ns"); wait and retry
-   - Validation passes but the publish step fails with "Too many writes in a short period of time" → ClawHub also rate-limits **publish writes** (observed 2026-11-01 twice in a row: first ~4 minutes after the trigger push, then a retry ~2 minutes later was also rejected — space retries at least ~20 minutes apart); when CI shows failure, read the publish-step log to distinguish "validation rejected" from "write throttled" — for the latter, wait a few minutes and re-trigger with a real SKILL.md change, do not bump the version
+   - Validation passes but the publish step fails with "Too many writes in a short period of time" → ClawHub also rate-limits **publish writes** (observed 2026-11-01 twice in a row: first ~4 minutes after the trigger push, then a retry ~2 minutes later was also rejected — space retries at least ~20 minutes apart)
+   - The same version throttled on every retry (5 attempts, up to 65 minutes apart) → suspect the version row itself was corrupted by the first partial write; further retries of that version are futile. Recover by bumping to a fresh version number instead of hammering the same one (2026-11-01: 2.2.0 failed six times, a bump to 2.2.1 published on the first try); when CI shows failure, read the publish-step log to distinguish "validation rejected" from "write throttled" — for the latter, wait a few minutes and re-trigger with a real SKILL.md change, do not bump the version
 4. The final criterion is inspect content identity, not a green CI run or the tags field (ClawHub has orphaned versions and lagging tag labels)
 
 ---
