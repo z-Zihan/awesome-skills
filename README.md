@@ -158,6 +158,7 @@ openclaw skills install skill-creator-ProMax
 openclaw skills install skill-review-pro
 openclaw skills install dev-mentor
 openclaw skills install context-budget-analyzer
+openclaw skills install delivery-spec-audit
 openclaw skills install rednote-creator
 openclaw skills install english-assessment
 openclaw skills install todo-list-promax
@@ -389,6 +390,7 @@ openclaw skills install skill-creator-ProMax
 openclaw skills install skill-review-pro
 openclaw skills install dev-mentor
 openclaw skills install context-budget-analyzer
+openclaw skills install delivery-spec-audit
 openclaw skills install rednote-creator
 openclaw skills install english-assessment
 openclaw skills install todo-list-promax
