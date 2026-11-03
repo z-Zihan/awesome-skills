@@ -1,7 +1,8 @@
 ---
 name: skill-review-pro
-version: "2.2.6"
+version: "2.2.7"
 homepage: https://github.com/z-Zihan/awesome-skills
+allowed-tools: Read, Write, Edit, Glob, Grep, Bash(clawhub:*)
 description: >
   AI Skill 质量评审系统。通过静态审查对 Skill 进行评分（100分制），
   输出专业的评审报告和改进建议。模块化架构：主控编排 + 类型策略 + 评分模型 + 修复执行。
@@ -14,6 +15,14 @@ description: >
 ---
 
 # skill-review-pro — AI Skill QA System
+
+## 工具权限与安全边界
+
+本 skill 声明的工具能力严格限于:
+- **文件读写**(Read/Write/Edit/Glob/Grep):仅读取被评审 Skill 的 SKILL.md 及其附属文件、写入评审报告和修复内容
+- **Bash**:仅允许执行 `clawhub` CLI 命令(publish_check 模式核对版本/sha 用),不允许其他 shell 命令
+- **无网络外发**:本 skill 不上传任何数据,所有评审均在本地完成;不采集环境变量;不访问用户数据目录以外的路径
+- subprocess 调用仅限 `clawhub inspect` 等只读查询,无任意命令执行
 
 ## 语言规则
 
