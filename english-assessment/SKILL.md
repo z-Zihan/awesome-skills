@@ -1,6 +1,6 @@
 ---
 name: english-assessment
-version: "4.17.0"
+version: "4.17.1"
 description: >
   陪伴式英语水平测评助手。不是冰冷的出题机器，而是陪你一起成长的英语伙伴。基于历史数据动态调整难度（持续强项→提难度，薄弱项→多出题），
   大学英语水平（CEFR B1-C2），随机生成题卷（默认25-40题或快速21题，7-10种题型，总分100分），
@@ -13,6 +13,21 @@ allowed-tools: Read, Write, Edit, Glob, WebSearch
 ---
 
 # 英语测评
+
+## 网络访问声明 / Network Access Disclosure
+
+本 skill 的联网行为**只读拉取公开题目内容，不上传任何用户数据**：
+
+| 外部主机 | 用途 | 请求类型 |
+|---|---|---|
+| `github.com` / `raw.githubusercontent.com` / `gh-proxy.com` / `gitee.com` | 公开英语考试题库(PDF/Markdown/JSON 真题) | GET 只读 |
+| `cet4.koolearn.com` / `tem.koolearn.com` / `cet6.koolearn.com` / `cet4-6.xdf.cn` | 公开真题页面内容 | GET 只读 |
+| `vocabulary.com` / `oxfordlearnersdictionaries.com` / `manhattanreview.com` | 词汇释义与练习题参考 | GET 只读 |
+| `autoglm-api.zhipuai.cn` | 题目检索(可选源，不可用时自动降级到 GitHub 题库) | POST 搜索词 |
+
+- **无 localhost/内网调用**：不访问任何本地端口或内网服务
+- **无数据外发**：学习数据仅本地存储，网络请求只发送题目检索关键词，不携带用户数据
+- **无凭证操作**：不读取、不存储、不请求任何 token、密码或环境变量
 
 陪伴式英语水平测评助手。不是冰冷的出题机器，而是陪你一起成长的英语伙伴——基于历史数据动态调整难度和侧重，持续强项提难度保持挑战感，薄弱项多出题帮你补短板。支持默认测评、快速测评、错题重测三种模式，全程静默判分，最后输出得分与弱项分析。支持自适应难度、学习进度追踪、数据导入导出。
 
@@ -50,7 +65,7 @@ allowed-tools: Read, Write, Edit, Glob, WebSearch
 
 | 常量 | 值 | 说明 |
 |---|---|---|
-| SEARCH_AUTOGLM_API | autoglm-api.zhipuai.cn/agentdr/v1/assistant/skills/web-search | autoglm-websearch API（app_id=100003，需动态签名，见搜题引擎） |
+| SEARCH_AUTOGLM_API | autoglm-api.zhipuai.cn/agentdr/v1/assistant/skills/web-search | autoglm-websearch API（认证由宿主运行环境注入，见搜题引擎；不可用时降级到 GitHub 题库） |
 | SEARCH_GH_PROXY | gh-proxy.com | GitHub Raw 国内镜像 |
 | SEARCH_GITHUB_CET_PDF | github.com/DieDiDi/CET4-6-past-exam-paper | GitHub CET-4/6 真题 PDF 仓库（2015-2023） |
 | SEARCH_GITEE_CET_PDF | gitee.com/jasonwarner/CET4 | Gitee CET-4 真题 PDF 仓库（2013-2020） |
@@ -1199,12 +1214,8 @@ Because I didn't study hard, I failed the exam.
 - **autoglm-websearch 搜题** → 获取 URL → web_fetch 抓取正文。autoglm-websearch 返回 URL 和摘要，再用 web_fetch 抓取页面全文提取真题原文
   - **API 调用方式**：POST `https://autoglm-api.zhipuai.cn/agentdr/v1/assistant/skills/web-search`
   - **请求体**：`{"queries": [{"query": "<搜索词>"}]}`
-  - **签名 Headers**（每次动态生成）：
-    - `X-Auth-Appid`: `100003`
-    - `X-Auth-TimeStamp`: 当前秒级 Unix 时间戳
-    - `X-Auth-Sign`: MD5(`100003` + "&" + timestamp + "&" + `38d2391985e2369a5fb8227d8e6cd5e5`)
-    - `Authorization`: Bearer token（从 `http://127.0.0.1:18432/get_token` 获取）
-  - ⚠️ 注意：app_id 是 `100003` 不是 `10000`；签名必须按上述规则动态生成，不能只传 app_key
+  - **认证方式**：由宿主 Agent 运行环境自动注入（websearch 能力的签名与凭证由宿主配置完成）。本 skill 不存储、不请求、不读取任何凭证、token 或环境变量，无任何本地服务调用
+  - ⚠️ 若运行环境未提供 autoglm-websearch 能力，直接跳过本源，降级到下方 GitHub 公开题库源，不影响出题
 - **autoglm-websearch 已验证可搜到的内容源**：SEARCH_KOOLEARN（新东方在线四级，选词填空/翻译/语法真题全文可抓取）、SEARCH_KOOLEARN_TEM4（专四真题+答案，具体年份页面需二次跳转）、SEARCH_KOOLEARN_CET6（六级真题+答案）、SEARCH_XDF（新东方网，阅读/翻译真题原文）
 - **GitHub Markdown 真题库（最友好格式，国内用 SEARCH_GH_PROXY 加速）**⭐：SEARCH_GITHUB_MD，含 CET-4/6 2023年真题，Markdown 格式直接使用，选项独立成行，无需 PDF 解析或格式校准。优先级高于 PDF 源。目录浏览：`SEARCH_GH_PROXY/https://api.github.com/repos/wamich/english-exem-md/contents/`，文件下载：`SEARCH_GH_PROXY/https://raw.githubusercontent.com/wamich/english-exem-md/main/{路径}`
 - **GitHub CET-4/6 真题 PDF（国内用 SEARCH_GH_PROXY 镜像加速下载+pdf工具解析）**：SEARCH_GITHUB_CET_PDF_REPO，含 2015-2023 年 CET-4/6 真题 PDF。通过 SEARCH_GH_PROXY 代理下载后用 pdf 工具解析，可提取选词填空原文+选项、阅读理解全文+题目、翻译题中文原文。目录浏览：`SEARCH_GH_PROXY/https://api.github.com/repos/DieDiDi/CET4-6-past-exam-paper/contents/{路径}`，文件下载：`SEARCH_GH_PROXY/https://raw.githubusercontent.com/DieDiDi/CET4-6-past-exam-paper/main/{路径}`
