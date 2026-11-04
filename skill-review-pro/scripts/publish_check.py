@@ -121,7 +121,9 @@ def check_one(skill_dir: Path, expect_sha: str | None, clawhub_bin: str, timeout
             pass
         if newer:
             add("remote-version", False,
-                f"本地 v{local_ver} > 线上 v{remote_ver} → 本次改动尚未发布(CI 失败或被吞)")
+                f"本地 v{local_ver} > 线上 v{remote_ver} → 本次改动尚未发布;若 publish CI 结论是 success,"
+                f"先查 publish 步骤日志的「Update submitted...pending security scans」行再判等待(该形态下提交已排队、"
+                f"等安全扫描落库即可,勿 bump/勿 rerun,详见 SKILL.md 发布核验模式第 4 态)")
         else:
             add("remote-version", False,
                 f"本地 v{local_ver} 落后线上 v{remote_ver}(本地有未发布/回退的改动?)")
