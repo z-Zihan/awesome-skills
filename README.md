@@ -19,6 +19,7 @@ Compatible with any AI Agent that reads local Markdown as system instructions (O
 Multi-dimensional code review: requirement completion, regression risk, edge cases, upstream/downstream impact. Outputs structured report with fix instructions. When user says "直接修复"/"fix", auto-switches to fix mode (`fix/` sub-skill) to apply fixes one by one.
 
 **Triggers**: review this code / check my changes / any issues / 直接修复 / fix
+**Shortcuts** (case-insensitive): `CRPM` / `CDRV` / `CRPX` / `CRP`
 
 ### 🏗️ fe-cli — Frontend Scaffolding
 
@@ -251,6 +252,7 @@ skill-creator-ProMax (generate)
 多维度代码审查：需求完成度、回归风险、边界情况、上下游影响。输出结构化结论，含修复指令。支持变更意图识别、风险推导链、审查置信度。用户说"直接修复"时自动切换到修复模式（`fix/` 子 skill），逐条 apply 修复。
 
 **触发词**：review 代码 / 帮我看看改动 / 代码有没有问题 / 直接修复 / fix
+**快捷命令**（不区分大小写）：`CRPM` / `CDRV` / `CRPX` / `CRP`
 
 ### 🏗️ fe-cli — 前端项目脚手架
 
