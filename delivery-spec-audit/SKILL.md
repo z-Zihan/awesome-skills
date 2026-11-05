@@ -1,6 +1,6 @@
 ---
 name: delivery-spec-audit
-version: "1.0.0"
+version: "1.1.0"
 homepage: https://github.com/z-Zihan/awesome-skills
 description: >
   交付规格覆盖审计器。当一次 Coding Agent 开发任务完成(或即将宣布完成)时,
@@ -67,13 +67,20 @@ python3 scripts/extract_spec.py <会话记录.jsonl> [--repo-root <仓库路径>
 
 - Claude Code 会话:`~/.claude/projects/<编码路径>/<sessionId>.jsonl`
 - OpenClaw trajectory:`~/.openclaw-autoclaw/` 下的 `*.trajectory.jsonl`
-- 自动识别格式;输出写过的文件清单(strong=工具写入 / weak=重定向推断)、
-  读过的文件、验证行为计数(测试/lint/构建/git 查看/grep 核验)。
+- 自动识别格式(CC JSONL / OpenClaw trajectory 的 full 与 partial 形态);
+  输出写过的文件清单(strong=工具写入 / weak=重定向推断)、读过的文件、
+  验证行为计数(测试/lint/构建/git 查看/grep 核验)、证据层级标注。
 
 **证据的边界(务必记住):**
 
 - 脚本只给"证据",不给"结论"——测试执行 7 次不等于测试通过 7 次;
 - `weak` 写入证据可能混入调试输出(如 `/tmp/dbg.mjs`),必须人工复核后再用;
+- **OpenClaw trajectory 分两种形态**(2026-11 dogfooding 实测发现):
+  交互会话输出完整证据(full);cron/隔离会话的 trajectory 里工具调用参数被
+  截断,脚本降级用 `trace.artifacts.toolMetas` 的描述层摘要(partial),
+  输出会标注「证据层级: partial」——此时写入无结构化路径、验证分类基于
+  meta 文本、toolMetas 自身也可能截断(实测 128 条只留 64),计数只可作线索,
+  **覆盖判定必须以 git status/diff/show 证据为主**;
 - 没有会话记录时(如用户口述任务),跳过本步,直接用 git diff/log 做证据,
   并在报告里注明"证据来源: git 而非会话记录,无法还原验证过程"。
 
@@ -153,10 +160,14 @@ in context; delivery-report requests; distrust reviews of a recent change.
    Mark unconfirmed lists as "default four classes, user not confirmed".
 2. **Extract evidence.**
    `python3 scripts/extract_spec.py <session.jsonl> [--repo-root <repo>] [--json]`
-   Supports Claude Code JSONL and OpenClaw trajectory. Returns written-file list
-   (strong=tool write / weak=shell-redirect inference), read files, and verify
+   Supports Claude Code JSONL and OpenClaw trajectory in both shapes:
+   interactive sessions yield full evidence; cron/isolated sessions have tool
+   calls truncated, so the script falls back to `trace.artifacts.toolMetas`
+   descriptions (partial evidence, labeled in output). Returns written-file list
+   (strong=tool write / weak=shell-redirect inference), read files, verify
    counts (test/lint/build/git-view/inspect). Evidence only — counts are not
-   pass/fail; weak items need manual review.
+   pass/fail; weak items need manual review. Under partial evidence, judge
+   coverage primarily from git status/diff/show, not from counts.
 3. **Judge per spec.** ✅ covered (direct evidence) / ⚠️ suspected gap (name the
    concrete counterexample scenario) / ➖ insufficient evidence. Never upgrade
    "I saw no gap" into "no gap".

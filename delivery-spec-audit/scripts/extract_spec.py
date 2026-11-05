@@ -20,6 +20,11 @@
   - 误报方向要明确:重定向推断(Bash 里 `> file`)证据强度标为 weak,
     可能混入调试输出,Agent 使用时须人工复核 weak 项。
 
+支持的 OpenClaw trajectory 形态:
+  - 交互会话(prompt.submitted.messages 含 toolCall)→ 完整证据(full)
+  - cron/isolated 会话(model.completed 截断、messages 为空)→ 降级为
+    trace.artifacts.toolMetas 描述层证据(partial),输出会显式标注
+
 用法:
     python3 extract_spec.py <session.jsonl> [--json]
     python3 extract_spec.py <session.jsonl> --repo-root /path/to/repo
@@ -202,6 +207,31 @@ def iter_messages_oc(path: Path):
                         yield block.get("name", ""), args if isinstance(args, dict) else {}
 
 
+def iter_tool_metas_oc(path: Path):
+    """OpenClaw trajectory(降级形态): trace.artifacts.data.toolMetas。
+
+    cron/isolated 会话的 model.completed 被截断、prompt.submitted.messages 为空,
+    完整 toolCalls 不可得;此时 trace.artifacts.toolMetas 仍保留每次工具调用的
+    toolName + meta 描述(自身可能被 trajectory-array-size-limit 截断)。
+    产出 (toolName, meta_text) 二元组,meta 是描述层证据(无结构化参数)。"""
+    with path.open(encoding="utf-8", errors="replace") as f:
+        for line in f:
+            if '"toolMetas"' not in line:
+                continue
+            try:
+                rec = json.loads(line)
+            except json.JSONDecodeError:
+                continue
+            if rec.get("type") != "trace.artifacts":
+                continue
+            data = rec.get("data") if isinstance(rec.get("data"), dict) else {}
+            metas = data.get("toolMetas") or []
+            if isinstance(metas, list):
+                for m in metas:
+                    if isinstance(m, dict) and m.get("toolName"):
+                        yield m["toolName"], m.get("meta", "") or ""
+
+
 def detect_format(path: Path) -> str:
     with path.open(encoding="utf-8", errors="replace") as f:
         head = f.read(64 * 1024)
@@ -210,9 +240,43 @@ def detect_format(path: Path) -> str:
     return "claude-code"
 
 
+def openclaw_detail_level(path: Path) -> str:
+    """判定 OpenClaw trajectory 的细节层级:
+    full   = prompt.submitted.messages 含 assistant toolCall(交互会话形态)
+    partial = messages 为空,仅 trace.artifacts.toolMetas 可用(cron/isolated 形态)
+    """
+    has_messages = False
+    has_tool_metas = False
+    with path.open(encoding="utf-8", errors="replace") as f:
+        for line in f:
+            if '"messages"' in line and not has_messages:
+                try:
+                    rec = json.loads(line)
+                except json.JSONDecodeError:
+                    continue
+                if rec.get("type") == "prompt.submitted":
+                    data = rec.get("data") if isinstance(rec.get("data"), dict) else {}
+                    msgs = data.get("messages") or []
+                    if isinstance(msgs, list) and msgs:
+                        has_messages = True
+            if '"toolMetas"' in line:
+                has_tool_metas = True
+            if has_messages:
+                break
+    return "full" if has_messages else ("partial" if has_tool_metas else "empty")
+
+
 def collect(path: Path, repo_root: Path | None) -> dict:
     fmt = detect_format(path)
-    iterator = iter_messages_oc(path) if fmt == "openclaw" else iter_tool_calls_cc(path)
+    detail = "full"
+    if fmt == "openclaw":
+        detail = openclaw_detail_level(path)
+    if fmt == "openclaw" and detail == "full":
+        iterator = iter_messages_oc(path)
+    elif fmt == "openclaw" and detail == "partial":
+        iterator = iter_tool_metas_oc(path)
+    else:
+        iterator = iter_tool_calls_cc(path)
 
     touch_set: set[str] = set()
     write_set: dict[str, str] = {}
@@ -239,8 +303,22 @@ def collect(path: Path, repo_root: Path | None) -> dict:
         else:
             touch_set.add(s)
 
+    meta_write_hints: list[str] = []
+
     for name, inp in iterator:
         tool_names[name] = tool_names.get(name, 0) + 1
+
+        # partial 模式:inp 是 meta 描述文本(证据弱一层,无结构化参数)
+        if isinstance(inp, str):
+            meta = inp
+            if name in WRITE_TOOLS:
+                meta_write_hints.append(meta)
+            else:
+                commands_total += 1
+                for k in classify_command(meta):
+                    verify[k] += 1
+            continue
+
         for key in PATH_KEYS:
             v = inp.get(key)
             if isinstance(v, str) and v:
@@ -267,6 +345,8 @@ def collect(path: Path, repo_root: Path | None) -> dict:
 
     return {
         "format": fmt,
+        "detail": detail if fmt == "openclaw" else "full",
+        "meta_write_hints": meta_write_hints,
         "session": str(path),
         "repo_root": str(repo_root) if repo_root else None,
         "counts": {
@@ -290,6 +370,15 @@ def render_md(r: dict) -> str:
         f"# 规格覆盖证据抽取 — {Path(r['session']).name}",
         "",
         f"- 会话格式: {r['format']}" + (f"(repo-root: {r['repo_root']})" if r["repo_root"] else ""),
+    ]
+    if r.get("detail") == "partial":
+        lines += [
+            "- ⚠️ 证据层级: partial——该 trajectory 为 cron/isolated 会话形态,"
+            "完整工具调用参数不可得,以下证据来自 trace.artifacts.toolMetas 的描述层摘要",
+            "  (写入无结构化路径,验证分类基于 meta 文本;toolMetas 自身也可能被截断,"
+            "计数可能少于真实调用数)",
+        ]
+    lines += [
         f"- 读过的文件: {c['files_touched_read']} 个",
         f"- 写过的文件: {c['files_written']} 个(工具写入 strong {c['writes_strong']},"
         f" 重定向推断 weak {c['writes_weak_redirected']})",
@@ -312,6 +401,11 @@ def render_md(r: dict) -> str:
             mark = "✅ 工具写入" if item["evidence"] == "strong" else "⚠️ 重定向推断(需人工复核)"
             lines.append(f"- [{mark}] {item['path']}")
         lines.append("")
+    if r.get("meta_write_hints"):
+        lines += ["## 写入线索(partial 证据:仅工具描述,无结构化路径,须结合 git status 复核)", ""]
+        for hint in r["meta_write_hints"]:
+            lines.append(f"- [📝 meta 线索] {hint}")
+        lines.append("")
     if r["bash_write_targets_weak"]:
         lines += ["## 重定向推断目标(弱证据,可能含调试输出)", ""]
         for t in r["bash_write_targets_weak"]:
@@ -326,7 +420,8 @@ def render_md(r: dict) -> str:
         "   功能边界 / 接口兼容 / 状态一致 / 错误处理 / 回归风险;",
         "2. 逐条规格对照写入文件与验证证据,判定: 已覆盖 / 疑似遗漏 / 证据不足;",
         "3. 「疑似遗漏」给出具体反例场景(哪个输入/哪条路径会暴露遗漏);",
-        "4. weak 证据必须人工复核后再下结论。",
+        "4. weak 证据必须人工复核后再下结论;",
+        "5. partial 证据层级下,先跑 git status/diff 补齐写入清单,再做覆盖判定。",
         "",
         "设计参照: CodeSpecWeave(arXiv:2610.40256)——互依规格最容易被逐条打勾式交付漏掉。",
     ]
