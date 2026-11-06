@@ -1,6 +1,6 @@
 ---
 name: delivery-spec-audit
-version: "1.1.0"
+version: "1.2.0"
 homepage: https://github.com/z-Zihan/awesome-skills
 description: >
   交付规格覆盖审计器。当一次 Coding Agent 开发任务完成(或即将宣布完成)时,
@@ -80,7 +80,9 @@ python3 scripts/extract_spec.py <会话记录.jsonl> [--repo-root <仓库路径>
   截断,脚本降级用 `trace.artifacts.toolMetas` 的描述层摘要(partial),
   输出会标注「证据层级: partial」——此时写入无结构化路径、验证分类基于
   meta 文本、toolMetas 自身也可能截断(实测 128 条只留 64),计数只可作线索,
-  **覆盖判定必须以 git status/diff/show 证据为主**;
+  **覆盖判定必须以 git status/diff/show 证据为主**;自动化会话的改动通常
+  已被提交——`git status` 为空时改用 `git log --since=<会话开始时间>` 定位
+  候选提交、`git show <sha> --stat` 核对文件清单,不要误判「没有写入」;
 - 没有会话记录时(如用户口述任务),跳过本步,直接用 git diff/log 做证据,
   并在报告里注明"证据来源: git 而非会话记录,无法还原验证过程"。
 
@@ -167,7 +169,10 @@ in context; delivery-report requests; distrust reviews of a recent change.
    (strong=tool write / weak=shell-redirect inference), read files, verify
    counts (test/lint/build/git-view/inspect). Evidence only — counts are not
    pass/fail; weak items need manual review. Under partial evidence, judge
-   coverage primarily from git status/diff/show, not from counts.
+   coverage primarily from git status/diff/show, not from counts. Automated
+   sessions usually commit their changes: if `git status` is empty, locate
+   the commits instead (`git log --since=<session-start>` then
+   `git show <sha> --stat`) — do not report "nothing written".
 3. **Judge per spec.** ✅ covered (direct evidence) / ⚠️ suspected gap (name the
    concrete counterexample scenario) / ➖ insufficient evidence. Never upgrade
    "I saw no gap" into "no gap".

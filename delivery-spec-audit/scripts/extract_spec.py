@@ -402,9 +402,16 @@ def render_md(r: dict) -> str:
             lines.append(f"- [{mark}] {item['path']}")
         lines.append("")
     if r.get("meta_write_hints"):
-        lines += ["## 写入线索(partial 证据:仅工具描述,无结构化路径,须结合 git status 复核)", ""]
+        lines += ["## 写入线索(partial 证据:仅工具描述,无结构化路径,须结合 git 复核)", ""]
         for hint in r["meta_write_hints"]:
             lines.append(f"- [📝 meta 线索] {hint}")
+        lines += [
+            "",
+            "> git 补齐指引: 若 `git status` 输出为空,改动大概率已被提交(自动化会话"
+            "常见). 改用提交定位: `git log --since=\"<会话开始时间>\" --oneline` "
+            "找到候选提交,再 `git show <sha> --stat` 核对文件清单. 不要因 status "
+            "为空而误判「没有写入」.",
+        ]
         lines.append("")
     if r["bash_write_targets_weak"]:
         lines += ["## 重定向推断目标(弱证据,可能含调试输出)", ""]
@@ -421,7 +428,8 @@ def render_md(r: dict) -> str:
         "2. 逐条规格对照写入文件与验证证据,判定: 已覆盖 / 疑似遗漏 / 证据不足;",
         "3. 「疑似遗漏」给出具体反例场景(哪个输入/哪条路径会暴露遗漏);",
         "4. weak 证据必须人工复核后再下结论;",
-        "5. partial 证据层级下,先跑 git status/diff 补齐写入清单,再做覆盖判定。",
+        "5. partial 证据层级下,先跑 git status/diff 补齐写入清单再做覆盖判定;"
+        "status 为空时按上方指引改用 git log/show 定位已提交的改动。",
         "",
         "设计参照: CodeSpecWeave(arXiv:2610.40256)——互依规格最容易被逐条打勾式交付漏掉。",
     ]
