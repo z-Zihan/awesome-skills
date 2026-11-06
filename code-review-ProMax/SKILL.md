@@ -1,6 +1,6 @@
 ---
 name: code-review-ProMax
-version: "2.1.1"
+version: "2.1.2"
 homepage: https://github.com/z-Zihan/awesome-skills
 description: >
   高级代码审查 Agent。对用户提供的 diff、文件、commit、GitHub PR 或 GitLab MR 进行高质量、
@@ -9,7 +9,7 @@ description: >
   review MR, review merge request, review修改, review当前的修改, 帮我review, 帮我看看代码,
   看看有没有问题, 帮我检查一下代码, 代码有没有问题, 这段代码怎么样, 改动有没有风险,
   能不能合入, review一下, 帮我过一遍代码, 检查一下改动, review这个PR, review这个MR.
-  快捷命令（不区分大小写，独立消息或句首出现即触发本 skill）：CRPM, CDRV, CRPX, CRP, CODR.
+  快捷命令（不区分大小写，独立消息或句首出现即触发本 skill）：CRPM, CDRV, CRPX, CRP, CORD.
   NOT for: general code questions, writing code, debugging live issues.
 ---
 
@@ -26,7 +26,7 @@ description: >
 ## 快捷命令（别名触发）
 
 以下纯字母命令**不区分大小写**（CRPM/crpm/Crpm 等任意大小写组合均有效），是本 skill 的专属快捷入口：
-`CRPM`、`CDRV`、`CRPX`、`CRP`、`CODR`
+`CRPM`、`CDRV`、`CRPX`、`CRP`、`CORD`
 
 触发规则：
 - 用户消息整体就是其中一个命令（如只发「crpm」），或消息以命令开头（如「crpm !123」「CDRV 帮我看下这个 diff」）→ **立即启用本 skill**，按消息剩余部分确定审查对象（PR/MR/commit/本地 diff）；无附加信息时按「审查目标」章节的来源优先级自动探测当前上下文的变更（git diff / 当前分支最新 commit / 用户最近提到的 PR/MR）
@@ -238,7 +238,7 @@ description: >
 **code-review-ProMax** — Senior code review agent for diffs, commits, GitHub PRs, GitLab MRs.
 
 ### Shortcut Commands (case-insensitive aliases)
-`CRPM`, `CDRV`, `CRPX`, `CRP`, `CODR` — any casing combination (crpm/Crpm/CRPM...) triggers this skill. When the user message is exactly one of these commands, or starts with one (e.g. "crpm !123"), immediately activate this skill and resolve the review target from the remaining message; with no extra info, auto-detect changes via the Input Sources priority (local diff / latest commit / recently mentioned PR/MR). Equivalent to a standard review; append 深度/focused for focused mode, 多轮/iterative for iterative mode.
+`CRPM`, `CDRV`, `CRPX`, `CRP`, `CORD` — any casing combination (crpm/Crpm/CRPM...) triggers this skill. When the user message is exactly one of these commands, or starts with one (e.g. "crpm !123"), immediately activate this skill and resolve the review target from the remaining message; with no extra info, auto-detect changes via the Input Sources priority (local diff / latest commit / recently mentioned PR/MR). Equivalent to a standard review; append 深度/focused for focused mode, 多轮/iterative for iterative mode.
 
 ### Core Approach
 - **Context-aware**: Reads surrounding code, not just the diff
