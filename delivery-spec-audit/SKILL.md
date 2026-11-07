@@ -1,6 +1,6 @@
 ---
 name: delivery-spec-audit
-version: "1.2.0"
+version: "1.2.1"
 homepage: https://github.com/z-Zihan/awesome-skills
 description: >
   交付规格覆盖审计器。当一次 Coding Agent 开发任务完成(或即将宣布完成)时,
@@ -85,6 +85,12 @@ python3 scripts/extract_spec.py <会话记录.jsonl> [--repo-root <仓库路径>
   候选提交、`git show <sha> --stat` 核对文件清单,不要误判「没有写入」;
 - 没有会话记录时(如用户口述任务),跳过本步,直接用 git diff/log 做证据,
   并在报告里注明"证据来源: git 而非会话记录,无法还原验证过程"。
+- **会话进行中(轨迹未落盘)**:OpenClaw 每个会话有 `<sessionId>.trajectory-path.json`
+  指针文件,但 runtime 轨迹 `<sessionId>.trajectory.jsonl` 要等轮次结束才落盘——
+  对"当前正在运行的轮次"审计会报 file not found(exit 3)。脚本检测到指针存在而
+  runtime 缺失时会在错误信息里提示"会话仍在运行中";此时不要轮询等待,改用
+  `git log --since=<会话开始时间>` + `git show <sha> --stat` 做 git 侧证据,
+  或等任务真正结束后再补做会话侧审计。
 
 ### 第三步:逐条规格判定(语义审查,你来完成)
 
@@ -185,3 +191,9 @@ Mismatched session log → confirm with user, never silently merge logs.
 Unknown repo root → run without `--repo-root`, ask user to confirm paths.
 Quick-glance request → skip spec follow-up questions, deliver matrix with an
 "unconfirmed spec list" caveat.
+Session still running → OpenClaw writes the trajectory pointer
+(`.trajectory-path.json`) immediately but the runtime `.trajectory.jsonl` only
+after the turn completes; auditing an in-flight run exits 3 with a "still
+running" hint. Don't poll — fall back to git-side evidence
+(`git log --since=<session start>` + `git show <sha> --stat`) or audit after
+the run finishes.
