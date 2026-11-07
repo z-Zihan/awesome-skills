@@ -445,7 +445,25 @@ def main() -> int:
 
     path = Path(args.session).expanduser()
     if not path.is_file():
-        print(f"error: file not found: {path}", file=sys.stderr)
+        pointer = path.with_suffix(".jsonl").parent / (path.name[:-len(".jsonl")] if path.name.endswith(".jsonl") else path.name)
+        hint = ""
+        # OpenClaw 轨迹指针存在但 runtime 文件缺失 => 会话仍在进行中,轨迹尚未落盘
+        stem = path.name
+        if stem.endswith(".trajectory.jsonl"):
+            stem = stem[: -len(".trajectory.jsonl")]
+        elif stem.endswith(".jsonl"):
+            stem = stem[: -len(".jsonl")]
+        ptr = path.parent / (stem + ".trajectory-path.json")
+        try:
+            import json as _json
+            if ptr.is_file():
+                rt = _json.load(open(ptr, encoding="utf-8")).get("runtimeFile", "")
+                hint = (f"\nhint: found trajectory pointer {ptr.name} -> runtime file not created yet. "
+                        f"The session is likely STILL RUNNING; trajectory is persisted after the turn completes. "
+                        f"Wait for the run to finish, then audit '{rt}'.")
+        except Exception:
+            pass
+        print(f"error: file not found: {path}{hint}", file=sys.stderr)
         return 3
     repo_root = Path(args.repo_root).expanduser().resolve() if args.repo_root else None
 
