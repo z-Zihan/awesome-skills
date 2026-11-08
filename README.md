@@ -83,6 +83,12 @@ Analyzes where an Agent session's context budget actually goes. Categorizes sess
 
 **Triggers**: analyze context / context budget / where did my tokens go / compaction risk / constraint audit / 会话太长了 / 上下文污染 / 约束丢失
 
+### 🛡️ mcp-server-audit — MCP Server Config Security Auditor
+
+Collects MCP server configs from all major hosts (Claude Code / Codex / Cursor / Windsurf / project `.mcp.json`) into one evidence report, deterministically flags risk shapes per server (shell-wrapped execution / package-runner remote code fetch / credentials in URL / plain HTTP / env exposure surface / command-injection traces), then analyzes exposure contextually and delivers tiered findings with executable hardening fixes. Audits what the config grants to the Agent — not the server's code quality. Bundled `collect_mcp.py` is read-only, never executes servers, and redacts all env/header values.
+
+**Triggers**: mcp audit / mcp security review / check mcp servers / mcp config review / MCP 审计 / MCP 安全
+
 ### 🧭 dev-mentor — Cross-Domain Learning Companion
 
 Helps experienced developers learn unfamiliar domains by building a full project from zero to production via continuous conversation. First batch: backend (TypeScript/Go/Python), databases, server deployment (Docker/Nginx/HTTPS/CI-CD), Rust systems programming. Auto-detects existing skills, uses analogies from known domains, explains technical terms on first use.
@@ -315,6 +321,12 @@ skill-creator-ProMax (generate)
 分析一次 Agent 会话的上下文预算花在了哪里：按七类归组（系统指令/任务目标/约束/工具输出/对话历史/中间推理/状态记忆）估算 Token 分布，识别五类污染模式（巨型工具输出、重复读取、僵尸假设、约束裸奔、无状态裸奔），预演自动压缩会丢什么，并给出四层处置治理建议（原文保留/结构化/留指针/可丢弃）。v1.1 起附带确定性脚本（`estimate_tokens.py` 估算 + `analyze_session.py` 解析 OpenClaw/JSONL 会话并输出七类预算表），v1.2 新增 `analyze_usage.py`：直接读取官方 usage 计量字段还原真实上下文增长轨迹并检测疑似压缩骤降点，v1.5 起双格式支持——Claude Code（连续上下文语义）与 OpenClaw trajectory（按轮 run 语义，轮间下降是重编译而非压缩，不做跨轮骤降误报），v1.6 进一步给出末轮 context.compiled 构成——系统提示/工具 schema/对话消息三块的字符占比、按角色分布与最大消息定位，直答「这一轮上下文被什么吃掉」，v1.7 再加工具 schema 利用率（加载未用的工具数量/字符占比/前缀聚合，区分「先清理工具输出」还是「先精简工具集」）；v1.4 的 `audit_constraints.py` 进一步解析压缩摘要行，对照判定每条约束是「被压缩丢弃」还是「被摘要救回」，输出「压缩摘要对照」清单直答「压缩丢掉了什么」；脚本不可用时自动退回人工估算。
 
 **触发词**：分析上下文 / 上下文预算 / Token 都花在哪了 / 压缩会丢什么 / 会话太长了 / 上下文污染
+
+### 🛡️ mcp-server-audit — MCP Server 配置安全审计器
+
+把本机各宿主（Claude Code / Codex / Cursor / Windsurf / 项目级 `.mcp.json`）的 MCP server 配置集中采集成一份证据报告，对每个 server 确定性标记风险形态（shell 包装执行 / 包管理器拉取远端代码 / 凭据写进 URL / 明文 HTTP / 环境变量暴露面 / 命令注入痕迹），再由 Agent 结合部署语境逐条做暴露面分析，输出分级清单与可执行的加固建议。审查的是「配置给了 Agent 什么能力」，不是 server 的代码质量。附带 `collect_mcp.py` 只读采集脚本：不执行任何 server、不发网络请求、env 与 header 值全部打码只留键名。设计依据 MCPHallu（arXiv:2611.07689）的实测结论——正确工具混入语义重叠的混淆工具后通过率从 84.7% 跌到 32.3%，暴露面本身就在制造失败，最小能力集是第一道防线。
+
+**触发词**：MCP 审计 / MCP 安全 / 检查 MCP 配置 / MCP server 审查 / mcp 配置体检 / mcp audit
 
 ### 🧭 dev-mentor — 跨领域学习伴侣
 
