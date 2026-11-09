@@ -1,6 +1,6 @@
 ---
 name: mcp-server-audit
-version: "1.0.0"
+version: "1.1.0"
 homepage: https://github.com/z-Zihan/awesome-skills
 allowed-tools: Read, Grep, Glob, Bash(python3:*)
 description: >
@@ -101,6 +101,23 @@ url、env_keys、header_keys、flags（确定性风险标记）。
    版本、删哪个 server），每条注明影响（会失去什么能力）。
 4. **明确没查什么**：只审了配置层；server 实现代码漏洞、运行时行为、返回内容
    的注入风险都不在覆盖范围——不要给出超出证据的结论。
+
+## 首个真实审计案例（v1.1.0 回填，本机实测）
+
+2026-11-10 在作者本机（macOS，Codex 宿主）跑了一次完整审计，作为流程示范：
+
+**采集结果**：扫到 2 个 stdio server（`computer-use`、`node_repl`），0 个带 flags，0 个 parse_error。
+
+**四问分析**（逐条给证据，不凭名字联想）：
+
+| server | 执行了什么 | 连到哪里 | 暴露了什么 | 是否在用 |
+|---|---|---|---|---|
+| computer-use | 相对路径 `./Codex Computer Use.app/.../SkyComputerUseClient`——行为随启动目录变化（cwd: "."），非 shell 包装、非包运行器 | 本地 stdio，无 URL | env_keys 空 | 需用户确认 |
+| node_repl | `/Applications/ChatGPT.app/...` 绝对路径二进制，args 空 | 本地 stdio | env_keys 空（宿主 config 里另有 env_vars 传递管道路径，属进程间通信配置而非凭据） | 需用户确认 |
+
+**分级与结论**：两者均无 P0/P1 形态。值得记录的两条 P2/P3：computer-use 的相对路径 + `cwd: "."` 意味着从不同目录启动 Codex 时该 server 可能静默失效或行为漂移（P2，改绝对路径即可消除）；node_repl 是 ChatGPT.app 自带组件，随应用更新变化，固定在宿主审计清单里定期复查（P3）。加固清单为空——没有需要立即处理的项目，这份「无事」报告本身就是审计的有效产出。
+
+**值得注意的负样本价值**：这个案例展示了两件容易做错的事。其一，`flags: []` 不等于「分析结束」——相对路径风险是四问分析（第二步）而非确定性 flags（第一步）才暴露的；其二，env 键名为空也要看宿主原配置里的相邻字段，本例 Codex config 的 `env_vars` 数组不是凭据而是运行时参数，审计报告里写清「看了、确认不是暴露面」比略过更有说服力。
 
 ## 异常情况
 
@@ -206,6 +223,23 @@ Risk tiers (context-dependent, not mechanical):
    remove which server), each noting the capability cost.
 4. **Explicit non-coverage**: config layer only; server code vulns, runtime
    behavior, response-content injection are out of scope — do not exceed evidence.
+
+## First Real Audit (backfilled in v1.1.0, tested on the author's machine)
+
+A full audit run on 2026-11-10 (macOS, Codex host), as a worked example:
+
+**Collection**: 2 stdio servers (`computer-use`, `node_repl`), 0 flagged, 0 parse errors.
+
+**Four-question analysis** (evidence-based, no name-based guessing):
+
+| server | What executes | Where it connects | What it exposes | Actually used? |
+|---|---|---|---|---|
+| computer-use | relative path `./Codex Computer Use.app/.../SkyComputerUseClient` — behavior varies with launch directory (cwd: "."), not shell-wrapped, not a package runner | local stdio, no URL | env_keys empty | user to confirm |
+| node_repl | absolute-path binary under `/Applications/ChatGPT.app/...`, no args | local stdio | env_keys empty (host config has a separate `env_vars` array carrying pipe paths — inter-process plumbing, not credentials) | user to confirm |
+
+**Tiers and verdict**: no P0/P1 shapes on either server. Two recorded findings: computer-use's relative path + `cwd: "."` means the server may silently fail or drift depending on where Codex is launched (P2 — fixed by using an absolute path); node_repl ships with ChatGPT.app and changes with app updates (P3 — keep it on the periodic audit list). The hardening list is empty — and a clean "nothing urgent" report is a valid audit outcome.
+
+**Negative-sample lessons**: two things this case shows are easy to get wrong. First, `flags: []` does not mean "analysis done" — the relative-path risk only surfaced at the semantic layer (Step 2), not the deterministic flags (Step 1). Second, empty env keys do not excuse skipping adjacent host config fields: this Codex config's `env_vars` array turned out to be runtime plumbing rather than secrets, and stating "checked, not an exposure" in the report is more convincing than silence.
 
 ## Error Handling
 
