@@ -21,7 +21,7 @@
     python3 publish_check.py check <skill目录> [<skill目录>...] [--expect-sha <git sha>]
     # skill 目录 = 含 SKILL.md 的目录;slug 取目录名(与 publish CI 口径一致)
 
-依赖: clawhub CLI(直接调用 `clawhub`,不存在时回退 `npx --yes clawhub`)。
+依赖: clawhub CLI(直接调用 `clawhub`,不存在时回退 `npx --yes clawhub@<锁定版本>`,版本号见下方 NPX_CLAWHUB_PIN)。
 输出: 每个 skill 一行结论 + 汇总;--json 时输出机器可读结果。
 退出码: 0 = 全部 PASS, 1 = 存在 FAIL/WARN(delay), 2 = 用法错误。
 """
@@ -47,19 +47,24 @@ def read_frontmatter_version(skill_dir: Path) -> str | None:
     return vm.group(1).strip() if vm else None
 
 
+# npx 回退时锁定 clawhub 版本,避免 "npx --yes clawhub" 每次拉取最新版导致的供应链漂移
+NPX_CLAWHUB_PIN = "0.23.3"
+
+
 def resolve_clawhub_bin(override: str | None) -> str:
     if override:
         return override
     from shutil import which
     if which("clawhub"):
         return "clawhub"
-    return "npx --yes clawhub"
+    return f"npx --yes clawhub@{NPX_CLAWHUB_PIN}"
 
 
 def inspect_remote(slug: str, clawhub_bin: str, timeout: int) -> tuple[dict | None, str]:
     """返回 (inspect 结果 dict 或 None, 错误消息)。None 且错误消息含 not-found 表示未发布。"""
     cmd = clawhub_bin.split() + ["inspect", slug, "--json"]
     try:
+        # 安全说明:cmd 来自 clawhub_bin.split() + 固定参数列表,argv 直传、不经 shell、无拼接用户输入
         proc = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout)
     except subprocess.TimeoutExpired:
         return None, f"inspect 超时(>{timeout}s)"

@@ -1,15 +1,15 @@
 ---
 name: skill-review-pro
-version: "2.2.9"
+version: "2.3.0"
 homepage: https://github.com/z-Zihan/awesome-skills
-allowed-tools: Read, Write, Edit, Glob, Grep, Bash(clawhub:*)
+allowed-tools: Read, Write, Edit, Glob, Grep, Bash(clawhub:*), Bash(python3:*), Bash(find:*), Bash(ls:*)
 description: >
   AI Skill 质量评审系统。通过静态审查对 Skill 进行评分（100分制），
   输出专业的评审报告和改进建议。模块化架构：主控编排 + 类型策略 + 评分模型 + 修复执行。
   AI Skill QA System. Evaluates Skills via static analysis,
   with 100-point scoring, modular architecture with type-aware policies.
   触发词：评审 skill, 测评 skill, skill 评分, skill 质量检查, 审查 skill,
-  改进 skill, 完善技能, 验证修复意见, 稳定性测试, 全库体检, benchmark, 发布核验,
+  改进 skill, 完善技能, 验证修复意见, 稳定性测试, 全库体检, skill benchmark, 发布核验,
   发布确认, review skill, evaluate skill, improve skill, validate fix, skill quality,
   repo audit, publish check, verify publish.
 ---
@@ -20,7 +20,7 @@ description: >
 
 本 skill 声明的工具能力严格限于:
 - **文件读写**(Read/Write/Edit/Glob/Grep):仅读取被评审 Skill 的 SKILL.md 及其附属文件、写入评审报告和修复内容
-- **Bash**:仅允许执行 `clawhub` CLI 命令(publish_check 模式核对版本/sha 用),不允许其他 shell 命令
+- **Bash**:仅允许执行只读命令——`clawhub` CLI(inspect/scan 等查询)、`python3`(仅限运行本 skill 自带脚本如 skill_audit.py/publish_check.py)、`find`/`ls`(列目录)；禁止写入类、网络发送类及任意其他 shell 命令
 - **无网络外发**:本 skill 不上传任何数据,所有评审均在本地完成;不采集环境变量;不访问用户数据目录以外的路径
 - subprocess 调用仅限 `clawhub inspect` 等只读查询,无任意命令执行
 
@@ -60,7 +60,7 @@ description: >
 
 ## 如何指定被测 Skill
 
-1. **文件路径** — "评审 `~/skills/xxx/SKILL.md`" → 直接读取，并自动扫描同目录下的子目录文件
+1. **文件路径** — "评审 `<已安装技能目录>/<skill-name>/SKILL.md`" → 直接读取，并自动扫描同目录下的子目录文件
 2. **当前对话中的 Skill** — 如果用户刚生成了 Skill，直接评当前生成的
 3. **已安装 Skill 名称** — "评审 screenshot-to-prompt" → 在本地 skills 目录查找，并扫描子目录
 4. **粘贴内容** — 用户直接贴 Skill 内容 → 只评审贴出的内容（无法扫描子目录）
@@ -345,7 +345,7 @@ R XX→XX | E XX→XX | UX XX→XX | M XX→XX
 
 ### 稳定性 Benchmark（仅用户主动触发）
 
-**触发词**：「稳定性测试」/「benchmark」/「跑几轮看看」
+**触发词**：「稳定性测试」/「skill benchmark」/「跑几轮看看」（单独出现的 "benchmark" 若上下文明显与 Skill 评审无关则不触发）
 **前置条件**：必须已完成至少一次完整评审
 
 1. 默认 3 轮，最多 5 轮。首轮基准分数取最近一次完整评审的评分；如无历史评审，首轮分数即为基准，后续轮次与其对比。
@@ -370,7 +370,7 @@ R XX→XX | E XX→XX | UX XX→XX | M XX→XX
    - 速率限制报错 → ClawHub 对 inspect 有频控（提示 reset in Ns），等待后重试
    - CI 校验通过但 publish 步骤报 "Too many writes in a short period of time" → ClawHub 对**发布写入**也有频控（2026-11-01 实测连续两次触发：首次在推送后约 4 分钟，重试在推送后约 2 分钟仍被拒，间隔需拉长到 20 分钟以上）
    - 同一版本号重试 5 次（间隔最长 65 分钟）仍全部限流 → 疑似该版本行已被首次半成品写坏（限流报错掩盖了部分写入），继续重试无效；正确恢复是 bump 到全新版本号绕开，而不是继续 hammer 同一版本（2026-11-01：2.2.0 六次未发，bump 2.2.1 后首发成功）；CI 显示 failure 时先看 publish 步骤日志区分「校验拒绝」与「写入限流」——后者等几分钟后用真实 SKILL.md 改动重新触发即可，不要 bump 版本
-   - publish 步骤报上传 ticket 超时或 HTTP 5xx → 与写入限流是**两种故障**：这是 ClawHub 服务端上传通道瞬时故障（GitHub Actions 出口网络正常、本机 curl 正常可佐证）；处置是直接 `gh run rerun <run-id> --failed` 重试，**不需要 bump 版本**——超时发生在版本行落库前，inspect 返回 not-found 佐证无孤儿版本，同版本重试安全（2026-11-02 实测：delivery-spec-audit 1.0.0 六次失败跨越 71 分钟后，次日凌晨同版本 rerun 一次成功）；若错误变成 "already exists"，先看是否带 "(reset in Ns)" 频控尾缀：带 → 仍是频控伪装的同一故障，冷却等待后同版本重试，**不要 bump**（2026-11-03 实测：skill-review-pro 2.2.5/2.2.6 连续报 "already exists (reset in Ns)"，两版本号均未 bump，约 30 分钟内 inspect latest 依次出现 2.2.5→2.2.6 且内容与本地逐字节一致——频控态的 already exists 是服务端排队延迟落库的表象，盲目 bump 会制造只有版本号的孤儿版本链）；不带频控尾缀且 inspect 能看到该版本行 → 才是真已存在，需 bump 新版本号
+   - publish 步骤报上传 ticket 超时或 HTTP 5xx → 与写入限流是**两种故障**：这是 ClawHub 服务端上传通道瞬时故障（GitHub Actions 出口网络正常、本机 curl 正常可佐证）；处置是**提请用户**执行 `gh run rerun <run-id> --failed` 重试（远程写操作超出本 skill 只读边界，由用户手动执行或明确授权后代跑），**不需要 bump 版本**——超时发生在版本行落库前，inspect 返回 not-found 佐证无孤儿版本，同版本重试安全（2026-11-02 实测：delivery-spec-audit 1.0.0 六次失败跨越 71 分钟后，次日凌晨同版本 rerun 一次成功）；若错误变成 "already exists"，先看是否带 "(reset in Ns)" 频控尾缀：带 → 仍是频控伪装的同一故障，冷却等待后同版本重试，**不要 bump**（2026-11-03 实测：skill-review-pro 2.2.5/2.2.6 连续报 "already exists (reset in Ns)"，两版本号均未 bump，约 30 分钟内 inspect latest 依次出现 2.2.5→2.2.6 且内容与本地逐字节一致——频控态的 already exists 是服务端排队延迟落库的表象，盲目 bump 会制造只有版本号的孤儿版本链）；不带频控尾缀且 inspect 能看到该版本行 → 才是真已存在，需 bump 新版本号
 4. 最终判据是 inspect 内容一致，不是 CI 绿灯或 tags 字段（ClawHub 存在孤儿版本、tag 标签滞后等异常）
 
 ---
@@ -443,7 +443,7 @@ You are an expert Skill reviewer. You complete both review and verification:
 
 ## How to Specify the Target Skill
 
-1. **File path** — "Review `~/skills/xxx/SKILL.md`" → Read directly, and auto-scan subdirectory files in the same directory
+1. **File path** — "Review `<installed-skills-dir>/<skill-name>/SKILL.md`" → Read directly, and auto-scan subdirectory files in the same directory
 2. **Skill in current conversation** — If user just generated a Skill, review the current one
 3. **Installed Skill name** — "Review screenshot-to-prompt" → Search in local skills directory, and scan subdirectories
 4. **Pasted content** — User pastes Skill content directly → Review pasted content only (cannot scan subdirectories)
@@ -646,7 +646,7 @@ Judgment conclusion for each suggestion:
 
 ### Stability Benchmark (only triggered by user)
 
-**Triggers**: "stability test" / "benchmark" / "run a few rounds" / "稳定性测试" / "跑几轮看看"
+**Triggers**: "stability test" / "skill benchmark" / "run a few rounds" (a bare "benchmark" unrelated to Skill QA does not activate this skill) / "稳定性测试" / "跑几轮看看"
 **Prerequisite**: Must have completed at least one full review
 
 1. Default 3 rounds, max 5 rounds. First round baseline score is taken from the most recent full review; if no historical review, first round score is the baseline, subsequent rounds compare against it.
@@ -671,7 +671,7 @@ Judgment conclusion for each suggestion:
    - Rate-limit error → ClawHub throttles inspect ("reset in Ns"); wait and retry
    - Validation passes but the publish step fails with "Too many writes in a short period of time" → ClawHub also rate-limits **publish writes** (observed 2026-11-01 twice in a row: first ~4 minutes after the trigger push, then a retry ~2 minutes later was also rejected — space retries at least ~20 minutes apart)
    - The same version throttled on every retry (5 attempts, up to 65 minutes apart) → suspect the version row itself was corrupted by the first partial write; further retries of that version are futile. Recover by bumping to a fresh version number instead of hammering the same one (2026-11-01: 2.2.0 failed six times, a bump to 2.2.1 published on the first try); when CI shows failure, read the publish-step log to distinguish "validation rejected" from "write throttled" — for the latter, wait a few minutes and re-trigger with a real SKILL.md change, do not bump the version
-   - The publish step fails on an upload-ticket timeout or HTTP 5xx → a **different failure mode** from write throttling: a transient outage of ClawHub's server-side upload channel (corroborated by normal GitHub Actions egress and normal local curl to clawhub.ai); the fix is simply `gh run rerun <run-id> --failed` — **no version bump needed**, because the timeout happens before the version row is written (inspect returns not-found, confirming no orphaned version), so same-version retries are safe (observed 2026-11-02: delivery-spec-audit 1.0.0 failed six times over 71 minutes, then a same-version rerun succeeded the next morning); if the error turns into "already exists", check for a "(reset in Ns)" rate-limit suffix first: with the suffix → same transient fault in disguise, cool down and retry the same version, **do not bump** (observed 2026-11-03: skill-review-pro 2.2.5/2.2.6 both reported "already exists (reset in Ns)"; neither version was bumped, and within ~30 minutes inspect latest showed 2.2.5 then 2.2.6, each byte-identical to local content — in a throttled state the already-exists message is an artifact of server-side queueing and delayed persistence; blind bumping would create an orphan version chain of number-only rows); without the suffix and the version row is visible via inspect → the row genuinely exists, bump to a new version
+   - The publish step fails on an upload-ticket timeout or HTTP 5xx → a **different failure mode** from write throttling: a transient outage of ClawHub's server-side upload channel (corroborated by normal GitHub Actions egress and normal local curl to clawhub.ai); the fix is a remote retry via `gh run rerun <run-id> --failed`, executed **by the user** (remote write is outside this skill's read-only boundary; ask the user to run it or explicitly delegate it) — **no version bump needed**, because the timeout happens before the version row is written (inspect returns not-found, confirming no orphaned version), so same-version retries are safe (observed 2026-11-02: delivery-spec-audit 1.0.0 failed six times over 71 minutes, then a same-version rerun succeeded the next morning); if the error turns into "already exists", check for a "(reset in Ns)" rate-limit suffix first: with the suffix → same transient fault in disguise, cool down and retry the same version, **do not bump** (observed 2026-11-03: skill-review-pro 2.2.5/2.2.6 both reported "already exists (reset in Ns)"; neither version was bumped, and within ~30 minutes inspect latest showed 2.2.5 then 2.2.6, each byte-identical to local content — in a throttled state the already-exists message is an artifact of server-side queueing and delayed persistence; blind bumping would create an orphan version chain of number-only rows); without the suffix and the version row is visible via inspect → the row genuinely exists, bump to a new version
 4. The final criterion is inspect content identity, not a green CI run or the tags field (ClawHub has orphaned versions and lagging tag labels)
 
 ---
