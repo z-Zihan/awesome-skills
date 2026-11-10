@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
-"""v1.7: analyze_usage.py 末轮构成新增工具 schema 利用率(加载未用/前缀聚合,区分「清工具输出」与「精简工具集」两类治理)。
+"""v1.8: analyze_usage.py 新增多文件 fleet 批量模式 + cacheRead 异常值防护(input+cacheRead 远超窗口时剔除统计并在报告中明示,防聚合被污染)。
+
+v1.7: analyze_usage.py 末轮构成新增工具 schema 利用率(加载未用/前缀聚合,区分「清工具输出」与「精简工具集」两类治理)。
 
 v1.5: analyze_usage.py 支持 OpenClaw trajectory 格式。
 
@@ -175,7 +177,18 @@ def analyze_openclaw(path: Path, window: int, lines):
             "unparsed_lines": unparsed,
         }
 
-    values = [v for _, v, _ in trace]
+    # v1.8 cacheRead 异常防护: 实测部分 provider 的 cacheRead 会跨会话累计而非
+    # 本轮编译上下文(2026-11-11 本机 374 条 trajectory 实证: 254 条出现
+    # input+cacheRead 高达 24M-38M 的不可能值;同期 context.compiled 消息字符
+    # 折算仅 ≈19k tokens)。这类数据点保留在轨迹明细里,但剔除出统计值。
+    plausible_limit = max(window * 8, 2_000_000)
+    implausible = [(ln, v, o) for ln, v, o in trace if v > plausible_limit]
+    plausible_trace = [(ln, v, o) for ln, v, o in trace if v <= plausible_limit]
+    if plausible_trace:
+        stat_trace = plausible_trace
+    else:
+        stat_trace = trace  # 全部异常时退回原始值,报告仍给出异常警告
+    values = [v for _, v, _ in stat_trace]
     # run-based: 不做跨 run 骤降检测;改为单 run 视角的波动统计
     sys_trunc = [c for c in compiled if c[1]]
     peak = max(values)
@@ -186,6 +199,8 @@ def analyze_openclaw(path: Path, window: int, lines):
         "window": window,
         "semantics": "run-based",
         "data_points": len(trace),
+        "implausible_points": len(implausible),
+        "implausible_peak_tokens": max((v for _, v, _ in implausible), default=None),
         "model_completed_events": completed,
         "context_first_tokens": values[0],
         "context_last_tokens": last_in,
@@ -310,6 +325,12 @@ def to_markdown(r: dict) -> str:
                  f"(systemPrompt 截断 {r['system_prompt_truncated_events']} 次,"
                  f"原始最长 {r['system_prompt_original_chars_max'] or 0:,} 字符;"
                  f"单轮最多 {r['messages_per_run_max']} 条消息 / {r['images_per_run_max']} 张图片)"]
+        if r.get("implausible_points"):
+            lines.append(
+                f"- ⚠️ cacheRead 异常防护:{r['implausible_points']} 个数据点的 input+cacheRead "
+                f"超过合理上限(窗口×8 且 ≥2M),疑似 provider 跨会话累计缓存而非本轮上下文,"
+                f"已从统计中剔除(异常峰值 {r['implausible_peak_tokens']:,} tokens);"
+                f"同一 run 的 context.compiled 字符折算是更可靠的规模证据")
         if r.get("compaction_timeouts"):
             lines.append(f"- ⚠️ 检测到 {r['compaction_timeouts']} 次 compaction 超时(timedOutDuringCompaction)")
         comp = r.get("composition")
@@ -375,18 +396,122 @@ def to_markdown(r: dict) -> str:
     return "\n".join(lines)
 
 
+def build_fleet_summary(results: list) -> dict:
+    """v1.8: 车队级聚合(中位数/极值),异常值防护后的统计才进入聚合。"""
+    def stat(key):
+        vals = sorted(r[key] for r in results if r.get(key) is not None)
+        if not vals:
+            return None
+        return {
+            "median": vals[len(vals) // 2],
+            "min": vals[0],
+            "max": vals[-1],
+            "n": len(vals),
+        }
+
+    def comp_stat(key):
+        vals = sorted(
+            c[key]
+            for r in results
+            if (c := r.get("composition")) and c.get(key) is not None
+        )
+        if not vals:
+            return None
+        return {
+            "median": vals[len(vals) // 2],
+            "min": vals[0],
+            "max": vals[-1],
+            "n": len(vals),
+        }
+
+    return {
+        "files_analyzed": len(results),
+        "window_peak_pct": stat("window_peak_pct"),
+        "context_last_tokens": stat("context_last_tokens"),
+        "implausible_points_total": sum(r.get("implausible_points") or 0 for r in results),
+        "tools_loaded_unused_pct": comp_stat("tools_loaded_unused_pct"),
+        "tools_unused_chars_pct": comp_stat("tools_unused_chars_pct"),
+        "messages_chars": comp_stat("messages_chars"),
+        "system_prompt_chars": comp_stat("system_prompt_chars"),
+        "tools_chars": comp_stat("tools_chars"),
+    }
+
+
+def fleet_lines(fleet: dict) -> list:
+    """把 fleet 汇总对象转成可读行。"""
+    def fmt(s):
+        if not s:
+            return "无数据"
+        return f"中位 {s['median']:,} / 最小 {s['min']:,} / 最大 {s['max']:,}(n={s['n']})"
+
+    lines = [
+        f"# Fleet 汇总({fleet['files_analyzed']} 个文件)",
+        "",
+        f"- 分析文件数:{fleet['files_analyzed']}",
+        f"- 窗口占用峰值%:{fmt(fleet['window_peak_pct'])}",
+        f"- 末轮输入 tokens:{fmt(fleet['context_last_tokens'])}",
+    ]
+    if fleet["implausible_points_total"]:
+        lines.append(
+            f"- ⚠️ 剔除 cacheRead 异常数据点共 {fleet['implausible_points_total']} 个"
+            "(已排除在统计外,详见各文件报告)")
+    lines += [
+        f"- 末轮构成·系统提示字符:{fmt(fleet['system_prompt_chars'])}",
+        f"- 末轮构成·工具 schema 字符:{fmt(fleet['tools_chars'])}",
+        f"- 末轮构成·对话消息字符:{fmt(fleet['messages_chars'])}",
+        f"- 工具加载未用占比:{fmt(fleet['tools_loaded_unused_pct'])}",
+        f"- 未用 schema 字符占比:{fmt(fleet['tools_unused_chars_pct'])}",
+    ]
+    return lines
+
+
 def main():
     ap = argparse.ArgumentParser(description="会话 usage 真实上下文轨迹分析(Claude Code / OpenClaw trajectory)")
-    ap.add_argument("file", help="会话 JSONL(CC: ~/.claude/projects/<proj>/<id>.jsonl;OpenClaw: *.trajectory.jsonl)")
+    ap.add_argument("file", nargs="+", help="会话 JSONL(CC: ~/.claude/projects/<proj>/<id>.jsonl;OpenClaw: *.trajectory.jsonl);v1.8 起支持多文件 fleet 汇总")
     ap.add_argument("--window", type=int, default=200000, help="上下文窗口大小(默认 200000)")
     ap.add_argument("--json", action="store_true", help="输出 JSON 而非 Markdown")
     args = ap.parse_args()
-    path = Path(args.file)
-    if not path.exists():
-        print(f"错误:文件不存在:{path}", file=sys.stderr)
+    window = max(args.window, 1)
+    paths = [Path(f) for f in args.file]
+    missing = [p for p in paths if not p.exists()]
+    if missing:
+        for p in missing:
+            print(f"错误:文件不存在:{p}", file=sys.stderr)
         sys.exit(1)
-    result = analyze(path, args.window)
-    print(json.dumps(result, ensure_ascii=False, indent=2) if args.json else to_markdown(result))
+    if len(paths) == 1:
+        result = analyze(paths[0], window)
+        print(json.dumps(result, ensure_ascii=False, indent=2) if args.json else to_markdown(result))
+        return
+    # v1.8 fleet 批量模式: 逐文件分析 + 车队级汇总(单文件损坏不拖垮整体)
+    results = []
+    skipped = []
+    for p in paths:
+        try:
+            r = analyze(p, window)
+        except Exception as exc:
+            skipped.append({"file": str(p), "error": f"analyze failed: {exc}"})
+            continue
+        if r.get("error"):
+            skipped.append({"file": str(p), "error": r["error"]})
+            continue
+        results.append(r)
+    if not results:
+        print("所有文件都无法解析出 usage 数据点。", file=sys.stderr)
+        sys.exit(1)
+    fleet = build_fleet_summary(results)
+    if args.json:
+        print(json.dumps({"results": results, "skipped": skipped, "fleet": fleet},
+                         ensure_ascii=False, indent=2))
+        return
+    for r in results:
+        print(to_markdown(r))
+        print()
+    if skipped:
+        print(f"## 跳过 {len(skipped)} 个文件(无 usage 数据点或解析失败)\n")
+        for s in skipped:
+            print(f"- `{s['file']}`: {s['error']}")
+        print()
+    print("\n".join(fleet_lines(fleet)))
 
 
 if __name__ == "__main__":

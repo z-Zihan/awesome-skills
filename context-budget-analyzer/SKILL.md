@@ -1,6 +1,6 @@
 ---
 name: context-budget-analyzer
-version: "1.7.0"
+version: "1.8.0"
 homepage: https://github.com/z-Zihan/awesome-skills
 description: >
   Agent 上下文预算分析器。扫描一次 Agent 会话的对话记录、Transcript 或手工提供的
@@ -16,7 +16,9 @@ description: >
   tool schema utilization,加载未用的工具,
   约束丢失,约束审计,constraint audit,governance decay,
   压缩丢掉了什么,压缩摘要对照,compaction diff,
-  OpenClaw trajectory,轨迹分析,run-based。
+  OpenClaw trajectory,轨迹分析,run-based,
+  多会话汇总,批量分析轨迹,fleet 汇总,对比多个会话,
+  usage 异常,cacheRead 异常,缓存计量异常,批量 trajectory。
   NOT for: 模型参数量估算、API 计费账单分析、Prompt 写作优化。
 ---
 
@@ -78,6 +80,7 @@ python3 scripts/analyze_session.py session.jsonl --json          # 机器可读
 ```bash
 python3 scripts/analyze_usage.py ~/.claude/projects/<项目路径编码>/<sessionId>.jsonl [--window 200000]   # Claude Code
 python3 scripts/analyze_usage.py <agent-dir>/sessions/<sessionId>.trajectory.jsonl [--window 200000]    # OpenClaw
+python3 scripts/analyze_usage.py a.trajectory.jsonl b.trajectory.jsonl c.jsonl [--json]                 # v1.8 多文件 fleet 汇总
 ```
 
 脚本自动识别两种格式并按各自语义分析,输出真实计量值,不是估算:
@@ -86,6 +89,10 @@ python3 scripts/analyze_usage.py <agent-dir>/sessions/<sessionId>.trajectory.jso
 - **OpenClaw trajectory(run-based 语义)**:`model.completed.data.usage`(input + cacheRead + cacheWrite,camelCase 键名)按轮(run)记录。**轮间数值下降是"上下文重编译/新任务开始",不是 compaction**,脚本因此不做跨 run 骤降检测,防止把正常重编译误报成压缩。同时统计 `context.compiled` 事件(systemPrompt 截断次数与原始长度、单轮消息数/图片数)与 compaction 超时;并输出**末轮上下文构成**(v1.6): 最后一个带消息的编译事件里,系统提示 / 工具 schema / 对话消息三块的字符数与占比、按角色分布(user/assistant/toolResult)和占字符最多的前三条消息,直答"这一轮上下文被什么吃掉";并给出工具 schema 利用率(v1.7): 编译进上下文的工具里有多少实际被调用,加载未用的占多少 schema 字符、集中在哪些前缀,用于区分"先清理工具输出"还是"先精简工具集"。构成为字符计量而非 token;若 trajectory 存储截断了超大字段(systemPrompt.truncated=true),按 originalChars 计并如实标注,实际值只会更大。
 
 末轮构成里还包含**工具 schema 利用率**(v1.7,仅 OpenClaw trajectory): 对比编译进上下文的 tools 列表与 toolResult 消息里的实际调用证据(toolResult 有结果必有调用,比匹配 assistant 文本可靠),输出"加载未用"的工具数量、占比及其占 schema 字符的比例,并按工具名前缀(如 feishu_*、sessions_*)聚合,定位精简空间。判读规则:**工具输出占字符大头 → 先治理大输出(截断/落盘/分页);加载未用的 schema 占大头 → 先精简工具集(按需启用插件/分组加载)**。两种格式都会在报告里标注自己的语义;格式识别只认前 30 行的 `traceSchema` 字段形态,CC 会话正文里回现 "openclaw-trajectory" 字样不会误路由。重复 usage 已按变化点去重。回答"上下文实际涨到多大、(CC)哪里发生了压缩、这一轮被什么吃掉、工具集要不要精简";七类内容归组仍用 `analyze_session.py`。
+
+v1.8 起脚本接受**多个文件**并输出车队级(Fleet)汇总:逐文件给出各自报告,末尾追加一张聚合表(窗口占用峰值%、末轮输入 tokens、末轮三块构成字符、工具加载未用占比的中位数/极值);`--json` 输出 `{results, skipped, fleet}` 结构,单文件损坏只进 skipped 不拖垮整体。回答"这台机器上 Agent 会话的整体负载形态""哪些会话在窗口红线上""全机工具集精简空间"这类跨会话问题。聚合只在异常防护后的统计上进行。
+
+v1.8 同时给 OpenClaw 轨迹加了 **cacheRead 异常防护**(实测动机:本机 374 条 trajectory 里 254 条出现 input+cacheRead 高达 24M-38M tokens 的不可能值,同 run 的 context.compiled 消息字符折算仅 ≈19k tokens--部分 provider 的 cacheRead 是跨会话累计值而非本轮上下文)。单个数据点超过「窗口×8 且 ≥2M」即判异常:保留在轨迹明细中但剔除出首末/峰值/均值统计,报告明示剔除数量与异常峰值,并提示用同 run 的 compiled 字符折算做规模交叉验证;全部数据点异常时退回原始值并在报告中标注。CC 格式不受影响(其 cache_read 语义是连续上下文的组成部分,实测无此现象)。
 
 ### scripts/audit_constraints.py - 约束丢失审计(治理衰减初筛)
 
@@ -269,7 +276,7 @@ Token 估算规则:中文约 1 字 ≈ 1~1.5 Token(脚本取 1.25),英文约 4 �
 
 ## Workflow
 
-1. **Acquire material** — transcript file path, pasted conversation, or structured description. Prefer the bundled scripts: `python3 scripts/analyze_session.py session.jsonl [--window N] [--json]` produces the 7-bucket budget table; `python3 scripts/estimate_tokens.py --text|--file|--code` estimates a single passage; for Claude Code sessions (`~/.claude/projects/**/*.jsonl`), `python3 scripts/analyze_usage.py <session.jsonl> [--window N]` reconstructs the REAL context trajectory from official `message.usage` fields (first/last/peak, window %, and suspected-compaction drops ≥20%) — measured values, not estimates; when symptoms involve forgotten constraints or violations, also run `python3 scripts/audit_constraints.py session.jsonl` for the three-tier constraint visibility audit, then manually confirm semantic validity of each high/mid item. Fall back to manual estimation (CJK ≈ 1~1.5 tokens/char, English ≈ 4 chars/token, code ≈ chars/3) only when Python is unavailable. Always mark numbers as estimates ("≈").
+1. **Acquire material** — transcript file path, pasted conversation, or structured description. Prefer the bundled scripts: `python3 scripts/analyze_session.py session.jsonl [--window N] [--json]` produces the 7-bucket budget table; `python3 scripts/estimate_tokens.py --text|--file|--code` estimates a single passage; for Claude Code sessions (`~/.claude/projects/**/*.jsonl`), `python3 scripts/analyze_usage.py <session.jsonl> [--window N]` reconstructs the REAL context trajectory from official `message.usage` fields (first/last/peak, window %, and suspected-compaction drops ≥20%) — measured values, not estimates; v1.8 accepts MULTIPLE files for a fleet-level aggregate (per-file reports + median/min/max summary; `--json` emits `{results, skipped, fleet}`), with a cacheRead sanity guard that excludes implausible OpenClaw usage points (input+cacheRead exceeding window×8 and 2M — provider-side cross-session cache accumulation) from stats while reporting them explicitly; when symptoms involve forgotten constraints or violations, also run `python3 scripts/audit_constraints.py session.jsonl` for the three-tier constraint visibility audit, then manually confirm semantic validity of each high/mid item. Fall back to manual estimation (CJK ≈ 1~1.5 tokens/char, English ≈ 4 chars/token, code ≈ chars/3) only when Python is unavailable. Always mark numbers as estimates ("≈").
 2. **Categorize** - script output gives the draft table (per-bucket tokens, ratio, chunk count); review key chunks yourself to assign healthy/risky verdicts - heuristic classification can miss scattered constraints and out-of-band state files.
 3. **Detect pollution** — giant outputs (>5% of window, auto-flagged by script), repeated content, zombie assumptions (refuted reasoning still present), one-shot constraints drifting toward compression loss, progress with no external state, governance decay (a constraint that was visible and obeyed, then silently dropped by compaction — confirmed via the constraint audit's high-risk grades plus user-reported symptoms; remediation upgrades to pinning). Every finding needs positional evidence.
 4. **Compaction dry-run** - what would be lost / what summaries might get wrong / minimum retention set (goal & acceptance criteria, verbatim constraints, current status list, rejected alternatives with reasons, evidence pointers).
