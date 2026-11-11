@@ -1,6 +1,6 @@
 ---
 name: skill-creator-ProMax
-version: "2.0.1"
+version: "2.1.0"
 homepage: https://github.com/z-Zihan/awesome-skills
 description: >
   从想法到 Skill 文件的全流程创建器。通过多轮对话帮助用户设计、打磨并生成高质量的 Agent Prompt，
@@ -8,7 +8,8 @@ description: >
   Full-cycle Skill creator from idea to file. Helps users design, iterate, and generate
   production-ready Agent Prompts through multi-turn conversation, then outputs
   multi-platform Skill files (OpenClaw, Claude Code, Cursor, Cline, etc.).
-  触发词：生成 skill, 创建 skill, 设计 skill, 新建 skill,
+  触发词：生成 skill, 创建 skill, 设计 skill, 新建 skill, 修 skill,
+  skill 该用脚本还是说明书, 能力包判断, 方法沉向代码, 形态判断, 重做 skill,
   skill prompt, agent prompt, system prompt,
   生成 agent prompt, 设计 skill prompt, 写个 skill prompt,
   skill-creator, create skill, design skill,
@@ -107,6 +108,23 @@ Stage 4 的任一步骤失败时 → 从失败步骤恢复，告知用户："Ste
 ---
 
 ## 主要职责
+
+### 0. 形态判断：这个能力该是说明书、脚本，还是能力包
+
+写任何 prompt 之前先回答一个问题：**这个 Skill 的核心价值，究竟依赖模型的临场判断，还是依赖每次都完全一致的执行？**
+
+判断尺：数一数任务方法里「不需要模型判断」的步骤占多少比例——
+
+- **比例低（多数步骤需要理解语境、临场取舍）** → 纯说明书形态（本 Skill 的默认输出）。模型负责"何时用、怎么变通"。
+- **比例中（流程固定但每步要看数据现场决定）** → 说明书 + 可选脚本辅助。脚本只做确定性部分（统计、格式校验、批量扫描），判断留在正文。参考仓库内 context-budget-analyzer、delivery-spec-audit 的分层做法。
+- **比例高（绝大多数步骤机械执行、错了就是错了）** → 建议用户考虑能力包形态：类型契约（防止参数错误）+ 确定性实现 + 离线测试。此时说明书只负责"何时触发"，不描述"怎样执行"。
+
+两个常见误判：
+
+1. **把说明书当万能形态**。重复执行且步骤机械的任务（全库体检、版本核对、格式校验），写成纯 prompt 会每次给出不同结果——这类任务从一开始就该建议脚本，哪怕只是几十行的 python。
+2. **把一切都脚本化**。需要理解用户意图、权衡取舍的任务（评审、定位、规划），脚本只会在假确定性里打转。判断类步骤的"不确定"是特性不是缺陷。
+
+形态判断的结论直接决定后续所有阶段的设计：多轮对话只对判断类内容有意义，脚本类内容应该一次性给全。
 
 ### 1. Skill 定位
 
@@ -287,6 +305,7 @@ Prompt 必须：
 ### Stage 1 — 定位与架构
 
 - Skill 名称与定位
+- 形态判断（说明书 / 说明书+脚本 / 能力包，含判断依据）
 - 核心原则
 - 主要职责
 - 推荐执行流程
@@ -402,6 +421,9 @@ Stage 3 是最容易跑偏的阶段。AI 可能在多轮对话中逐渐偏离 sk
 
 ### Core Positioning
 Transform a vague idea into a production-ready Skill Prompt through multi-turn conversation, then generate multi-platform Skill files (OpenClaw, Claude Code, Cursor, Cline, etc.).
+
+### Form Decision (added in 2.1.0)
+Before writing any prompt, decide the form: does the core value depend on model judgment (plain prompt), fixed pipeline with live data (prompt + script for deterministic parts), or mechanical repetition (capability bundle: type contract + deterministic implementation + offline tests)? Rule of thumb: the higher the fraction of no-judgment steps, the more the method should sink into code. See "主要职责 0. 形态判断" in the Chinese section for the full guide.
 
 ### 4-Stage Workflow
 1. **Stage 1 — Positioning & Architecture**: Skill name, core principles, responsibilities, workflow, constraints. Pause for user confirmation.
