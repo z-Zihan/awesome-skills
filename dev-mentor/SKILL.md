@@ -1,6 +1,6 @@
 ---
 name: dev-mentor
-version: "2.0.1"
+version: "2.1.0"
 homepage: https://github.com/z-Zihan/awesome-skills
 description: >
   面向有经验的开发者的跨领域学习伴侣。帮助开发者学习不熟悉的领域，
@@ -191,28 +191,28 @@ Rust 基础 → 所有权与借用 → 类型系统 → 错误处理 → Cargo �
 
 | 类别 | 推荐 | 版本 |
 |---|---|---|
-| 语言（前端转后端） | TypeScript | ≥ 5.x（使用最新稳定版） |
-| 语言（追求性能） | Go | ≥ 1.22（使用最新稳定版） |
-| 语言（快速原型） | Python | ≥ 3.12（使用最新稳定版） |
-| 框架（TS） | NestJS | ≥ 10.x（使用最新稳定版） |
-| 框架（Go） | Gin | ≥ 1.9（使用最新稳定版） |
-| 框架（Python） | FastAPI | ≥ 0.110（使用最新稳定版） |
-| 数据库 | PostgreSQL | ≥ 16（使用最新稳定版） |
-| 缓存 | Redis | ≥ 7.2（使用最新稳定版） |
-| ORM（TS） | Prisma | ≥ 5.x（使用最新稳定版） |
-| ORM（Go） | GORM | ≥ 1.25（使用最新稳定版） |
-| ORM（Python） | SQLAlchemy | ≥ 2.x（使用最新稳定版） |
+| 语言（前端转后端） | TypeScript | ≥ 7.0（TypeScript 7 是 Go 重写版，2026-11 起为 latest；仍用 5.x/6.x 项目照常维护） |
+| 语言（追求性能） | Go | ≥ 1.25（1.25 为最老受支持线，最新稳定 1.27） |
+| 语言（快速原型） | Python | ≥ 3.13（3.14/3.15 已稳定，第三方库兼容性最稳的是 3.13+） |
+| 框架（TS） | NestJS | ≥ 11（当前大版本 12，11 仍在维护） |
+| 框架（Go） | Gin | ≥ 1.10（当前 v1.12） |
+| 框架（Python） | FastAPI | ≥ 0.129（0.x 线持续快发，锁到当月最新即可） |
+| 数据库 | PostgreSQL | ≥ 17（当前大版本 18） |
+| 缓存 | Redis | ≥ 8.0（开源许可证已回到 AGPL/RSAL 双许可，8.x 为当前主线） |
+| ORM（TS） | Prisma | ≥ 6（当前 7.x；v8 尚在 RC，等 stable 再用） |
+| ORM（Go） | GORM | ≥ 1.30（当前 2.x 线发布到 v2.0.0-alpha 前的稳定 tag 是 1.30） |
+| ORM（Python） | SQLAlchemy | ≥ 2.0（2.1 线已发布） |
 
 ### 服务器与部署
 
 | 类别 | 推荐 | 版本 |
 |---|---|---|
-| 容器化 | Docker | ≥ 24.x（使用最新稳定版） |
+| 容器化 | Docker | ≥ 28（当前 29.x） |
 | 容器编排 | Docker Compose | ≥ 2.x（使用最新稳定版） |
-| 反向代理 | Nginx | ≥ 1.24（使用最新稳定版） |
+| 反向代理 | Nginx | ≥ 1.26（mainline 1.31.x，生产建议 1.26/1.30 stable 线） |
 | HTTPS 证书 | Let's Encrypt + Certbot | 最新稳定版 |
 | CI/CD | GitHub Actions | — |
-| 进程管理（Node.js） | PM2 | ≥ 5.x（使用最新稳定版） |
+| 进程管理（Node.js） | PM2 | ≥ 6（当前 7.x） |
 | 监控 | Uptime Kuma | 最新稳定版 |
 
 ### Rust
@@ -221,13 +221,15 @@ Rust 基础 → 所有权与借用 → 类型系统 → 错误处理 → Cargo �
 |---|---|---|
 | 工具链 | rustup + Cargo | 最新稳定版 |
 | 异步运行时 | Tokio | ≥ 1.x（使用最新稳定版） |
-| Web 框架 | Actix-web ≥ 4.x / Axum ≥ 0.7 | 使用最新稳定版 |
+| Web 框架 | Actix-web ≥ 4.x / Axum ≥ 0.8（0.9 开发中） | 使用最新稳定版 |
 | 序列化 | Serde | ≥ 1.x（使用最新稳定版） |
-| 数据库 | sqlx ≥ 0.7 / diesel ≥ 2.x | 使用最新稳定版 |
+| 数据库 | sqlx ≥ 0.9（3.x 筹备中）/ diesel ≥ 2.3 | 使用最新稳定版 |
 | 错误处理 | thiserror + anyhow | 最新稳定版 |
 | CLI | clap | ≥ 4.x（使用最新稳定版） |
 
 > 以上推荐会随用户背景和项目需求动态调整。详见各 `tracks/` 文件的具体指导。
+>
+> 版本下限由维护者对照官方发布源（crates.io / npm / PyPI / endoflife.date）定期刷新；教学时若发现推荐下限已低于当前稳定大版本，以下一个稳定大版本为准。
 
 ---
 
@@ -597,9 +599,9 @@ Patient cross-domain mentor + experienced full-stack engineer. Auto-detects user
 - **Phase 5** — Summary & next steps
 
 ### Tech Stack (Version-Anchored)
-- **Backend**: TypeScript ≥5.x / Go ≥1.22 / Python ≥3.12; NestJS ≥10.x / Gin ≥1.9 / FastAPI ≥0.110; PostgreSQL ≥16; Redis ≥7.2; Prisma ≥5.x / GORM ≥1.25 / SQLAlchemy ≥2.x
-- **Rust**: rustup (latest stable); Tokio ≥1.x; Actix-web ≥4.x / Axum ≥0.7; Serde ≥1.x; sqlx ≥0.7; clap ≥4.x; thiserror + anyhow
-- **Deployment**: Docker ≥24.x; Docker Compose ≥2.x; Nginx ≥1.24; Let's Encrypt + Certbot; GitHub Actions; PM2 ≥5.x; Uptime Kuma
+- **Backend**: TypeScript ≥7.0 / Go ≥1.25 / Python ≥3.13; NestJS ≥11 / Gin ≥1.10 / FastAPI ≥0.129; PostgreSQL ≥17; Redis ≥8.0; Prisma ≥6 / GORM ≥1.30 / SQLAlchemy ≥2.0
+- **Rust**: rustup (latest stable); Tokio ≥1.x; Actix-web ≥4.x / Axum ≥0.8; Serde ≥1.x; sqlx ≥0.9; clap ≥4.x; thiserror + anyhow
+- **Deployment**: Docker ≥28; Docker Compose ≥2.x; Nginx ≥1.26; Let's Encrypt + Certbot; GitHub Actions; PM2 ≥6; Uptime Kuma
 
 ### State Management
 Persisted in `dev-mentor-projects.json` with `schemaVersion: 1`, per-project tracking (phase, completed steps, tech stack, issues, todos). Auto-restore on session start; `.bak` fallback on corruption.

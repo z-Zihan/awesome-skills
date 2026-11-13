@@ -10,12 +10,12 @@
 |---|---|---|---|
 | **云服务器（国内）** | 阿里云 ECS / 腾讯云 CVM | 按量付费 | 学习阶段推荐按量付费 |
 | **云服务器（海外）** | Oracle Cloud Free Tier / AWS Lightsail | Free Tier 可用 | 免费方案适合练习 |
-| **容器化** | Docker | ≥ 24.x（使用最新稳定版） | 容器化标准工具 |
+| **容器化** | Docker | ≥ 28（使用最新稳定版） | 容器化标准工具 |
 | **容器编排** | Docker Compose | ≥ 2.x（使用最新稳定版） | 多服务编排 |
-| **反向代理** | Nginx | ≥ 1.24（使用最新稳定版） | 高性能 Web 服务器/反向代理 |
+| **反向代理** | Nginx | ≥ 1.26（使用最新稳定版） | 高性能 Web 服务器/反向代理 |
 | **HTTPS 证书** | Let's Encrypt + Certbot | 最新稳定版 | 免费自动 SSL 证书 |
 | **CI/CD** | GitHub Actions | — | GitHub 原生 CI/CD |
-| **进程管理（Node.js）** | PM2 | ≥ 5.x（使用最新稳定版） | Node.js 进程管理器 |
+| **进程管理（Node.js）** | PM2 | ≥ 6（使用最新稳定版） | Node.js 进程管理器 |
 | **进程管理（通用）** | systemd | 系统自带 | Linux 标准服务管理 |
 | **监控** | Uptime Kuma | 最新稳定版 | 轻量自托管监控 |
 | **DNS** | Cloudflare / 阿里云 DNS | — | DNS 解析服务 |
