@@ -1,6 +1,6 @@
 ---
 name: fe-cli
-version: "3.1.4"
+version: "3.2.0"
 homepage: https://github.com/z-Zihan/awesome-skills
 description: >
   前端项目脚手架 CLI。支持 React/Vue/Next.js/Nuxt.js/Astro/React Native + shadcn/Ant Design/MUI/Tailwind
@@ -220,6 +220,7 @@ This file is for AI agents to quickly understand the project.
 - **CSS 预处理器**：默认 Sass（SCSS 语法）
 - **路径别名**：在 tsconfig 和 vite config 中配置 `@/` → `src/`
 - **响应式断点**：Mobile < 768px < Tablet < 1024px < Desktop
+- **路由（React）**：使用 `react-router` 单包（v8+）；`react-router-dom` 已被 v8 移除，DOM 专用 API（如 `RouterProvider`）从 `react-router/dom` 导入
 - **网络库**：原生 fetch 封装（不用 axios），见 references/shared-base.md
 - **环境文件**：始终生成 `.env`、`.env.development`、`.env.test`、`.env.production`
 - **日志**：始终生成 `services/logger.ts` + `services/log-export.ts`。使用 `Logger.child("Module")` 模式。最大存储 5MB 自动清理。仅开发模式控制台输出。日志仅本地导出（下载文件）；模板不包含远程日志上报能力。
@@ -297,7 +298,7 @@ This file is for AI agents to quickly understand the project.
 
 **fe-cli** is a unified entry point for scaffolding frontend projects. It detects the project type from user input and routes to one of 9 sub-skills: **web** (SPA), **admin** (dashboard/CRUD), **h5** (mobile), **electron** (desktop), **tauri** (lightweight desktop), **ssr** (Next.js/Nuxt), **miniapp** (WeChat Mini Program), **rn** (React Native), or **astro** (Astro/Gatsby/VitePress static site). Each sub-skill handles type-specific questions, file generation, and setup.
 
-**Key rules:** Default package manager is **bun** (fallback: pnpm); default CSS preprocessor is **Sass (SCSS)**; path alias `@/` → `src/`; native **fetch** wrapper (no axios); always generate `.env` / `.env.development` / `.env.test` / `.env.production`; always generate `services/logger.ts` + `services/log-export.ts`; target Node 18+; Vite handles TS transpilation (separate `typecheck` script), except Electron/Tauri main process needs `tsc -p tsconfig.electron.json`; default deployment: **Vercel**; chart libs: **Recharts** (lightweight) / **ECharts** (heavy); new UI libs: **shadcn/ui + Lucide** (React), **shadcn-vue + Vue Bits** (Vue), **Chakra UI**, **React Bits**; scaffold generators (shadcn/shadcn-vue) must be installed as pinned devDependencies (e.g. `bun add -d shadcn`) and run via `bunx`, never unpinned `npx @latest`; log export is local-only (no remote log submission capability).
+**Key rules:** Default package manager is **bun** (fallback: pnpm); default CSS preprocessor is **Sass (SCSS)**; path alias `@/` → `src/`; router: single **`react-router`** package (v8+; `react-router-dom` was removed in v8, DOM-specific APIs like `RouterProvider` come from `react-router/dom`); native **fetch** wrapper (no axios); always generate `.env` / `.env.development` / `.env.test` / `.env.production`; always generate `services/logger.ts` + `services/log-export.ts`; target Node 18+; Vite handles TS transpilation (separate `typecheck` script), except Electron/Tauri main process needs `tsc -p tsconfig.electron.json`; default deployment: **Vercel**; chart libs: **Recharts** (lightweight) / **ECharts** (heavy); new UI libs: **shadcn/ui + Lucide** (React), **shadcn-vue + Vue Bits** (Vue), **Chakra UI**, **React Bits**; scaffold generators (shadcn/shadcn-vue) must be installed as pinned devDependencies (e.g. `bun add -d shadcn`) and run via `bunx`, never unpinned `npx @latest`; log export is local-only (no remote log submission capability).
 
 After type-specific files, generate the **shared common layer** (request utils, global styles, multi-env config, utilities, type declarations). Finally, generate `.ai/PROJECT.md` for AI-readability. Supports **existing project audit** against the same standards.
 
