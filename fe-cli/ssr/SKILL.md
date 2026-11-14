@@ -47,7 +47,7 @@ bunx nuxi init <project-name> --packageManager bun
 | Less | `less` |
 | Zustand | `zustand` |
 | Redux Toolkit | `@reduxjs/toolkit react-redux` |
-| Ant Design | `antd @ant-design/icons @ant-design/v5-patch-for-react-19` |
+| Ant Design | `antd @ant-design/icons`（antd 6+ 原生支持 React 19，不再需要 v5-patch 包） |
 | shadcn/ui (Next.js) | `bun add -d shadcn && bunx shadcn init`（固定版本）+ `lucide-react` (requires Tailwind) |
 | shadcn-vue (Nuxt) | `bun add -d shadcn-vue && bunx shadcn-vue init`（固定版本）+ `lucide-vue-next` (requires Tailwind) |
 | Recharts | `recharts` |
