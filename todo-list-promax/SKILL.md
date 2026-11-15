@@ -1,6 +1,6 @@
 ---
 name: todo-list-promax
-version: "2.2.2"
+version: "2.2.3"
 description: >
   个人待办事项永久存储、智能分类与定时提醒系统。
   自动从聊天消息中捕获待办（文字/图片/附件），解析时间与优先级，每日晚上9点推送未完成提醒。
@@ -199,7 +199,11 @@ description: >
      e. 如无匹配项，不推送
      f. 更新 `last_reminder_at` 为当前时间
   3. 推送消息末尾附操作指引：`回复"完成 #N"标记完成 · 回复"TODOLIST"查看全部 · 回复"#N due_time:X"修改 · 回复"撤销"恢复最近操作`
-  4. cron 命令示例：`openclaw cron add --schedule "0 21 * * *" --task "Read todos.json, filter pending items with due_time, push reminder if any"`
+  4. cron 命令示例（以 OpenClaw CLI 实测为准）：
+   - 创建：`openclaw cron add --cron "0 21 * * *" "todo-daily-reminder" "读取 ${workspace}/todo-list/todos.json，筛选 status != done 且 due_time 非空的待办，按截止时间升序、同截止按优先级排序，有条目则推送提醒"`
+   - CLI 没有 `--schedule`/`--task` 选项：调度用 `--cron`（或 `--at`/`--every`），任务内容用位置参数传递
+   - 查看：`openclaw cron list`（返回 UUID 与任务名）
+   - 关闭：`openclaw cron remove <UUID>`（remove 只认 UUID，不接受任务名）
 
 - **降级策略：** cron 不可用或执行失败时，在下次用户交互时补充推送未提醒项（检查 `last_reminder_at`，若超过 24 小时则补推）；用户已关闭提醒时不补推
 
@@ -327,9 +331,10 @@ description: >
 ```
 
 ### Cron Setup (Minimal Steps)
-1. Create cron: `0 21 * * *`
+1. Create cron: `openclaw cron add --cron "0 21 * * *" "todo-daily-reminder" "<reminder prompt>"` — the CLI has no `--schedule`/`--task` flags; use `--cron` plus positional args
 2. On trigger: read `todos.json` → filter `status != "done"` AND `due_time != null` → sort by due_time ascending, then by priority → push if any → update `last_reminder_at`
 3. Append action guide to push message
+4. Disable: `openclaw cron list` to get the job UUID, then `openclaw cron remove <UUID>` (remove accepts UUID only, not the job name)
 
 ### Constraints
 - Owner consent required before enabling cron reminders; users can disable anytime
