@@ -1,6 +1,6 @@
 ---
 name: project-onboarding
-version: "2.0.4"
+version: "2.0.5"
 homepage: https://github.com/z-Zihan/awesome-skills
 description: >
   帮助有经验的开发者快速接手陌生项目，支持前端 Web、后端服务、
@@ -138,11 +138,12 @@ description: >
 - **只读原则**：分析过程只执行只读命令（read / ls / find / head / cat 等）；禁止写入、删除、安装依赖、执行项目脚本或发起网络请求（用户明确要求除外）
 - **安全引用**：命令中的路径必须整体加引号（如 `find "$PROJECT" ...`），不把未校验的用户输入直接拼进命令
 - **范围限定**：不跟随符号链接越出项目目录；不读取项目目录之外的文件（如 `~/.ssh`、凭据文件）
+- **find 惯用法（强制）**：项目含 `node_modules`/`vendor`/`dist`/`build` 等依赖或产物目录时，扫描命令必须先 `prune` 掉这些目录，并给表达式加深度上限——否则结果被依赖包淹没，GNU find 还会对后置 `-maxdepth` 刷 warning。统一形态：`find {project} -path "*/node_modules" -prune -o -maxdepth 3 \( -name "*.test.*" -o -name "*.spec.*" \) -print`；`-o` 连接多条件时必须加 `\( \)` 分组，否则 prune 的 `-o` 会吞掉第一个条件
 
 ### 项目类型识别 — 执行动作
 
 1. `read {project}/package.json` → 提取 dependencies 和 devDependencies，匹配前端/客户端/Node 后端信号
-2. `exec find {project} -maxdepth 2 -name "*.config.*" -o -name "go.mod" -o -name "Cargo.toml" -o -name "pom.xml" -o -name "app.json"` → 识别后端/小程序/移动端信号
+2. `exec find {project} -maxdepth 2 \( -name "*.config.*" -o -name "go.mod" -o -name "Cargo.toml" -o -name "pom.xml" -o -name "app.json" \) -print` → 识别后端/小程序/移动端信号
 3. `exec ls {project}/src-tauri/ {project}/electron/ 2>/dev/null` → 客户端信号
 4. `exec ls {project}/android/ {project}/ios/ 2>/dev/null` → 移动端信号
 5. 多信号命中时 → 按混合项目处理，所有匹配的专项模块均加载
@@ -153,31 +154,31 @@ description: >
 2. `exec ls {project}/` → 目录结构概览
 3. `read {project}/README.md` → 项目用途；**缺失时标注"未找到 README，跳过项目用途说明"，继续后续步骤**
 4. `read {project}/.env.example` → 环境变量；**缺失时标注"证据不足"，跳过环境变量说明**
-5. `exec find {project} -name "*.config.*" -maxdepth 1` → 构建配置；**缺失时标注"证据不足"，跳过构建配置说明**
+5. `exec find {project} -maxdepth 1 -name "*.config.*"` → 构建配置；**缺失时标注"证据不足"，跳过构建配置说明**
 
 ### Stage 2 通用模块深入 — 执行动作
 
 1. `exec find {project}/src -type d -maxdepth 2` → 目录结构；**缺失时标注"证据不足"，跳过目录结构分析**
 2. `read {project}/src/index.*` 或 `main.*` → 入口文件；**缺失时标注"证据不足"，跳过入口分析**
-3. `exec find {project} -name ".eslintrc*" -o -name ".prettierrc*" -o -name "tsconfig.json" -maxdepth 1` → 工程规范；**缺失时标注"证据不足"，跳过工程规范分析**
-4. `exec find {project} -name "Dockerfile" -o -name "docker-compose*" -o -name ".github" -type d -maxdepth 2` → 部署配置；**缺失时标注"证据不足"，跳过部署配置分析**
-5. `exec find {project} -name "*.test.*" -o -name "*.spec.*" | head -5` → 测试结构；**缺失时标注"证据不足"，跳过测试结构分析**
+3. `exec find {project} -maxdepth 1 \( -name ".eslintrc*" -o -name ".prettierrc*" -o -name "tsconfig.json" \) -print` → 工程规范；**缺失时标注"证据不足"，跳过工程规范分析**
+4. `exec find {project} -maxdepth 2 \( -name "Dockerfile" -o -name "docker-compose*" -o -name ".github" \) -print` → 部署配置；**缺失时标注"证据不足"，跳过部署配置分析**
+5. `exec find {project} -path "*/node_modules" -prune -o \( -name "*.test.*" -o -name "*.spec.*" \) -print | head -5` → 测试结构（不 prune 会先命中依赖包里的同名文件）；**按此形态仍无结果才标注"证据不足"，跳过测试结构分析**
 
 ### Stage 3 专项模块 — 按类型选择执行
 
 **前端 Web：**
-- `exec find {project}/src -name "router*" -o -name "routes*" | head -5` → 路由
-- `exec find {project}/src -name "store*" -o -name "*reducer*" | head -5` → 状态管理
-- `exec find {project}/src -name "request*" -o -name "api*" -o -name "http*" | head -5` → API 层
+- `exec find {project}/src -maxdepth 4 \( -name "router*" -o -name "routes*" \) -print | head -5` → 路由
+- `exec find {project}/src -maxdepth 4 \( -name "store*" -o -name "*reducer*" \) -print | head -5` → 状态管理
+- `exec find {project}/src -maxdepth 4 \( -name "request*" -o -name "api*" -o -name "http*" \) -print | head -5` → API 层
 
 **后端：**
-- `exec find {project} -path "*/migration*" -o -path "*/schema*" | head -5` → 数据库
-- `exec find {project} -path "*/middleware*" -o -path "*/guard*" | head -5` → 中间件
-- `exec find {project} -path "*/route*" -o -name "controller*" | head -5` → 路由/控制器
+- `exec find {project} -path "*/node_modules" -prune -o -maxdepth 5 \( -path "*/migration*" -o -path "*/schema*" \) -print | head -5` → 数据库
+- `exec find {project} -path "*/node_modules" -prune -o -maxdepth 5 \( -path "*/middleware*" -o -path "*/guard*" \) -print | head -5` → 中间件
+- `exec find {project} -path "*/node_modules" -prune -o -maxdepth 5 \( -path "*/route*" -o -name "controller*" \) -print | head -5` → 路由/控制器
 
 **客户端：**
 - `read {project}/electron/main.*` 或 `{project}/src-tauri/src/main.rs` → 主进程
-- `exec find {project} -name "preload*" -o -name "bridge*" | head -5` → IPC
+- `exec find {project} -path "*/node_modules" -prune -o -maxdepth 4 \( -name "preload*" -o -name "bridge*" \) -print | head -5` → IPC
 
 ### 大项目策略
 
