@@ -1,6 +1,6 @@
 ---
 name: project-doc-analyst
-version: "2.0.1"
+version: "2.0.2"
 homepage: https://github.com/z-Zihan/awesome-skills
 description: >
   专家级项目分析与文档生成 Agent。深度阅读整个代码仓库，输出面向人类和 AI 的
@@ -10,7 +10,8 @@ description: >
   分析这个项目, 帮我分析项目, 项目架构分析, 代码仓库分析,
   生成技术文档, 项目总览, 架构图, 调用链图, 数据流图,
   architecture analysis, documentation generator.
-  NOT for: writing single files of code, general Q&A about code snippets, live debugging.
+  NOT for: writing single files of code, general Q&A about code snippets, live debugging,
+  onboarding guides for new developers (use project-onboarding for that).
 ---
 
 # project-doc-analyst — 专家级项目分析与文档生成 Agent
@@ -159,6 +160,10 @@ description: >
 **当应用过滤规则后，项目剩余文件数 > 200 时，必须执行以下策略：**
 
 1. **先扫结构不读内容**：`find` + `ls` + `head`，建立文件索引
+   - `find` 必须剪枝依赖目录，否则 node_modules/vendor/target 会淹没真实源码（先命中几万个第三方测试文件，索引完全失真）：
+     `find <project> \( -name node_modules -o -name vendor -o -name target -o -name dist -o -name .git \) -prune -o -type f -name "*.ts" -print`
+   - `-maxdepth` 写在路径之后、其他条件之前（GNU find 对后置的 maxdepth 刷警告且行为不一致）
+   - `-o` 多条件必须用 `\( ... \)` 分组并以 `-print` 收尾（prune 后的 `-o` 会吞掉第一个条件，只输出剪枝匹配项）
 2. **按优先级列表批量读取 P0 文件**：用 `cat` 一次读多个小文件
 3. **识别核心模块**：根据入口文件的 import/export 确定核心依赖图
 4. **只深入核心链路**：从入口 → 中间件 → 服务 → 数据的完整链路
@@ -276,6 +281,8 @@ description: >
 1. 说明该请求超出了项目文档分析的职责范围
 2. 如果在分析过程中发现值得关注的代码问题，可在文档中提及，但不执行修改
 3. 建议用户使用专门的 coding/review/debug skill 来处理此类请求
+
+当用户想要的是"快速上手开发"而不是"深度文档"时（如"帮我了解这个项目怎么跑""新人接手要看什么"），建议改用 project-onboarding——本 Skill 输出的是完整文档套件，启动成本高；接手场景要的是分阶段的开发视角。两个 Skill 的边界：文档资产 → project-doc-analyst；开发上手 → project-onboarding。
 
 ## 必须生成的文档
 
@@ -573,3 +580,4 @@ Documents must be self-contained — no source repo access needed. Use "module n
 - **Explain "what" and "why"**: For every important module
 - **Degradation strategy**: File read failure → skip + mark; unanalyzable project → terminate with reason; context exhaustion → output completed parts + remaining plan
 - **Out-of-scope requests** (refactor, new features, bug fixes): Decline and suggest using specialized coding/review/debug skills instead
+- **Boundary with project-onboarding**: documentation assets → this skill; dev onboarding (how to run, stage-based quick start) → project-onboarding
