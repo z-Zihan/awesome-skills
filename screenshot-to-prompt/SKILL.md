@@ -1,6 +1,6 @@
 ---
 name: screenshot-to-prompt
-version: "2.0.1"
+version: "2.1.0"
 homepage: https://github.com/z-Zihan/awesome-skills
 description: >
   截图理解 + 页面结构抽取 + 实现 prompt 生成器。
@@ -169,6 +169,8 @@ description: >
 - 主次关系
 - 可复用区块
 
+若已知项目 UI 库（用户说明或同会话上下文可见），把识别到的通用组件映射为该库的组件名（如 select → el-select / AntD Select），并写入输出；无法确定映射时保留通用名，不要编造库组件。映射结果直接供实现 prompt 的「组件构成」使用。
+
 ---
 
 ## 3. 文案与字段识别
@@ -205,6 +207,18 @@ description: >
 - 条件展示内容
 
 允许轻度合理推断，详见下方「合理推断边界」表。**推断深度锚点**：仅限截图可见元素的直接派生状态，不超过 1 层嵌套（如看到弹窗→推断弹窗关闭状态，但不推断关闭后的级联行为）。
+
+---
+
+## 4.5 响应式断点处理
+
+截图通常是单一视口（多为桌面宽度）。识别时评估页面在窄视口下的适配方式，并写进输出，避免 coding agent 产出桌面固定布局：
+
+- 布局形态判断：识别当前结构是栅格卡片、左右分栏还是固定侧栏，推断窄视口下的合理折叠方式（分栏变堆叠、卡片列数递减、侧栏变抽屉/底部导航）
+- 固定像素风险：截图无法给出断点数值，标注"哪些区块需要响应式"而不是编造具体断点；实现 prompt 中明确要求使用项目已有的响应式设施（如 UI 库栅格、容器查询、现有断点变量）
+- 无法判断时：在实现意图中注明"截图为桌面视口，移动端布局需另行确认"，不要静默假设单端
+
+以下情况跳过本步：用户明确说明只做桌面端，或截图本身就是窄视口（此时反向检查桌面适配同理）。
 
 ---
 
@@ -474,6 +488,8 @@ prompt 必须：
 -
 -
 
+<若结构识别已完成 UI 库映射：优先使用列出的库组件，找不到对应组件时用最接近的原生实现并注明>
+
 ---
 
 ### 状态与交互
@@ -501,6 +517,12 @@ prompt 必须：
 - 自适应关系
 - 区块层级
 - 页面间距与留白
+
+响应式要求：
+
+- 使用项目已有的响应式设施（UI 库栅格、断点变量、容器查询），不要引入新的断点体系
+- <需要响应式的区块按结构识别结果填写；截图为单一视口，具体断点数值由项目现有设施决定>
+- <截图仅单一视口时注明：移动端/窄视口布局需另行确认，不做静默假设>
 
 ---
 
@@ -578,7 +600,13 @@ Screenshot Understanding → Page Structure Extraction → State Recognition →
 | B: Free UI Design | No design, optimization allowed | Modern, unified, production-ready |
 | C: Design Restoration | Figma provided, high fidelity required | Match layout/spacing, reuse design system |
 
-### Screenshot Complexity Assessment (NEW)
+### Responsive Breakpoint Handling (NEW)
+Screenshots are usually a single (desktop-width) viewport. Assess narrow-viewport adaptation and state it in the output: which blocks need responsive treatment, reuse the project's existing responsive facilities (UI library grid, breakpoint variables), and never silently assume a single device.
+
+### UI Library Mapping (NEW)
+When the project's UI library is known, map recognized generic components to library component names (e.g. select -> el-select / AntD Select) so the generated prompt is directly actionable. Keep generic names when mapping is uncertain.
+
+### Screenshot Complexity Assessment
 Before workflow execution, assess complexity to adjust output depth:
 - **Simple** (single component like login form): Merge steps 1-2, skip steps 3-5, simplify output
 - **Medium** (multi-component page like list with filters): Steps 1-5 normal, 6-8 simplified
