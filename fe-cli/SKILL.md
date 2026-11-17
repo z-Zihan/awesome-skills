@@ -1,12 +1,13 @@
 ---
 name: fe-cli
-version: "3.2.0"
+version: "3.2.1"
 homepage: https://github.com/z-Zihan/awesome-skills
 description: >
   前端项目脚手架 CLI。支持 React/Vue/Next.js/Nuxt.js/Astro/React Native + shadcn/Ant Design/MUI/Tailwind
   + Zustand/Redux + i18n，初始化标准化前端项目。支持 9 种项目类型：Web SPA、后台管理、移动 H5、
   Electron 桌面端、Tauri 桌面端、SSR (Next.js/Nuxt)、小程序 (微信/Taro)、React Native 移动端、
   静态建站 (Astro/Gatsby/VitePress)。
+  包含各框架（Vercel/Netlify/Cloudflare Pages 等）的部署指导命令，仅在用户主动要求部署时提供。
   触发：用户要求创建新前端项目、初始化项目、搭建脚手架，
   或提到"新建前端项目"、"初始化项目"、"脚手架"、"创建 React/Vue 项目"。
   也可用于检查/审查已有前端项目的规范性。

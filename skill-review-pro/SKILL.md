@@ -1,6 +1,6 @@
 ---
 name: skill-review-pro
-version: "2.3.0"
+version: "2.3.1"
 homepage: https://github.com/z-Zihan/awesome-skills
 allowed-tools: Read, Write, Edit, Glob, Grep, Bash(clawhub:*), Bash(python3:*), Bash(find:*), Bash(ls:*)
 description: >
@@ -21,7 +21,7 @@ description: >
 本 skill 声明的工具能力严格限于:
 - **文件读写**(Read/Write/Edit/Glob/Grep):仅读取被评审 Skill 的 SKILL.md 及其附属文件、写入评审报告和修复内容
 - **Bash**:仅允许执行只读命令——`clawhub` CLI(inspect/scan 等查询)、`python3`(仅限运行本 skill 自带脚本如 skill_audit.py/publish_check.py)、`find`/`ls`(列目录)；禁止写入类、网络发送类及任意其他 shell 命令
-- **无网络外发**:本 skill 不上传任何数据,所有评审均在本地完成;不采集环境变量;不访问用户数据目录以外的路径
+- **无网络外发(唯一例外:发布核验)**:评审全程本地完成,不上传任何数据,不采集环境变量,不访问用户数据目录以外的路径。唯一允许出网的场景是发布核验——`scripts/publish_check.py` 通过 `clawhub` CLI(或回退 `npx clawhub@<锁定版本>`)对 ClawHub 发起**只读查询**,不提交、不修改任何线上数据
 - subprocess 调用仅限 `clawhub inspect` 等只读查询,无任意命令执行
 
 ## 语言规则
@@ -486,7 +486,7 @@ skill-review-pro/
 - **policies/<domain>/** — Load domain-specific policy by type
 - **fix** — Read during fix phase (only when user actively triggers)
 - **scripts/skill_audit.py** — Run for repo-wide audit; its output is review input only
-- **scripts/publish_check.py** — Run for publish verification; requires network access and the clawhub CLI. When unavailable, report "cannot verify" honestly instead of guessing publish status
+- **scripts/publish_check.py** — Run for publish verification. This is the ONLY network-touching step in this skill: it performs read-only queries against ClawHub via the `clawhub` CLI (or the pinned `npx clawhub@<version>` fallback) — no submissions, no mutations. Requires the clawhub CLI. When unavailable, report "cannot verify" honestly instead of guessing publish status
 
 When reading modules, read the full content of the corresponding `SKILL.md` as supplementary instructions for the current phase.
 
