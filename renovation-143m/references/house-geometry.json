@@ -17,6 +17,11 @@
         "file": "images/layout-cad-plan-a.jpg",
         "type": "CAD平面布置截图",
         "reliability": "estimated"
+      },
+      {
+        "file": "images/layout-2d-furniture-plan.png",
+        "type": "二维家具布置研究图（设计稿，非原始图纸）",
+        "reliability": "estimated"
       }
     ],
     "accuracy_note": "所有尺寸为图纸标注/截图识别估算值（estimated），非实测（measured）。最后核验时间：2026-11-18（仅图面核对，未复尺）",
