@@ -103,7 +103,7 @@ Companion-style English proficiency assessment at college level (CEFR B1-C2). Ra
 
 ### 🏠 renovation-143m — 143㎡ Dedicated Renovation Assistant
 
-Long-term renovation decision assistant bound to one fixed floor plan: a ~143㎡ upgrade home with 3 bedrooms, 2 living areas, 2 bathrooms, 1 kitchen, and 1 balcony. Covers the full pipeline: inspection, style research, space design, storage planning, plumbing/electrical and lighting, appliances and materials, budgeting, pitfall avoidance, and AI-generated renderings. Built-in floor plan data (size estimates and orientation analysis for 13 spaces), a 25-item regret checklist, and a library of niche practical design ideas. Every analysis is tied to this specific layout; no generic advice. Style research requires live web search, and AI rendering prompts must include layout constraints.
+Long-term renovation design system bound to one fixed floor plan: a ~143㎡ upgrade home with 3 bedrooms, 2 living areas, 2 bathrooms (both opening to public areas), 1 kitchen, and 1 south balcony. Includes a geometry/circulation validation engine (PASS/FAIL/UNKNOWN), a requirement version registry (REQ-IDs with confirmed/preferred/pending/rejected states), and a strict design-then-render pipeline: 2D layout → size & circulation checks → feasibility review → 3D rendering → reverse visual audit. Covers inspection, style research (live web search), space design, storage allocation, plumbing/electrical, appliances, materials, budgeting, pitfall avoidance (30-item checklist), and confirmed renovation intents (walk-in closet removal, urinal in the dining-side bathroom, north equipment platform legally opened up, semi-open office/gaming zone). No generic advice; unverified dimensions are always flagged.
 
 **Triggers**: 143装修 / 装修规划 / 验房 / renovation planning / home inspection / renovation style / storage design / lighting plan / renovation budget / AI rendering
 
@@ -342,7 +342,7 @@ skill-creator-ProMax (generate)
 
 ### 🏠 renovation-143m — 143㎡专属装修助手
 
-基于固定户型（三室两厅两卫一厨一阳台改善型住宅）的长期装修决策助手。覆盖验房、风格研究、空间设计、收纳规划、水电灯光、家电材料、预算规划、避坑、AI生图模拟全流程。内置完整户型数据（13个空间尺寸估算+朝向分析）、25条避坑检查清单、小众实用设计库。所有分析绑定本户型，不提供泛通用建议。风格研究强制联网搜索，AI生图提示词必须包含户型约束。
+基于固定户型（三室两厅两卫一厨一阳台改善型住宅，双卫均公共化）的长期装修设计系统。内置户型几何模型与动线校验引擎（PASS/FAIL/UNKNOWN 分级）、装修需求版本管理（REQ 编号 + 已确认/倾向/待确认/已否决五态追踪）、「先二维设计→尺寸动线校验→可行性审查→再3D生图→反向视觉审查」闭环流水线。覆盖验房、风格研究、空间设计、收纳分配、水电灯光、家电材料、预算规划、避坑（30条）、AI生图全流程。已登记改造需求：主卧取消衣帽间、餐厅旁公卫加小便池、原主卫改公共入口、北侧设备平台合法打通、客厅半开放办公电竞区。所有分析绑定本户型，不提供泛通用建议；未经核实的数据一律标注待确认。
 
 **触发词**：143装修 / 专属装修助手 / 装修规划 / 验房 / 装修风格 / 收纳设计 / 水电规划 / 灯光规划 / 家电规划 / 材料选择 / 预算规划 / 装修避坑 / AI效果图
 
