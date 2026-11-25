@@ -89,6 +89,12 @@ Collects MCP server configs from all major hosts (Claude Code / Codex / Cursor /
 
 **Triggers**: mcp audit / mcp security review / check mcp servers / mcp config review / MCP 审计 / MCP 安全
 
+### ✍️ git-author-guard — Git Commit Identity Guard
+
+Keeps git commit authorship honest in sandboxed / agent shells. `detect` mode reports the silent `GIT_AUTHOR_*` / `GIT_COMMITTER_*` environment overrides that beat `git config` on every commit (a classic sandbox trap: you configured `user.name`, commits still get signed as a bot identity), and prints the safe `env -u ...` commit command; `scan` mode audits recent commits and lists any whose author does not match the expected identity before you push (author-only by default — GitHub web-UI squash merges legitimately set committer to GitHub; use `--include-committer` for a full audit). Bundled script is read-only: never commits, pushes, or rewrites history.
+
+**Triggers**: 提交署名 / git 身份 / 署名检查 / commit 作者 / author check / GIT_AUTHOR / push 前核验
+
 ### 🧭 dev-mentor — Cross-Domain Learning Companion
 
 Helps experienced developers learn unfamiliar domains by building a full project from zero to production via continuous conversation. First batch: backend (TypeScript/Go/Python), databases, server deployment (Docker/Nginx/HTTPS/CI-CD), Rust systems programming. Auto-detects existing skills, uses analogies from known domains, explains technical terms on first use.
@@ -170,6 +176,7 @@ openclaw skills install rednote-creator
 openclaw skills install english-assessment
 openclaw skills install todo-list-promax
 openclaw skills install renovation-143m
+openclaw skills install git-author-guard
 openclaw skills update --all
 ```
 
@@ -328,6 +335,12 @@ skill-creator-ProMax (generate)
 
 **触发词**：MCP 审计 / MCP 安全 / 检查 MCP 配置 / MCP server 审查 / mcp 配置体检 / mcp audit
 
+### ✍️ git-author-guard — Git 提交署名守卫
+
+管住沙箱/Agent shell 里的提交署名。`detect` 模式检测四个 `GIT_AUTHOR_*` / `GIT_COMMITTER_*` 环境变量对 `git config` 身份的静默覆盖（经典陷阱：`user.name` 配得好好的，提交却署成了机器人身份），并给出带 `env -u ...` 前缀的安全提交命令；`scan` 模式在 push 前扫描近期提交，列出作者不符合期望身份的提交（默认只核 author——GitHub 网页 squash 合并把 committer 记为 GitHub 属预期，全查加 `--include-committer`）。附带脚本只读：不提交、不推送、不改写历史。
+
+**触发词**：提交署名 / git 身份 / 署名检查 / commit 作者 / author check / GIT_AUTHOR / push 前核验
+
 ### 🧭 dev-mentor — 跨领域学习伴侣
 
 帮助有经验的开发者学习不熟悉的领域，通过连续对话从零完成项目的完整生命周期。首批支持：后端开发（TypeScript/Go/Python）、数据库、服务器部署（Docker/Nginx/HTTPS/CI-CD）、Rust 系统编程。自动识别用户已有经验，不重复教，用类比教学。专业名词自带解释，代码使用最新技术栈和最佳实践。
@@ -409,6 +422,7 @@ openclaw skills install rednote-creator
 openclaw skills install english-assessment
 openclaw skills install todo-list-promax
 openclaw skills install renovation-143m
+openclaw skills install git-author-guard
 openclaw skills update --all
 ```
 
